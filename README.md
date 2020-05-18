@@ -1,10 +1,10 @@
 # FlexRAN
-===========
+============
 Copyright (C) 2019-2020 Intel Corporation
 
 Introduction
 ============
-FlexRAN is Intel 4G and 5G baseband PHY Reference Design, which uses Xeon® series Processor with Intel Architecture. This 5GNR Reference PHY consists of a binary which are validated on a Intel® Xeon® SkyLake / CascadeLake platforms and demonstrates the capabilities of the software running different 5GNR L1 features. It implemented the relevant functions in [3GPP TS 38.211, 212, 213, 214 and 215].
+FlexRAN is Intel 4G and 5G baseband PHY Reference Design, which uses Xeon® series Processor with Intel Architecture. This 5GNR Reference PHY consists of a L1 binary which are validated on a Intel® Xeon® SkyLake / CascadeLake platforms and demonstrates the capabilities of the software running different 5GNR L1 features. It implemented the relevant functions in [3GPP TS 38.211, 212, 213, 214 and 215].
 
 L1 Application Overview
 ============
@@ -34,10 +34,7 @@ Each test type has a bunch of test cases (with unique testNum) and these are def
 Real-Time Host Installation
 ============
 
-Installation Guide in Baremetal
-=========== 
-
-Installation Guide in Container
+Build lib
 ===========
 
 Testing in Baremetal
