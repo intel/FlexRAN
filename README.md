@@ -167,6 +167,167 @@ Testing in Baremetal
 Testing in Container
 ===========
 
+Build O-DU docker image
+-------------------------
+
+Please follow the build procedures on baremetal host to build FAPI/WLS/FH and copy the code/binaries to the oran_release folder on your build server. The docker build will just copy the pre-built binaries to docker image.
+
+    oran_release/phy
+    oran_release/FlexRAN-FEC-SDK-19-04
+    oran_release/FlexRAN
+Set the network proxy and ORAN_RELEASE environment variable before build
+
+    export http_proxy=<your_proxy>
+    export https_proxy=<your_proxy>
+    export no_proxy="localhost,127.0.0.1"
+    export ORAN_RELEASE=<TOP_FOLDER>/oran_release
+Update ${ORAN_RELEASE}/phy/setupenv.sh, change DIR_ROOT to /opt/oran_release. Run below script to trigger the docker build:
+
+    sh ${ORAN_RELEASE}/FlexRAN/docker/build-oran-l1-image.sh
+After the docker build finishes, docker image with oran-release tag will be generated
+
+    …
+    Successfully tagged oran-release-du:1.0
+
+Run O-DU docker container in Kubernetes cluster
+-------------------------------------------------
+
+You can push the O-DU docker image to your local docker registry where Kubernetes cluster can pull the image. Or you can copy the image locally to your Kubernetes worker node. In your worker node, make sure you have configured the system/tools correctly following previous sections for running L1 in baremetal host.
+
+    Assume intel system studio is installed in /opt/intel/system_studio_2019/
+    Make sure you have enough 1G hugepages
+
+Update the Kubernetes pod yaml configuration for your system configuration
+
+    cat ${ORAN_RELEASE}/FlexRAN/docker/oran-release-du.yaml
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      labels:
+        app: oran-release-du-pod
+      name: oran-release-du-pod
+    spec:
+      containers:
+      - securityContext:
+          privileged: false
+          capabilities:
+            add:
+              - SYS_ADMIN
+              - IPC_LOCK
+              - SYS_NICE
+        command:
+          - sleep
+          - infinity
+        tty: true
+        stdin: true
+        image: oran-release-du:1.0
+        name: l1app
+        resources:
+          requests:
+            memory: "16Gi"
+            hugepages-1Gi: 8Gi
+          limits:
+            memory: "16Gi"
+            hugepages-1Gi: 8Gi
+        volumeMounts:
+        - name: hugepage
+          mountPath: /hugepages
+        - name: varrun
+          mountPath: /var/run/dpdk
+          readOnly: false
+        - name: iss-path
+          mountPath: /opt/intel/system_studio_2019/
+      - securityContext:
+          privileged: false
+          capabilities:
+            add:
+              - SYS_ADMIN
+              - IPC_LOCK
+              - SYS_NICE
+        command:
+          - sleep
+          - infinity
+        tty: true
+        stdin: true
+        image: oran-release-du:1.0
+        name: oran-fapi
+        resources:
+          requests:
+            hugepages-1Gi: 4Gi
+            memory: "4Gi"
+          limits:
+            hugepages-1Gi: 4Gi
+            memory: "4Gi"
+        volumeMounts:
+        - name: hugepage
+          mountPath: /hugepages
+        - name: iss-path
+          mountPath: /opt/intel/system_studio_2019/
+        - name: varrun
+          mountPath: /var/run/dpdk
+          readOnly: false
+      - securityContext:
+          privileged: false
+          capabilities:
+            add:
+              - SYS_ADMIN
+              - IPC_LOCK
+              - SYS_NICE
+        command:
+          - sleep
+          - infinity
+        tty: true
+        stdin: true
+        image: oran-release-du:1.0
+        name: testmac
+        resources:
+          requests:
+            memory: "4Gi"
+          limits:
+            memory: "4Gi"
+        volumeMounts:
+        - name: hugepage
+          mountPath: /hugepages
+        - name: iss-path
+          mountPath: /opt/intel/system_studio_2019/
+        - name: varrun
+          mountPath: /var/run/dpdk
+          readOnly: false
+      volumes:
+      - name: hugepage
+        emptyDir:
+          medium: HugePages
+      - name: varrun
+        emptyDir: {}
+      - name: iss-path
+        hostPath:
+          path: /opt/intel/system_studio_2019/
+
+Create the pod using kubectl
+
+    kubectl create –f oran-release-du.yaml
+
+After the pod/containers are running, login different containers (l1app, fapi, testmac) and start the applications.
+Open first terminal and execute l1app container, and run l1app
+
+    kubectl exec oran-release-du-pod -c l1app -it bash
+    source /opt/oran_release/phy/setupenv.sh
+    cd /opt/oran_release/FlexRAN/l1/bin/nr5g/gnb/l1/
+    ./l1.sh -e
+After l1app is started, open second terminal, execute oran-fapi container, and run fapi
+
+    kubectl exec oran-release-du-pod -c oran-fapi -it bash
+    source /opt/oran_release/phy/setupenv.sh
+    cd /opt/oran_release/phy/fapi_5g/bin
+    ./oran_5g_fapi.sh --cfg oran_5g_fapi.cfg
+Open third terminal, execute testmac container, and run testmac
+
+    kubectl exec oran-release-du-pod -c testmac -it bash
+    source /opt/oran_release/phy/setupenv.sh   
+    cd /opt/oran_release/FlexRAN/l1/bin/nr5g/gnb/testmac
+    ./l2.sh --testfile oran_bronze_rel_fec_sw.cfg
+After testmac container is started and running, you can see the test is running. You can check the terminal of each container to verify the test result.
+
 Bit Exact Test Cases
 ===========
 
