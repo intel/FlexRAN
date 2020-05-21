@@ -194,8 +194,8 @@ Run O-DU docker container in Kubernetes cluster
 
 You can push the O-DU docker image to your local docker registry where Kubernetes cluster can pull the image. Or you can copy the image locally to your Kubernetes worker node. In your worker node, make sure you have configured the system/tools correctly following previous sections for running L1 in baremetal host.
 
-    Assume intel system studio is installed in /opt/intel/system_studio_2019/
-    Make sure you have enough 1G hugepages
+* Assume intel system studio is installed in /opt/intel/system_studio_2019/
+* Make sure you have enough 1G hugepages
 
 Update the Kubernetes pod yaml configuration for your system configuration
 
