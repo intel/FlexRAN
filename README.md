@@ -160,9 +160,11 @@ Pay attention to the Avg. and Max. On a well-tuned platform, the numbers should 
 
 Build lib
 ===========
+Follow the steps in O-RAN SC O-DU Low project document to build WLS, FAPI TM and FH lib. Get through link https://docs.o-ran-sc.org/projects/o-ran-sc-o-du-phy/en/latest/index.html
 
 Testing in Baremetal
 ===========
+Follow the steps in O-RAN SC O-DU Low project document to run L1 and associate testmac testing. Get through link https://docs.o-ran-sc.org/projects/o-ran-sc-o-du-phy/en/latest/index.html
 
 Testing in Container
 ===========
@@ -330,5 +332,5 @@ After testmac container is started and running, you can see the test is running.
 
 Bit Exact Test Cases
 ===========
-
+It was decribed in the O-RAN SC O-DU Low project document, get through below link https://docs.o-ran-sc.org/projects/o-ran-sc-o-du-phy/en/latest/index.html 
 
