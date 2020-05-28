@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: oran-release-du-pod
+  name: oran-release-du-pod
+spec:
+  containers:
+  - securityContext:
+      privileged: false
+      capabilities:
+        add:
+          - SYS_ADMIN
+          - IPC_LOCK
+          - SYS_NICE
+    command:
+      - sleep
+      - infinity
+    tty: true
+    stdin: true
+    image: oran-release-du:1.0
+    name: l1app
+    resources:
+      requests:
+        memory: "16Gi"
+        hugepages-1Gi: 8Gi
+      limits:
+        memory: "16Gi"
+        hugepages-1Gi: 8Gi
+    volumeMounts:
+    - name: hugepage 
+      mountPath: /hugepages
+    - name: varrun
+      mountPath: /var/run/dpdk
+      readOnly: false
+    - name: iss-path
+      mountPath: /opt/intel/system_studio_2019/
+  - securityContext:
+      privileged: false
+      capabilities:
+        add:
+          - SYS_ADMIN
+          - IPC_LOCK
+          - SYS_NICE
+    command:
+      - sleep
+      - infinity
+    tty: true
+    stdin: true
+    image: oran-release-du:1.0
+    name: oran-fapi
+    resources:
+      requests:
+        hugepages-1Gi: 4Gi
+        memory: "4Gi"
+      limits:
+        hugepages-1Gi: 4Gi
+        memory: "4Gi"
+    volumeMounts:
+    - name: hugepage
+      mountPath: /hugepages
+    - name: iss-path
+      mountPath: /opt/intel/system_studio_2019/
+    - name: varrun
+      mountPath: /var/run/dpdk
+      readOnly: false
+  - securityContext:
+      privileged: false
+      capabilities:
+        add:
+          - SYS_ADMIN
+          - IPC_LOCK
+          - SYS_NICE
+    command:
+      - sleep
+      - infinity
+    tty: true
+    stdin: true
+    image: oran-release-du:1.0
+    name: testmac
+    resources:
+      requests:
+        memory: "4Gi"
+      limits:
+        memory: "4Gi"
+    volumeMounts:
+    - name: hugepage
+      mountPath: /hugepages
+    - name: iss-path
+      mountPath: /opt/intel/system_studio_2019/
+    - name: varrun
+      mountPath: /var/run/dpdk
+      readOnly: false
+  volumes:
+  - name: hugepage
+    emptyDir:
+      medium: HugePages
+  - name: varrun
+    emptyDir: {}
+  - name: iss-path
+    hostPath:
+      path: /opt/intel/system_studio_2019/

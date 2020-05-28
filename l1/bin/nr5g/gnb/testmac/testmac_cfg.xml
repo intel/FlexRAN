@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<!--                                                                                                                                                              -->
+<!--   Copyright (2019) Intel Corporation.                                                                                                                        -->
+<!--                                                                                                                                                              -->
+<!--   Redistribution. Redistribution and use in binary form, without modification, are permitted provided that the following conditions are met:                 -->
+<!--                                                                                                                                                              -->
+<!--    * Redistributions must reproduce the above copyright notice and the following disclaimer in the documentation and/or other materials provided with        -->
+<!--   the distribution.                                                                                                                                          -->
+<!--    * Neither the name of Intel Corporation nor the names of its suppliers may be used to endorse or promote products derived from this software              -->
+<!--   without specific prior written permission.                                                                                                                 -->
+<!--    * No reverse engineering, decompilation, or disassembly of this software is permitted.                                                                    -->
+<!--                                                                                                                                                              -->
+<!--   Limited patent license.  Intel Corporation grants a world-wide, royalty-free, non-exclusive license under patents it now or hereafter                      -->
+<!--   owns or controls to make, have made, use, import, offer to sell and sell ("Utilize") this software, but solely to the extent that any                      -->
+<!--   such patent is necessary to Utilize the software in the form provided by Intel. The patent license shall not apply to any combinations which include       -->
+<!--   this software.  No hardware per se is licensed hereunder.                                                                                                  -->
+<!--                                                                                                                                                              -->
+
+<TestMacConfig>
+    <version>oran_bronze_release_v1.0</version>
+
+    <Api>
+        <!-- Full path to wls device used for transport of MAC-PHY API (e.g. /dev/wls0 )-->
+        <wls_dev_name>/dev/wls</wls_dev_name>
+
+        <!-- If this is set to 1, then WLS needs to be built with DPDK option -->
+        <wlsDpdkSupport>1</wlsDpdkSupport>
+
+        <!-- WLS Memory size. Default is 1GB. Leave 10MB for structure that is also shared within this 1GB -->
+        <wlsMemorySize>0x7ec00000</wlsMemorySize>
+    </Api>
+
+    <!-- PhyStart Default Info -->
+    <PhyStart>
+        <!-- PhyStart Mode: 0 - Radio. 1 - Timer -->
+        <PhyStartMode>1</PhyStartMode>
+        <!-- PhyStart Period: TTI Duration 1 <= Period <= 10000 -->
+        <PhyStartPeriod>40</PhyStartPeriod>
+        <!-- PhyStart Count: Number of TTIs to run 0: Length of test from config file 1 <= Period <= 4294967295 -->
+        <PhyStartCount>0</PhyStartCount>
+    </PhyStart>
+
+    <MlogVars>
+        <!-- Number of subframes are logged into Mlog. Needs to be a power of 2 -->
+        <MlogSubframes>128</MlogSubframes>
+        <!-- Number of Cores being logged into Mlog -->
+        <MlogCores>3</MlogCores>
+        <!-- Size of each subframe (in bytes) -->
+        <MlogSize>2048</MlogSize>
+    </MlogVars>
+
+    <!-- CPU Binding to Application Threads -->
+    <Threads>
+        <!-- Wireless Subsystem Thread: Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
+        <wlsRxThread>1, 90, 0</wlsRxThread>
+
+        <!-- System Threads: Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
+        <systemThread>0, 0, 0</systemThread>
+
+        <!-- TestMac Run Thread: Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
+        <runThread>0, 89, 0</runThread>
+
+        <!-- Thread to send / receive URLLC APIS to / from testmac to Phy. It will be created only when the phy_config has URLLC Support added to it: Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
+        <urllcThread>19, 90, 0</urllcThread>
+    </Threads>
+
+    <TestUeMode>
+        <!-- This field signifies if TestUE mode is enabled or not. If enabled, L1 IQ samples will be transmitted over ethernet from testue App -->
+        <TestUeModeEnable>0</TestUeModeEnable>
+    </TestUeMode>
+
+    <!-- Timer-mode DPDK IO options. -->
+    <DpdkIo>
+        <!-- DPDK IO thread: Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
+        <dpdkIoThread>1, 70, 0</dpdkIoThread>
+
+        <!-- DPDK: Add a PCI device in white list The argument format is <[domain:]bus:devid.func> -->
+        <dpdk_dev>0000:00:06.0</dpdk_dev>
+    <DpdkIo>
+
+</TestMacConfig>
