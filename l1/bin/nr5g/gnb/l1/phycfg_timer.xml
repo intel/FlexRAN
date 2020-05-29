@@ -66,7 +66,7 @@
         <!--  DPDK Interrupt mode enable        [0 - disabled, PMD is used, 1 - enabled, uio irq is used] -->
         <dpdkIrqMode>0</dpdkIrqMode>
         <!--  DPDK FEC BBDEV to use             [0 - SW, 1 - FPGA, 2 - Both] -->
-        <dpdkBasebandFecMode>1</dpdkBasebandFecMode>
+        <dpdkBasebandFecMode>0</dpdkBasebandFecMode>
         <!--  DPDK BBDev name added to the whitelist. The argument format is <[domain:]bus:devid.func> -->
         <dpdkBasebandDevice>0000:22:00.0</dpdkBasebandDevice>
         <!--  Ferry Bridge (FB) mode            [0 - LTE MODE, 1 - CPRI BYPASS MODE] -->

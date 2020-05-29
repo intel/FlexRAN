@@ -28,7 +28,6 @@
 
 #!/bin/bash
 #echo off
-export RTE_WLS=../../../../wls_mod
 
 l1Binary="./l1app"
 cfgxmlfile=
