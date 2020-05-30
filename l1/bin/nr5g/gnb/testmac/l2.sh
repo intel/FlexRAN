@@ -27,9 +27,6 @@
 #######################################################################
 
 
-export RTE_WLS=../../../../wls_mod
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$RTE_WLS
-
 MACHINE_TYPE=`uname -m`
 
 if [ ${MACHINE_TYPE} == 'x86_64' ]; then
