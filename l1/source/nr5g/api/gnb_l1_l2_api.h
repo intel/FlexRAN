@@ -152,7 +152,8 @@ typedef struct tSfnSlot
     uint32_t nSFN:10;       // system frame number 0->1023
     uint32_t nSlot:9;       // slot number 0->319
     uint32_t nCarrierIdx:4; // carrier index, 0->15
-    uint32_t nRsv:9;
+    uint32_t nSym:4;        // Symbol Number, 0->13
+    uint32_t nRsv:5;
 } SFN_SlotStruct, *PSFN_SlotStruct;
 
 //------------------------------------------------------------------------------------------------------------
@@ -231,7 +232,7 @@ typedef struct tConfigReq
      /*Number of receiving antennas */
     uint8_t      nNrOfRxAnt;
 
-     /* Max Number of transmission ports (1 - 8) */
+     /* Max Number of transmission ports (1 - 16) */
      uint8_t      nNrOfDLPorts;
      /* Max Number of receiving Virtual ports (1 - 8). There maybe more than 1 virtual port mapped to a physical port transmitted by UE */
      uint8_t      nNrOfULPorts;
@@ -303,9 +304,10 @@ typedef struct tConfigReq
     /* Cell-Specific scrambling ID for group hopping and sequence hopping*/
     uint16_t   nHoppingId;
 
-    /* If 1, then this cell will get URLLC apis from L2 */
+    /* If 1, then this cell is a URLLC cell */
     uint16_t   nUrllcCapable;
-    uint16_t   reserved;
+    /* Bit Mask (14 Bits) which indicate which symbol numbers to send SLOT_IND to L2 */
+    uint16_t   nUrllcMiniSlotMask;
 
 } CONFIGREQUESTStruct, *PCONFIGREQUESTStruct;
 
@@ -828,8 +830,8 @@ typedef struct tUlSchPduInfo
 
     /**** word 21 *****/
     uint16_t   nNid;                // Data-scrambling-IdentityValue : 0->1023
-    uint8_t    nAlphaScaling;       //configured by higher parameter scaling
-    uint8_t    nBetaOffsetACKIndex; //BetaoffsetAck index
+    uint8_t    nAlphaScaling;       // configured by higher parameter scaling, ENUMERATED for UCI-onPUSCH RRC { f0p5, f0p65, f0p8, f1 }, Value 0->3
+    uint8_t    nBetaOffsetACKIndex; // BetaoffsetAck index
 
     /**** word 22 *****/
     /*Beam index value:0~63*/
@@ -1042,7 +1044,9 @@ typedef struct tUlCrcStruct
 
     /**** word 3 *****/
     uint8_t  nCrcFlag;      //CRC flag to indicate if error detected:0: CRC error ,1: CRC correct
-    uint8_t  rsv1[3];
+    uint8_t  nChanDetected; //Channel Detected flag. 0: possible DTX detected for channel, 1: channel detected
+    uint8_t  nDtxDetected;  //DTX detected.  0: channel present, 1: DTX detected for channel
+    uint8_t  rsv1[1];
 } ULCRCStruct, *PULCRCStruct;
 
 //------------------------------------------------------------------------------------------------------------
@@ -1055,7 +1059,7 @@ typedef struct tCrcIndicationStruct
     /**** word 2 *****/
     SFN_SlotStruct sSFN_Slot;
 
-    uint8_t   nCrc;        // Number of CRCs included in this message:Value: 0->255
+    uint8_t    nCrc;        // Number of CRCs included in this message:Value: 0->255
     uint8_t    rsv1[3];
 
     ULCRCStruct sULCRCStruct[];
@@ -1100,12 +1104,12 @@ typedef struct tUlSchUciPduDataStruct
 
     /**** word 2 *****/
     uint16_t nPduUciAckLen;      // The total length (in bits) of UlSch UCI Ack/Nack PDU payload, without the padding bytes.
-    uint16_t nPduUciRiLen;      // The total length (in bits) of UlSch UCI Rank PDU payload, without the padding bytes.
+    uint16_t nPduUciRiLen;       // The total length (in bits) of UlSch UCI Rank PDU payload, without the padding bytes.
 
     /**** word 3 *****/
     uint16_t nPduUciCqiLen;      // The total length (in bits) of UlSch UCI Cqi PDU payload, without the padding bytes.
-    uint8_t  nUciDetected; // Indicates if L1 was able to decode UCI or not (0- detected / 1 - dtx )
-    uint8_t  nUciCrc;      // for polar coded UCI, CRC flag to indicate if error detected:0: CRC error ,1: CRC correct
+    uint8_t  nUciDetected;       // Indicates if L1 was able to decode UCI or not (0- detected / 1 - dtx )
+    uint8_t  nUciCrc;            // for polar coded UCI, CRC flag to indicate if error detected:0: CRC error ,1: CRC correct
 
     /**** word 4 *****/
     uint8_t nUciAckBits[MAX_UCI_BIT_BYTE_LEN];
@@ -1136,9 +1140,9 @@ typedef struct tUlUciPduDataStruct
     uint16_t  nRNTI;        // The RNTI associated with the UE,Value: 1 -> 65535
 
     /**** word 2 *****/
-    uint8_t   nSRPresent;   // Whether SR present, Value 0~1, valid for format0
-    uint8_t   pucchDetected; // Indicates if L1 was able to decode PUCCH or not (0 - CRC fail / 1 - CRC pass / 2 - DTX)
-    uint16_t  nPduBitLen;   // The total length (in bits) of PDU Payload, Value: 0~640?
+    uint8_t   nSRPresent;    // Whether SR present, Value 0~1, valid for format0
+    uint8_t   pucchDetected; // Indicates if L1 was able to decode PUCCH or not (0 - CRC fail / 1 - CRC pass / 2 - DTX / 3 - UE has left the cell)
+    uint16_t  nPduBitLen;    // The total length (in bits) of PDU Payload, Value: 0~640?
 
     /**** word 3 *****/
     int16_t  nSNR;          // SNR in dB , estimated by this PUCCH
@@ -1314,6 +1318,31 @@ typedef enum
 //------------------------------------------------------------------------------------------------------------
 // Payload for MSG_TYPE_PHY_ADD_REMOVE_CORE message
 #define MAX_NUM_SET_CORE_MASK ( 4 )
+typedef enum
+{
+    CELL_MASK = 0,
+    SRS_MASK,
+    DLBEAM_MASK,
+    MAX_MASK_OPTIONS
+} CORE_MASK_OPTIONS;
+
+typedef enum
+{
+    PDSCH_SPLIT = 0,
+    PDSCH_DL_WEIGHT_SPLIT,
+    PUSCH_CHANEST_SPLIT,
+    PUSCH_MMSE_SPLIT,
+    PUSCH_LLR_RX_SPLIT,
+    PUSCH_UL_WEIGHT_SPLIT,
+    PUCCH_SPLIT,
+    SRS_SPLIT,
+    FEC_ENC_SPLIT,
+    FEC_DEC_SPLIT,
+    FEC_DEC_NUM_ITER,
+    FEC_DEC_EARLY_TERM_DISABLE,
+    NUM_SPLIT_OPTIONS
+} CHANNEL_SPLIT_OPTIONS;
+
 typedef struct tAddRemoveBbuCores
 {
     /**** word 1 *****/
@@ -1323,8 +1352,8 @@ typedef struct tAddRemoveBbuCores
     SFN_SlotStruct sSFN_Slot;
 
     BBUPOOL_CORE_OPERATION eOption;
-    uint64_t nCoreMask[MAX_NUM_SET_CORE_MASK];
-    uint64_t nSrsCoreMask[MAX_NUM_SET_CORE_MASK];
+    uint64_t nCoreMask[MAX_MASK_OPTIONS][MAX_NUM_SET_CORE_MASK];
+    uint32_t nMacOptions[NUM_SPLIT_OPTIONS];
 } ADD_REMOVE_BBU_CORES, *PADD_REMOVE_BBU_CORES;
 //------------------------------------------------------------------------------------------------------------
 

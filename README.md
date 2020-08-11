@@ -81,7 +81,7 @@ Run below command to activate Real Time Profile
 
 Configure kernel command line
 Edit /etc/default/grub and append the following to the GRUB_CMDLINE_LINUX:
->`"processor.max_cstate=1 intel_idle.max_cstate=0 intel_pstate=disable idle=poll default_hugepagesz=1G hugepagesz=1G hugepages=32 intel_iommu=off selinux=0 enforcing=0 nmi_watchdog=0 audit=0 mce=off kthread_cpus=0 irqaffinity=0"`
+>`"processor.max_cstate=1 intel_idle.max_cstate=0 intel_pstate=disable idle=poll default_hugepagesz=1G hugepagesz=1G hugepages=32 intel_iommu=on iommu=pt selinux=0 enforcing=0 nmi_watchdog=0 audit=0 mce=off kthread_cpus=0 irqaffinity=0"`
 
 Add the following:
 >`GRUB_CMDLINE_LINUX_DEFAULT="${GRUB_CMDLINE_LINUX_DEFAULT:+$GRUB_CMDLINE_LINUX_DEFAULT }\$tuned_params"`
@@ -93,7 +93,7 @@ After the change, the grub file runs the following command to update the grub:
 Reboot the server, and check the kernel parameter, which should look like:
 >`cat /proc/cmdline`
 
->`BOOT_IMAGE=/vmlinuz-3.10.0-1062.12.1.rt56.1042.el7.x86_64 root=UUID=9b3e69f6-88af-4af1-8964-238879b4f282 ro crashkernel=auto rd.lvm.lv=centos/root rd.lvm.lv=centos/swap rhgb quiet processor.max_cstate=1 intel_idle.max_cstate=0 intel_pstate=disable idle=poll default_hugepagesz=1G hugepagesz=1G hugepages=32 intel_iommu=off selinux=0 enforcing=0 nmi_watchdog=0 audit=0 mce=off kthread_cpus=0 irqaffinity=0 skew_tick=1 isolcpus=1-19 intel_pstate=disable nosoftlockup nohz=on nohz_full=1-19 rcu_nocbs=1-19`
+>`BOOT_IMAGE=/vmlinuz-3.10.0-1062.12.1.rt56.1042.el7.x86_64 root=UUID=9b3e69f6-88af-4af1-8964-238879b4f282 ro crashkernel=auto rd.lvm.lv=centos/root rd.lvm.lv=centos/swap rhgb quiet processor.max_cstate=1 intel_idle.max_cstate=0 intel_pstate=disable idle=poll default_hugepagesz=1G hugepagesz=1G hugepages=32 intel_iommu=on iommu=pt selinux=0 enforcing=0 nmi_watchdog=0 audit=0 mce=off kthread_cpus=0 irqaffinity=0 skew_tick=1 isolcpus=1-19 intel_pstate=disable nosoftlockup nohz=on nohz_full=1-19 rcu_nocbs=1-19`
 
 Set CPU frequency using msr-tools
 >`git clone https://github.com/intel/msr-tools/`
@@ -332,5 +332,5 @@ After testmac container is started and running, you can see the test is running.
 
 Bit Exact Test Cases
 ===========
-It was decribed in the O-RAN SC O-DU Low project document, get through below link https://docs.o-ran-sc.org/projects/o-ran-sc-o-du-phy/en/latest/index.html 
+It was described in the O-RAN SC O-DU Low project document, get through below link https://docs.o-ran-sc.org/projects/o-ran-sc-o-du-phy/en/latest/index.html 
 

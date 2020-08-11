@@ -17,18 +17,21 @@
 <!--                                                                                                                                                              -->
 
 <TestMacConfig>
-    <version>oran_bronze_release_v1.0</version>
+    <version>oran_bronze_release_v1.1</version>
 
     <Api>
-        <!-- Full path to wls device used for transport of MAC-PHY API (e.g. /dev/wls0 )-->
-        <wls_dev_name>/dev/wls</wls_dev_name>
-
-        <!-- If this is set to 1, then WLS needs to be built with DPDK option -->
-        <wlsDpdkSupport>1</wlsDpdkSupport>
+        <!-- Full path to wls device used for transport of MAC-PHY API (e.g. wls0 )-->
+        <wls_dev_name>wls0</wls_dev_name>
 
         <!-- WLS Memory size. Default is 1GB. Leave 10MB for structure that is also shared within this 1GB -->
         <wlsMemorySize>0x7ec00000</wlsMemorySize>
     </Api>
+
+    <!-- This section defines all DPDK related parameters used for DPDK initialization -->
+    <DPDK>
+        <!--  DPDK IOVA Mode used for DPDK initialization. If 0, then PA mode. Else VA Mode. This needs to match whatever is in phycfg xml files -->
+        <dpdkIovaMode>0</dpdkIovaMode>
+    </DPDK>
 
     <!-- PhyStart Default Info -->
     <PhyStart>
@@ -63,19 +66,5 @@
         <!-- Thread to send / receive URLLC APIS to / from testmac to Phy. It will be created only when the phy_config has URLLC Support added to it: Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
         <urllcThread>19, 90, 0</urllcThread>
     </Threads>
-
-    <TestUeMode>
-        <!-- This field signifies if TestUE mode is enabled or not. If enabled, L1 IQ samples will be transmitted over ethernet from testue App -->
-        <TestUeModeEnable>0</TestUeModeEnable>
-    </TestUeMode>
-
-    <!-- Timer-mode DPDK IO options. -->
-    <DpdkIo>
-        <!-- DPDK IO thread: Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
-        <dpdkIoThread>1, 70, 0</dpdkIoThread>
-
-        <!-- DPDK: Add a PCI device in white list The argument format is <[domain:]bus:devid.func> -->
-        <dpdk_dev>0000:00:06.0</dpdk_dev>
-    <DpdkIo>
 
 </TestMacConfig>

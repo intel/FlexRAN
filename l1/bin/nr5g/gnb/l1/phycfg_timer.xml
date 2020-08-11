@@ -19,18 +19,13 @@
 
 
 <PhyConfig>
-    <version>oran_bronze_release_v1.0</version>
+    <version>oran_bronze_release_v1.1</version>
 
     <Api>
         <!--  Maximum number of successive missing API allowed before triggering PHY stop (-1 is infinite) -->
         <successiveNoApi>15</successiveNoApi>
-        <!--  If this is enabled (1 - WLS Interrupt mode) dedicated wls thread is created where l1 will call WLS_Wait and this thread is woken up by L2 -->
-        <!--  If this is disabled (0 - WLS Polling mode) WLS_Get is called from the timer thread (timer mode) or dpdk thread (radio mode) where L1 is polling for APIs from MAC -->
-        <wlsThreadEnable>0</wlsThreadEnable>
-        <!--  Full path to wls device used for transport of MAC-PHY API (e.g. /dev/wls0 )-->
-        <wls_dev_name>/dev/wls</wls_dev_name>
-        <!-- If this is set to 1, then WLS needs to be built with DPDK option -->
-        <wlsDpdkSupport>1</wlsDpdkSupport>
+        <!--  Full path to wls device used for transport of MAC-PHY API (e.g. wls0 )-->
+        <wls_dev_name>wls0</wls_dev_name>
         <!-- WLS Memory size. Default is 1GB. Leave 10MB for structure that is also shared within this 1GB -->
         <wlsMemorySize>0x7ec00000</wlsMemorySize>
     </Api>
@@ -44,7 +39,7 @@
             <!--  Bit 1: UlFftOut.bin -->
             <!--  Bit 16: DlIfftIn.txt -->
             <!--  Bit 17: UlFftOut.txt -->
-            <iqLogDumpToFile>0x0</iqLogDumpToFile>
+            <iqLogDumpToFile>0</iqLogDumpToFile>
         </IqLogs>
         <DebugLogs>
             <phyMlog>1</phyMlog>
@@ -52,23 +47,22 @@
         </DebugLogs>
     </PhyLogs>
 
-    <Power>
-        <!-- Enable/disable power saving features [0 - disable (no power saving), 1 - enable power saving features ] -->
-        <powerSaveEnable>0</powerSaveEnable>
-    </Power>
+    <!-- This section defines all DPDK related parameters used for DPDK initialization -->
+    <DPDK>
+        <!--  DPDK memory size allocated from hugepages [MB]  [default: 2048] -->
+        <dpdkMemorySize>2048</dpdkMemorySize>
+        <!--  DPDK IOVA Mode used for DPDK initialization. If 0, then PA mode. Else VA Mode -->
+        <dpdkIovaMode>0</dpdkIovaMode>
+        <!--  DPDK FEC BBDEV to use             [0 - SW, 1 - FPGA, 2 - Both] -->
+        <dpdkBasebandFecMode>0</dpdkBasebandFecMode>
+        <!--  DPDK BBDev name added to the whitelist. The argument format is <[domain:]bus:devid.func> -->
+        <dpdkBasebandDevice>0000:1f:00.1</dpdkBasebandDevice>
+    </DPDK>
 
     <!-- This section is used with FerryBridge FPGA and 5GNR code -->
     <Radio>
         <!-- Enable/disable radio               [0 - disable (external app control radio), 1 - use Ferry Bridge -->
         <radioEnable>0</radioEnable>
-        <!--  DPDK memory size allocated from hugepages [MB]  [default: 2048] -->
-        <dpdkMemorySize>2048</dpdkMemorySize>
-        <!--  DPDK Interrupt mode enable        [0 - disabled, PMD is used, 1 - enabled, uio irq is used] -->
-        <dpdkIrqMode>0</dpdkIrqMode>
-        <!--  DPDK FEC BBDEV to use             [0 - SW, 1 - FPGA, 2 - Both] -->
-        <dpdkBasebandFecMode>0</dpdkBasebandFecMode>
-        <!--  DPDK BBDev name added to the whitelist. The argument format is <[domain:]bus:devid.func> -->
-        <dpdkBasebandDevice>0000:22:00.0</dpdkBasebandDevice>
         <!--  Ferry Bridge (FB) mode            [0 - LTE MODE, 1 - CPRI BYPASS MODE] -->
         <ferryBridgeMode>1</ferryBridgeMode>
         <!--  Number of Ethernet ports on FB    [0 - DPDK port 0, 1 - DPDK port 1, 2 - both DPDK port 0 and port 1 (CA mode with two ETH)] -->
@@ -81,15 +75,15 @@
         <!--  Radio Config 0 -->
         <RadioConfig0>
             <!-- DPDK: Add a PCI device in white list The argument format is <[domain:]bus:devid.func> -->
-            <radioCfg0PCIeEthDev>0000:19:00.0</radioCfg0PCIeEthDev>
+            <radioCfg0PCIeEthDev>0000:86:00.0</radioCfg0PCIeEthDev>
             <!-- DPDK: RX Thread core id [0-max core] -->
-            <radioCfg0DpdkRx>1</radioCfg0DpdkRx>
+            <radioCfg0DpdkRx>2</radioCfg0DpdkRx>
             <!-- DPDK: TX Thread core id [0-max core] -->
-            <radioCfg0DpdkTx>2</radioCfg0DpdkTx>
+            <radioCfg0DpdkTx>3</radioCfg0DpdkTx>
             <!--  Number of Tx Antenna         [1, 2, 4] -->
-            <radioCfg0TxAnt>2</radioCfg0TxAnt>
+            <radioCfg0TxAnt>4</radioCfg0TxAnt>
             <!--  Number of Rx Antenna         [1, 2, 4] -->
-            <radioCfg0RxAnt>2</radioCfg0RxAnt>
+            <radioCfg0RxAnt>4</radioCfg0RxAnt>
             <!--  Rx AGC configuration         [0 - Rx AGC disabled, 1 - Rx AGC enabled (default for fpga release 1.3.1)] -->
             <radioCfg0RxAgc>0</radioCfg0RxAgc>
             <!--  Number of cells running on this port   [1 - Cell , 2 - Cells, 3 - Cells , 4 - Cells ] -->
@@ -128,7 +122,7 @@
             <!--  Rx AGC configuration         [0 - Rx AGC disabled, 1 - Rx AGC enabled (default for fpga release 1.3.1)] -->
             <radioCfg1RxAgc>0</radioCfg1RxAgc>
             <!--  Number of cells running on this port   [1 - Cell , 2 - Cells ] -->
-            <radioCfg1NumCell>2</radioCfg1NumCell>
+            <radioCfg1NumCell>1</radioCfg1NumCell>
             <!-- First Phy instance ID mapped to this port    [0-7 - valid range of PHY instance for first cell ] -->
             <radioCfg1Cell0PhyId>2</radioCfg1Cell0PhyId>
             <!-- Second Phy instance ID mapped to this port    [0-7 - valid range of PHY instance for second cell ] -->
@@ -360,44 +354,57 @@
         <Pdsch>
             <!-- Split PDSCH symbol processing -->
             <PdschSymbolSplit>0</PdschSymbolSplit>
+
+            <!-- Split PDSCH DL beamforiming weight generation processing -->
+            <PdschDlWeightSplit>0</PdschDlWeightSplit>
+
             <!-- Max number of parallel tasks that the DL FEC Encoder is split into. Number needs to be between 1 and 4. If wrong value entered, it will be defaulted to 1.  -->
             <!-- For hardware offload (using fpga / eAsic) it will be defaulted to 1.  -->
-            <fecEncSplit>4</fecEncSplit>
+            <FecEncSplit>4</FecEncSplit>
         </Pdsch>
         <Pusch>
             <!-- Split processing for Channel Estimation for PUSCH -->
-            <ChanEstSplit>0</ChanEstSplit>
+            <PuschChanEstSplit>0</PuschChanEstSplit>
 
             <!-- Split processing for MMSE for PUSCH -->
-            <MmseSplit>0</MmseSplit>
+            <PuschMmseSplit>0</PuschMmseSplit>
+
+            <!-- Split processing for LLR Rx for PUSCH -->
+            <PuschLlrRxSplit>0</PuschLlrRxSplit>
+
+            <!-- Split PUSCH UL beamforiming weight generation processing -->
+            <PuschUlWeightSplit>0</PuschUlWeightSplit>
 
             <!-- Software FEC Decoder Early Termination disabled. If 1, then programmed number of iterations are run from MAC PHY API regardless of CRC PASS -->
-            <fecDecEarlyTermDisable>0</fecDecEarlyTermDisable>
+            <FecDecEarlyTermDisable>0</FecDecEarlyTermDisable>
 
             <!-- FEC LDPC Decoder Number of iterations. If 0 then Number of iterations is set to 10. Else this value is used -->
-            <fecDecNumIter>12</fecDecNumIter>
+            <FecDecNumIter>12</FecDecNumIter>
 
             <!-- Max number of parallel tasks that the UL FEC Decoder is split into. Number needs to be between 1 and 4. If wrong value entered, it will be defaulted to 1. -->
             <!-- For hardware offload (using fpga / eAsic) it will be defaulted to 1.  -->
-            <fecDecSplit>4</fecDecSplit>
+            <FecDecSplit>4</FecDecSplit>
 
             <!-- Only for terasic. Number of decimal digits of LLR fixed point output. If 0 then this value is set to 2, which means LLR is 8S2. Else this value is used -->
             <llrOutDecimalDigit>2</llrOutDecimalDigit>
 
             <!-- SNR Threshold for IRC -->
             <IrcEnableThreshold>-10</IrcEnableThreshold>
+
+            <!-- interpolation method for PUSCH CE 0: 1RB sinc interpolation 1: 4RB sinc interpolation-->
+            <CEInterpMethod>0</CEInterpMethod>
         </Pusch>
         <Pucch>
             <!-- Split processing for PUCCH -->
-            <PucchSplit>2</PucchSplit>
+            <PucchSplit>0</PucchSplit>
         </Pucch>
         <Srs>
             <!-- Split processing for SRS CE -->
-            <srsCeSplit>2</srsCeSplit>
+            <SrsCeSplit>0</SrsCeSplit>
         </Srs>
         <Prach>
-            <!-- Prach Detection Threshold. This is a Multiplier on top of what L1 finds as thershold. Needs to be >=1 -->
-            <prachDetectThreshold>1</prachDetectThreshold>
+            <!-- Prach Detection Threshold. If non zero, computed value is used. -->
+            <prachDetectThreshold>0</prachDetectThreshold>
         </Prach>
     </PhyVars>
 
@@ -412,17 +419,17 @@
 
     <!-- CPU Binding to Application Threads -->
     <Threads>
-        <!-- Wireless Subsystem Thread (Single core id value): Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR]. Only created when wlsThreadEnable = 1  -->
-        <wlsRxThread>2, 96, 0</wlsRxThread>
-
-        <!-- Wireless Subsystem Worker Thread (Single core id value): Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR]. Only created when wlsThreadEnable = 1  -->
-        <wlsWorkerThread>2, 96, 0</wlsWorkerThread>
-
         <!-- System Threads (Single core id value): Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
         <systemThread>0, 0, 0</systemThread>
 
         <!-- Timer Thread (Single core id value): Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
         <timerThread>2, 96, 0</timerThread>
+
+        <!-- XRAN Thread (core where the XRAN polling function is pinned: Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
+        <xRANThread>0, 96, 0</xRANThread>
+
+        <!-- core mask for XRAN Packets Worker (core where the XRAN packet processing is pinned): Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
+        <xRANWorker>0, 96, 0</xRANWorker>
 
         <!-- FPGA for LDPC Thread (Single core id value): Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
         <FpgaDriverCpuInfo>3, 96, 0</FpgaDriverCpuInfo>
@@ -432,7 +439,7 @@
         <FrontHaulCpuInfo>3, 96, 0</FrontHaulCpuInfo>
 
         <!-- DPDK Radio Master Thread (Single core id value): Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
-        <radioDpdkMaster>0, 99, 0</radioDpdkMaster>
+        <radioDpdkMaster>2, 99, 0</radioDpdkMaster>
     </Threads>
 
     <BbuPoolConfig>
@@ -451,8 +458,13 @@
 
         <!-- BBUPool Worker Thread Cores dedicated for SRS processing in case of Massive MIMO Configs. Mask needs to be a subset of BbuPoolThreadDefault_0_63 or BbuPoolThreadDefault_64_127 -->
         <!-- (Bit mask of all cores that are used for BBU Pool in Decimal or Hex [needs to start with "0x"]) -->
-        <BbuPoolThreadSrs_0_63>0x80</BbuPoolThreadSrs_0_63>
+        <BbuPoolThreadSrs_0_63>0x0</BbuPoolThreadSrs_0_63>
         <BbuPoolThreadSrs_64_127>0x0</BbuPoolThreadSrs_64_127>
+
+        <!-- BBUPool Worker Thread Cores dedicated for DL beam  processing in case of Massive MIMO Configs. Mask needs to be a subset of BbuPoolThreadDefault_0_63 or BbuPoolThreadDefault_64_127 -->
+        <!-- (Bit mask of all cores that are used for BBU Pool in Decimal or Hex [needs to start with "0x"]) -->
+        <BbuPoolThreadDlbeam_0_63>0x0</BbuPoolThreadDlbeam_0_63>
+        <BbuPoolThreadDlbeam_64_127>0x0</BbuPoolThreadDlbeam_64_127>
 
         <!-- URLLC Processing Thread (Single core id value) -->
         <BbuPoolThreadUrllc>8</BbuPoolThreadUrllc>
@@ -462,7 +474,7 @@
         <!-- Time advance added in FPGA from PPS. This is to sync with RRU -->
         <FrontHaulTimeAdvance>7450</FrontHaulTimeAdvance>
 
-        <!-- Number of ports used from FPGA. 462607 (0x70F0F) 2Ports: 459523 (0x70303) -->
+        <!-- Number of ports used from FPGA. 4Ports: 462607 (0x70F0F) 2Ports: 459523 (0x70303) -->
         <nEthPorts>462607</nEthPorts>
         <!-- phase compensation enable flag 0:disablle 1:enable -->
         <nPhaseCompFlag>0</nPhaseCompFlag>
@@ -472,7 +484,7 @@
         <nFecFpgaVersionMu3>0x20010900</nFecFpgaVersionMu3>
 
         <!-- FEC Version for sub3 and sub6 -->
-        <nFecFpgaVersionMu0_1>0x1226D401</nFecFpgaVersionMu0_1>
+        <nFecFpgaVersionMu0_1>0x0319d420</nFecFpgaVersionMu0_1>
 
         <!-- Front Haul Version for mmWave -->
         <nFhFpgaVersionMu3>0x8001000F</nFhFpgaVersionMu3>
@@ -482,14 +494,20 @@
     </Fpga>
 
     <xRAN>
-        <!--  DPDK NIC card VF for C-plane   added to the whitelist. The argument format is <[domain:]bus:devid.func> -->
+        <!--  DPDK NIC card VF for C-plane added to the whitelist. The argument format is <[domain:]bus:devid.func> -->
         <dpdkXranDeviceCP>0000:d8:02.1</dpdkXranDeviceCP>
         <!--  DPDK NIC card VF for C-plane   added to the whitelist. The argument format is <[domain:]bus:devid.func> -->
         <dpdkXranDeviceUP>0000:d8:02.0</dpdkXranDeviceUP>
-        <!-- XRAN: Mac address of lls-CU -->
-        <llsCuMac>00:11:22:33:44:66</llsCuMac>
-        <!-- XRAN: Mac address of RU -->
+        <!-- XRAN: Mac address of O-DU -->
+        <DuMac>00:11:22:33:44:66</DuMac>
+        <!-- XRAN: Mac address of O-RU -->
         <RuMac>00:11:22:33:44:55</RuMac>
+
+        <!-- XRAN: Category of O-RU 0 - Category A, 1 - Category B -->
+        <Category>1</Category>
+
+        <!-- XRAN: enabble sleep on PMD cores -->
+        <xranPmdSleep>1</xranPmdSleep>
 
         <!-- RU Settings -->
         <Tadv_cp_dl>25</Tadv_cp_dl>
@@ -506,7 +524,9 @@
         <Ta3_min>20</Ta3_min>
         <Ta3_max>32</Ta3_max>
 
-        <!-- lls-CU Settings -->
+        <!-- O-DU Settings -->
+        <!-- MTU size -->
+        <MTU>9600</MTU>
         <!-- VLAN Tag used for C-Plane -->
         <c_plane_vlan_tag>1</c_plane_vlan_tag>
         <u_plane_vlan_tag>2</u_plane_vlan_tag>
@@ -529,23 +549,51 @@
         <xRANNumDLPRBs>0</xRANNumDLPRBs>
         <!-- Total Number of UL PRBs per symbol (starting from RB 0) that is received (used for testing. If 0, then value is used from PHY_CONFIG_API) -->
         <xRANNumULPRBs>0</xRANNumULPRBs>
+        <!-- refer to alpha as defined in section 9.7.2 of ORAN spec. this value should be alpha*(1/1.2288ns), range 0 - 1e7 (ns) -->
+        <Gps_Alpha>0</Gps_Alpha>
+        <!-- beta value as defined in section 9.7.2 of ORAN spec. range -32767 ~ +32767 -->
+        <Gps_Beta>0</Gps_Beta>
+
+        <!-- XRAN: Compression mode on O-DU <-> O-RU 0 - no comp 1 - BFP -->
+        <xranCompMethod>0</xranCompMethod>
+
+        <nPrbElemDl>0</nPrbElemDl>
+        <!--nRBStart, nRBSize, nStartSymb, numSymb, nBeamIndex, bf_weight_update, compMethod, iqWidth, BeamFormingType -->
+        <!-- weight base beams -->
+        <PrbElemDl0>0,48,0,14,1,1,1,9,1</PrbElemDl0>
+        <PrbElemDl1>48,48,0,14,2,1,1,9,1</PrbElemDl1>
+        <PrbElemDl2>96,48,0,14,3,1,1,9,1</PrbElemDl2>
+        <PrbElemDl3>144,48,0,14,4,1,1,9,1</PrbElemDl3>
+        <PrbElemDl4>144,36,0,14,5,1,1,9,1</PrbElemDl4>
+        <PrbElemDl5>180,36,0,14,6,1,1,9,1</PrbElemDl5>
+        <PrbElemDl6>216,36,0,14,7,1,1,9,1</PrbElemDl6>
+        <PrbElemDl7>252,21,0,14,8,1,1,9,1</PrbElemDl7>
+
+
+        <nPrbElemUl>0</nPrbElemUl>
+        <!--nRBStart, nRBSize, nStartSymb, numSymb, nBeamIndex, bf_weight_update, compMethod, iqWidth, BeamFormingType -->
+        <!-- weight base beams -->
+        <PrbElemUl0>0,48,0,14,1,1,1,9,1</PrbElemUl0>
+        <PrbElemUl1>48,48,0,14,2,1,1,9,1</PrbElemUl1>
+        <PrbElemUl2>72,36,0,14,3,1,1,9,1</PrbElemUl2>
+        <PrbElemUl3>108,36,0,14,4,1,1,9,1</PrbElemUl3>
+        <PrbElemUl4>144,36,0,14,5,1,1,9,1</PrbElemUl4>
+        <PrbElemUl5>180,36,0,14,6,1,1,9,1</PrbElemUl5>
+        <PrbElemUl6>216,36,0,14,7,1,1,9,1</PrbElemUl6>
+        <PrbElemUl7>252,21,0,14,8,1,1,9,1</PrbElemUl7>
+
     </xRAN>
 
-    <TestUeMode>
-        <!-- This field signifies if TestUE mode is enabled or not. If enabled, L1 IQ samples will be transmitted over ethernet from testue App -->
-        <TestUeModeEnable>0</TestUeModeEnable>
+    <StreamStats>
+        <!-- If this is set to 1, L1 statistics are streamed over UDP to the desitnation address and port -->
+        <StreamStats>0</StreamStats>
 
-        <!-- Timer-mode DPDK IO options. -->
-        <DpdkIo>
-            <!-- DPDK IO thread: Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
-            <dpdkIoThread>12, 90, 0</dpdkIoThread>
+        <!-- Destination IP Address to stream the stats -->
+        <StreamIp>127.0.0.1</StreamIp>
 
-            <dpdkPort>0</dpdkPort>
-
-            <!-- DPDK: Add a PCI device in white list The argument format is <[domain:]bus:devid.func> -->
-            <dpdkDev>0000:00:05.0</dpdkDev>
-        </DpdkIo>
-    </TestUeMode>
+        <!-- IP Port used to create UDP socket -->
+        <StreamPort>2000</StreamPort>
+    </StreamStats>
 
 </PhyConfig>
 
