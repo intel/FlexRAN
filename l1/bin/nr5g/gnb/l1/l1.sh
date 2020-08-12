@@ -22,14 +22,15 @@
 #   Contact Information:
 #   Intel Corporation
 # 
-#  version: O-RAN Bronze release V1.0
+#  version: O-RAN Bronze release V1.1
 #
 #######################################################################
-
 #!/bin/bash
 #echo off
+export RTE_WLS=$DIR_WIRELESS_WLS
 
 l1Binary="./l1app"
+#l1Binary="gdb --args ./l1app $@"
 cfgxmlfile=
 MY_DIR=`pwd`
 WLS_DPDK_MODE=1
@@ -51,9 +52,17 @@ elif [ "x"$1 = "x-fb" ]; then
 elif [ "x"$1 = "x-rsub6" ]; then
     cfgxmlfile="phycfg_radio_sub6.xml"
     echo "Radio mode with Terasic Front Hual FPGA - Sub6 100Mhz"
+    echo "Inserting Driver"
+	cd ../../../../libs/cpa/sub6/rec
+	./run.sh install
+	cd $MY_DIR
 elif [ "x"$1 = "x-rmmw" ]; then
     cfgxmlfile="phycfg_radio_mmw.xml"
     echo "Radio mode with Terasic Front Hual FPGA - MMWave"
+    echo "Inserting Driver"
+	cd ../../../../libs/cpa/mmw/rec
+	./run.sh install
+	cd $MY_DIR
 elif [ "x"$1 = "x-e" ]; then
     cfgxmlfile="phycfg_timer.xml"
     echo "TIMER Mode"
@@ -73,7 +82,7 @@ fi
 ulimit -c unlimited
 
 if [ ${MACHINE_TYPE} == 'x86_64' ]; then
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$RTE_WLS
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$RTE_WLS:../../../../libs/cpa/bin
 
     if [ $WLS_DPDK_MODE = "0" ]; then
         echo Non DPDK WLS MODE

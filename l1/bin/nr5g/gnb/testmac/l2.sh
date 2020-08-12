@@ -22,7 +22,7 @@
 #   Contact Information:
 #   Intel Corporation
 # 
-#  version: RefPHY-20.02
+#  version: O-RAN Bronze release V1.1
 #
 #######################################################################
 
@@ -50,7 +50,8 @@ fi
 echo start 5GNR Test MAC
 if [ "$1" = "-g" ]; then
     shift
-    gdb-ia --args ./testmac DIR_WIRELESS_TEST=$DIR_WIRELESS_TEST_5G $@
+    #gdb-ia --args ./testmac DIR_WIRELESS_TEST=$DIR_WIRELESS_TEST_5G $@
+    gdb --args ./testmac DIR_WIRELESS_TEST=$DIR_WIRELESS_TEST_5G $@
 else
     ./testmac DIR_WIRELESS_TEST=$DIR_WIRELESS_TEST_5G $@
 fi

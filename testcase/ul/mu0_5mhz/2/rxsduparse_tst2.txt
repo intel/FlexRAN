@@ -1,5 +1,5 @@
 ##----------------------------------------------------------------------------
-#type[PUCCH] fn[0] slot[0] carrier[0] chanId[0] len[24]
+#type[PUCCH] fn[0] slot[0] sym[0] carrier[0] chanId[0] len[24]
       #ta[0] cqi[30.0] stat[1] srdet[0]
       #data[
              66,  41, 181,
