@@ -227,10 +227,10 @@ Update the Kubernetes pod yaml configuration for your system configuration
         resources:
           requests:
             memory: "16Gi"
-            hugepages-1Gi: 8Gi
+            hugepages-1Gi: 2Gi
           limits:
             memory: "16Gi"
-            hugepages-1Gi: 8Gi
+            hugepages-1Gi: 2Gi
         volumeMounts:
         - name: hugepage
           mountPath: /hugepages
