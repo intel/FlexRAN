@@ -175,7 +175,6 @@ Build O-DU docker image
 Please follow the build procedures on baremetal host to build FAPI/WLS/FH and copy the code/binaries to the oran_release folder on your build server. The docker build will just copy the pre-built binaries to docker image.
 
     oran_release/phy
-    oran_release/FlexRAN-FEC-SDK-19-04
     oran_release/FlexRAN
 Set the network proxy and ORAN_RELEASE environment variable before build
 
