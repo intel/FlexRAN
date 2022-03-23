@@ -1,30 +1,20 @@
-#######################################################################
-#
-# GPL LICENSE SUMMARY
+########################################################################
+#   Copyright (2021) Intel Corporation.                                                                                                                        
+#                                                                                                                                                              
+#   Redistribution. Redistribution and use in binary form, without modification, are permitted provided that the following conditions are met:                
+#                                                                                                                                                             
+#  * Redistributions must reproduce the above copyright notice and the following disclaimer in the documentation and/or other materials provided with       
+#    the distribution.                                                                                                                                         
+#  * Neither the name of Intel Corporation nor the names of its suppliers may be used to endorse or promote products derived from this software             
+#   without specific prior written permission.                                                                                                                
+#  * No reverse engineering, decompilation, or disassembly of this software is permitted.                                                                   
+#                                                                                                                                                             
+#   Limited patent license.  Intel Corporation grants a world-wide, royalty-free, non-exclusive license under patents it now or hereafter                     
+#   owns or controls to make, have made, use, import, offer to sell and sell ("Utilize") this software, but solely to the extent that any                     
+#   such patent is necessary to Utilize the software in the form provided by Intel. The patent license shall not apply to any combinations which include      
+#   this software.  No hardware per se is licensed hereunder.                                                                                                 
 # 
-#   Copyright(c) 2007-2019 Intel Corporation. All rights reserved.
-# 
-#   This program is free software; you can redistribute it and/or modify
-#   it under the terms of version 2 of the GNU General Public License as
-#   published by the Free Software Foundation.
-# 
-#   This program is distributed in the hope that it will be useful, but
-#   WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#   General Public License for more details.
-# 
-#   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
-#   The full GNU General Public License is included in this distribution
-#   in the file called LICENSE.GPL.
-# 
-#   Contact Information:
-#   Intel Corporation
-# 
-#  version: O-RAN Bronze release V1.1
-#
-#######################################################################
+#######################################################################         
 
 
 MACHINE_TYPE=`uname -m`

@@ -1,1 +1,8 @@
 sdk/build-avx512-icc/source/phy/lib_scramble/scramble_table.bin filter=lfs diff=lfs merge=lfs -text
+*.bin filter=lfs diff=lfs merge=lfs -text
+*.d filter=lfs diff=lfs merge=lfs -text
+l1app filter=lfs diff=lfs merge=lfs -text
+testmac filter=lfs diff=lfs merge=lfs -text
+*.so filter=lfs diff=lfs merge=lfs -text
+*.ko filter=lfs diff=lfs merge=lfs -text
+testcase/dl/mu1_100mhz/252/dliq_c0.txt filter=lfs diff=lfs merge=lfs -text

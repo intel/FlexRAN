@@ -1,6 +1,6 @@
 
 /*########################################################################################
-###   Copyright (2019) Intel Corporation.                                              ###
+###   Copyright (2021) Intel Corporation.                                              ###
 ###                                                                                    ###
 ###   Redistribution. Redistribution and use in binary form, without modification,     ###
 ###   are permitted provided that the following conditions are met:                    ###
@@ -22,8 +22,8 @@
 ###   The patent license shall not apply to any combinations which include this        ###
 ###   software.  No hardware per se is licensed hereunder.                             ###
 #########################################################################################*/
-
 /**
+ *
  * @brief API Definitions exhanged between MAC and PHY
  * @file gnb_l1_l2_api.h
  * @ingroup group_source_nr5g_api
@@ -63,9 +63,11 @@ extern "C" {
 #define MAX_TDD_PERIODICITY               (80)
 #define MAX_NUM_OF_SYMBOL_PER_SLOT        (14)
 #define MAX_TXRU_NUM                      (4)
-#define MAX_RXRU_NUM                      (4)
+#define MAX_RXRU_NUM                      (16)
+#define MAX_NUM_ANT                       (64)
+#define MAX_SRS_PORT_PER_UE               (2)
 #define MAX_PANEL_NUM                     (4)
-
+#define SINR_STEP_SIZE                    (256.0)
 
 // API Message Type Field coding definitions
 #define MSG_TYPE_PHY_CONFIG_REQ       (0x1)
@@ -102,6 +104,7 @@ extern "C" {
 #define MSG_TYPE_PHY_UL_UNCODED_BITS        (202)
 #define MSG_TYPE_PHY_ADD_REMOVE_CORE        (203)
 #define MSG_TYPE_PHY_UL_PRACH_IQ_SAMPLES    (204)
+#define MSG_TYPE_PHY_UL_MMIMO_SRS_IQ_SAMPLES    (205)
 
 #define RUN_TIME_APIS_FROM_MAC   ((1<<MSG_TYPE_PHY_DL_CONFIG_REQ) | \
                                  (1 << MSG_TYPE_PHY_UL_CONFIG_REQ) | \
@@ -151,9 +154,9 @@ typedef struct tSfnSlot
 {
     uint32_t nSFN:10;       // system frame number 0->1023
     uint32_t nSlot:9;       // slot number 0->319
-    uint32_t nCarrierIdx:4; // carrier index, 0->15
+    uint32_t nCarrierIdx:5; // carrier index, 0->23
     uint32_t nSym:4;        // Symbol Number, 0->13
-    uint32_t nRsv:5;
+    uint32_t nRsv:4;
 } SFN_SlotStruct, *PSFN_SlotStruct;
 
 //------------------------------------------------------------------------------------------------------------
@@ -234,7 +237,7 @@ typedef struct tConfigReq
 
      /* Max Number of transmission ports (1 - 16) */
      uint8_t      nNrOfDLPorts;
-     /* Max Number of receiving Virtual ports (1 - 8). There maybe more than 1 virtual port mapped to a physical port transmitted by UE */
+     /* Max Number of receiving Virtual ports (1 - 16). There maybe more than 1 virtual port mapped to a physical port transmitted by UE */
      uint8_t      nNrOfULPorts;
 
     /**** word 14 *****/
@@ -256,13 +259,13 @@ typedef struct tConfigReq
     /**** word 336 - 432 *****/
     /*According to SSB Mask, beam index filled. For example, if SSB mask bit 26 set to 1, then nBeamId[26] will be used to indicate beam ID of SSB 26.
     value: 0~63*/
-    uint8_t nBeamId[64];
-    /*According to nBeamId[64], if nBeamId[26] is used, nNrofTxRUPerBeam[26] indicates the number of TxRU.
+    uint8_t nBeamId[MAX_NUM_ANT];
+    /*According to nBeamId[MAX_NUM_ANT], if nBeamId[26] is used, nNrofTxRUPerBeam[26] indicates the number of TxRU.
     Value: 1~4*/
-    uint8_t nNrofTxRUPerBeam[64];
+    uint8_t nNrofTxRUPerBeam[MAX_NUM_ANT];
     /*TxRU index for SSB beam, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3
-    value:0~3*/
-    uint8_t nTxRUIdx[64][MAX_TXRU_NUM];
+    value:0~15*/
+    uint8_t nTxRUIdx[MAX_NUM_ANT][MAX_TXRU_NUM];
 
     /**** word 433 *****/
     /* PRACH config*/
@@ -308,7 +311,6 @@ typedef struct tConfigReq
     uint16_t   nUrllcCapable;
     /* Bit Mask (14 Bits) which indicate which symbol numbers to send SLOT_IND to L2 */
     uint16_t   nUrllcMiniSlotMask;
-
 } CONFIGREQUESTStruct, *PCONFIGREQUESTStruct;
 
 //------------------------------------------------------------------------------------------------------------
@@ -328,7 +330,7 @@ typedef struct tStartReq
 {
     L1L2MessageHdr sMsgHdr;
     SFN_SlotStruct sSFN_Slot;
-    uint32_t nMode;
+    uint32_t nMode;             // 0 = Radio (non-oran compliant), 1 = timer mode, 3 = Radio (with ferrybridge front haul), 4 = Radio (oran/xran compliant)
     uint32_t nCount;
     uint32_t nPeriod;
 } STARTREQUESTStruct, *PSTARTREQUESTStruct;
@@ -441,7 +443,7 @@ typedef struct tDlSchPdu
     uint32_t  nTBSize[MAX_DL_PER_UE_CODEWORD_NUM];    // transmit block size (in bytes)
 
     /**** word 9, 10 *****/
-    uint8_t   nPortIndex[MAX_DL_PER_UE_DMRS_PORT_NUM];// 0: port 1000,1: port 1001 …. 11: port 1011
+    uint8_t   nPortIndex[MAX_DL_PER_UE_DMRS_PORT_NUM];// 0: port 1000,1: port 1001 . 11: port 1011
 
     /**** word 11 *****/
     uint8_t   nHARQID;           //HARQ Process number, 0->15
@@ -481,7 +483,7 @@ typedef struct tDlSchPdu
     uint8_t   nPTRSTimeDensity;  // PT-RS time density,Value: 0,1, 2 or 4,0 means PT-RS is not present
 
     /**** word 22 *****/
-    uint8_t   nPTRSPortIndex[MAX_DL_PER_UE_PTRS_PORT_NUM];  //0: port 1000,1: port 1001…. 11: port 1011
+    uint8_t   nPTRSPortIndex[MAX_DL_PER_UE_PTRS_PORT_NUM];  //0: port 1000,1: port 1001. 11: port 1011
     uint8_t   nNrOfDMRSAssPTRS[MAX_DL_PER_UE_PTRS_PORT_NUM];//The number of DM-RS ports associated to PT-RS  Value: 1->6
 
     /**** word 23 *****/
@@ -512,7 +514,7 @@ typedef struct tDlSchPdu
     uint16_t  rv2;
 
     /**** word 28-32 *****/
-    /*TxRU index, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 value:0~3*/
+    /*TxRU index, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 value:0~15*/
     uint8_t    nTxRUIdx[MAX_TXRU_NUM];
 
 } DLSCHPDUStruct, *PDLSCHPDUStruct;
@@ -591,7 +593,7 @@ typedef struct tDciPduStruct
     uint16_t     nID;
 
     /**** word 21-25 *****/
-    /* TxRU index, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 Value:0~3 */
+    /* TxRU index, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 Value:0~15 */
     uint8_t      nTxRUIdx[MAX_TXRU_NUM];
 } DCIPDUStruct, *PDCIPDUStruct;
 
@@ -601,45 +603,46 @@ typedef struct  tSrsPduStruct
     PDUStruct  sPDUHdr;
 
     /**** word 2 *****/
-    uint16_t   nRNTI;               // The RNTI used for identifying the UE when receiving the PDU,Value: 1 -> 65535.
-    uint16_t   nUEId;               // UE index in the sector,Value:0 -> 1199
+    uint16_t   nRNTI;                   /* The RNTI used for identifying the UE when receiving the PDU,Value: 1 -> 65535. */
+    uint16_t   nUEId;                   /* UE index in the sector,Value:0 -> 1199 */
 
     /**** word 3 *****/
-    uint16_t   nBWPSize;            // bandwidth part size,Value: 20->275
-    uint16_t   nBWPStart;           // bandwidth part start RB index,Value: 0->254
+    uint16_t   nBWPSize;                /* bandwidth part size,Value: 20->275 */
+    uint16_t   nBWPStart;               /* bandwidth part start RB index,Value: 0->254 */
 
     /**** word 4 *****/
-    uint8_t    nSubcSpacing;        // subcarrierSpacing value:0->4
-    uint8_t    nCpType;             // Cyclic prefix type  0: Normal; 1: Extended
-    uint8_t    nStartPos;
-    uint8_t    nNrOfSymbols;            /* Number of SRS symbols, Value: 1 ,2 ,4.*/
+    uint8_t    nSubcSpacing;            /* subcarrierSpacing value:0->4 */
+    uint8_t    nCpType;                 /* Cyclic prefix type  0: Normal; 1: Extended */
+    uint8_t    nStartPos;               /* Starting position in time domain, l_offset, 3GPP 38.211, Sec 6.4.1.4.3, Table 2.  Values: 0 -> 5 */
+    uint8_t    nNrOfSymbols;            /* Number of SRS symbols, Value: 1 ,2 ,4 */
 
     /**** word 5 *****/
-    uint8_t    nComb;                   /* KTC*/
-    uint8_t    nCombOffset;
+    uint8_t    nComb;                   /* Transmission Comb, KTC , 3GPP 38.211, Sec 6.4.1.4.3, Table 2.  Values: 2, 4 */
+    uint8_t    nCombOffset;             /* Comb Offset, 3GPP 38.211, Sec 6.4.1.4.3, Table 2.  Values: 0 -> 3 */
     uint8_t    nNrOfSrsPorts;           /* port number could be {1,2,4}*/
-    uint8_t    nCyclicShift;
+    uint8_t    nCyclicShift;            /* Cyclic Shift, 3GPP 38.211, Sec 6.4.1.4.3, Table 2.  Values: 0 -> 11 */
 
     /**** word 6 *****/
-    uint8_t    nBsrs;
-    uint8_t    nCsrs;
-    uint8_t    nBHop;
+    uint8_t    nBsrs;                   /* b-SRS, SRS bandwidth index, 3GPP 38.211, Sec 6.4.1.4.3, Table 2.  Values: 0 -> 3 */
+    uint8_t    nCsrs;                   /* c-SRS, SRS bandwidth config index, 3GPP 38.211, Sec 6.4.1.4.3, Table 2.  Values: 0 -> 63 */
+    uint8_t    nBHop;                   /* b-hop, freqHopping, 3GPP 38.211, Sec 6.4.1.4.3, Table 2.  Values: 0 -> 3 */
     uint8_t    nHopping;                /* groupOrSequenceHopping, value:0->2, 0: neither, 1: groupHopping, 2: sequenceHopping*/
 
     /**** word 7 *****/
-    uint8_t    nFreqPos;                /*startPosition ,the starting position in the time domain  value:0->5 */
+    uint8_t    nFreqPos;                /* RRC Config message, SRS-Resource.freqDomainPosition, n_rrc  value: 0 -> 67 */
     uint8_t    nResourceType;           /* 0: aperiodic, 1: semi-persistent, 2: periodic*/
-    uint16_t   nFreqShift;              /*freqDomainShift, nShift   value:0->268*/
+    uint16_t   nFreqShift;              /* RRC config message, SRS-Resource.freqDomainShift, nShift   value: 0 -> 268 */
 
     /**** word 8 *****/
-    uint16_t   nSrsId;                  /* nSRSid srs sequence identity is assigned by high layer*/
-    uint8_t    nRepetition;             /* repetitionFactor, Value: 1 ,2 ,4.*/
+    uint16_t   nSrsId;                  /* RRC Config message, SRS-Resource.sequenceID, nSRSid srs sequence identity is assigned by high layer,  value = 0->1023 */
+    uint8_t    nRepetition;             /* repetitionFactor, Value: 1 ,2 ,4 */
     uint8_t    rsv1;
 
     /**** word 9 *****/
-    uint16_t   nTsrs;                  /* SRS-Periodicity in slots*/
-    uint16_t   nToffset;             /*SRS-Periodicity offset in slots.*/
-
+    uint16_t   nTsrs;                   /* SRS-Periodicity in slots, of type 'periodicityAndOffset-p' RRC Config Message */
+                                        /* Values = 1,2,4,5,8,10,16,20,32,40,64,80.160,320,640,1280,2560 */
+    uint16_t   nToffset;                /* SRS-Periodicity offset in slots, of type 'periodicityAndOffset-p' RRC Config Message */
+                                        /* Values = 0 -> (nTsrs - 1), for example, if nTsrs = 160, valid value = 0 -> 159 */
     /**** word 10 *****/
     /*Beam index value:0~63*/
     uint8_t    nBeamId;
@@ -648,7 +651,7 @@ typedef struct  tSrsPduStruct
     uint8_t    rsv2[2];
 
     /**** word 11 *****/
-    /*RxRU index, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 value:0~3*/
+    /*RxRU index, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 value:0~15*/
     uint8_t    nRxRUIdx[MAX_RXRU_NUM];
 }SRSPDUStruct,*PSRSPDUStruct;
 
@@ -673,7 +676,7 @@ typedef struct  tPrachPduStruct
     uint8_t     nNrofRxRuPerBeam [MAX_PANEL_NUM];
 
     /**** word 5 -> 8*****/
-    /*RxRU index, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 value:0~3*/
+    /*RxRU index, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 value:0~15*/
     uint8_t     nRxRUIdx[MAX_PANEL_NUM][MAX_RXRU_NUM];
 }PRACHPDUStruct,*PPRACHPDUStruct;
 
@@ -743,7 +746,7 @@ typedef struct tCsiRsPduStruct
     uint8_t      rsv[2];
 
     /**** word 9-13 *****/
-    /*TxRU index, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 Value:0~3*/
+    /*TxRU index, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 Value:0~15*/
     uint8_t      nTxRUIdx[MAX_TXRU_NUM];
 } CSIRSPDUStruct, *PCSIRSPDUStruct;
 
@@ -775,7 +778,7 @@ typedef struct tUlSchPduInfo
     uint8_t    nNrOfLayers;         // number of layers,Value: 1,2,4
 
     /**** word 6 *****/
-    uint8_t    nPortIndex[MAX_UL_PER_UE_DMRS_PORT_NUM];//Up to 4 ports,0: port 1000,1: port 1001 …. 11: port 1011
+    uint8_t    nPortIndex[MAX_UL_PER_UE_DMRS_PORT_NUM];//Up to 4 ports,0: port 1000,1: port 1001 . 11: port 1011
 
     /**** word 7 *****/
     uint8_t    rsv1;
@@ -823,10 +826,10 @@ typedef struct tUlSchPduInfo
     uint8_t    nPTRSTimeDensity;    //.PT-RS time density,Value: 0,1, 2 or 4,0 means PT-RS is not present
 
     /**** word 20 *****/
-    uint8_t    nPTRSPortIndex[MAX_UL_PER_UE_PTRS_PORT_NUM];//0: port 1000,1: port 1001 …. 11: port 1011
+    uint8_t    nPTRSPortIndex[MAX_UL_PER_UE_PTRS_PORT_NUM];//0: port 1000,1: port 1001 . 11: port 1011
     uint8_t    nPTRSFreqDensity;    // PT-RS frequency density,Value: 0, 2 or 4,0 means PT-RS is not present
     uint8_t    nPTRSReOffset;       // UL-PTRS-RE-offset , refer to Table 6.4.1.2.2.1-1 in [2] Value: 0->3
-    uint8_t    rsv;
+    uint8_t    nTpPi2BPSK;          //TP with Pi2BPSK .0 : TpPi2BPSK disable ,1 : TpPi2BPSK enable
 
     /**** word 21 *****/
     uint16_t   nNid;                // Data-scrambling-IdentityValue : 0->1023
@@ -834,21 +837,21 @@ typedef struct tUlSchPduInfo
     uint8_t    nBetaOffsetACKIndex; // BetaoffsetAck index
 
     /**** word 22 *****/
-    /*Beam index value:0~63*/
-    uint8_t    nBeamId;
-    /* Number of RxRU value:1~4*/
-    uint8_t    nNrofRxRU;
     uint16_t   nAck;        //number of HARQ bits
-
+    uint8_t    nBetaOffsetCSIP1Index;   // BetaoffsetCsi-part1 index
+    uint8_t    nBetaOffsetCSIP2Index;   // BetaoffsetCsi-part2 index
 
     /**** word 23 *****/
-    /*TxRU index for SSB beam, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 value:0~3*/
-    uint8_t    nRxRUIdx[MAX_RXRU_NUM];
+    uint16_t   nCSIPart1;             // number of CSI part1 bits
+    uint16_t   nCSIPart2;             // number of CSI part2 bits
 
     /**** word 24 *****/
-    uint8_t    nTpPi2BPSK;           //TP with Pi2BPSK .0 : TpPi2BPSK disable ,1 : TpPi2BPSK enable
-    uint8_t    rsvTP;
+    uint8_t    nBeamId;               // Beam index value:0~63
+    uint8_t    nNrofRxRU;             // Number of RxRU value:1~4*/
     uint16_t   nTPPuschID;           //nPUSCH-Identity
+
+    /**** word 25 *****/
+    uint8_t    nRxRUIdx[MAX_RXRU_NUM];
 } ULSCHPDUStruct, *PULSCHPDUStruct;
 
 typedef struct tUlUcchPduInfo
@@ -908,7 +911,7 @@ typedef struct tUlUcchPduInfo
     uint16_t   nGroupId;
 
     /**** word 12-16 *****/
-    /* RxRU index, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 value:0~3*/
+    /* RxRU index, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 value:0~15*/
     uint8_t    nRxRUIdx[MAX_RXRU_NUM];
 } ULCCHUCIPDUStruct, *PULCCHUCIPDUStruct;
 
@@ -941,7 +944,12 @@ typedef struct tDlConfigRequestStruct
     uint8_t        nLte_CRS_nrofCRS_Ports;      //LTE 4G, number of Tx Antennas {n1, n2, n4}
 
     uint8_t        nLte_CRS_v_shift;            //LTE 4G vShift = nPhyCellId % 6.  {n0, n1, n2, n3, n4, n5}
-    uint8_t        nRsv[3];
+
+    /* Enable Precoder for DL and UL DCI. Setting this field will run precoder on DL / UL DCI resource map and fill all the antenna */
+    uint8_t        nPdcchPrecoderEn;
+    /* Enable Precoder for SSB. Setting this field will run precoder on SSB resource map and fill all the antenna */
+    uint8_t        nSSBPrecoderEn;
+    uint8_t        nRsv[1];
 
     PDSCHGroupInfoStruct sPDSCHGroupInfoStruct[MAX_MIMO_GROUP_NUM];
     // PDUStruct  for multiple(nPDU) PDU.
@@ -1039,8 +1047,8 @@ typedef struct tUlCrcStruct
     uint16_t nRNTI;         // The RNTI associated with the UE,Value: 1 -> 65535
 
     /**** word 2 *****/
-    int16_t  nSNR;          // SNR in dB , estimated by this PUSCH
-    int16_t  nTA;           // Timing advance value in samples ,estimated by this PUSCH
+    int16_t  nSNR;          // Reported SNR in 1/256 dB steps, estimated by this PUSCH
+    int16_t  nTA;           // Reported Timing advance value in samples ,estimated by this PUSCH
 
     /**** word 3 *****/
     uint8_t  nCrcFlag;      //CRC flag to indicate if error detected:0: CRC error ,1: CRC correct
@@ -1104,17 +1112,23 @@ typedef struct tUlSchUciPduDataStruct
 
     /**** word 2 *****/
     uint16_t nPduUciAckLen;      // The total length (in bits) of UlSch UCI Ack/Nack PDU payload, without the padding bytes.
-    uint16_t nPduUciRiLen;       // The total length (in bits) of UlSch UCI Rank PDU payload, without the padding bytes.
+    uint8_t  nUciDetected;          // Indicates if L1 was able to decode Ack UCI or not (0- detected / 1 - dtx ), for sizes < 11
+    uint8_t  nUciCrc;               // for polar coded Ack UCI, CRC flag to indicate if error detected:0: CRC error ,1: CRC correct
 
     /**** word 3 *****/
-    uint16_t nPduUciCqiLen;      // The total length (in bits) of UlSch UCI Cqi PDU payload, without the padding bytes.
-    uint8_t  nUciDetected;       // Indicates if L1 was able to decode UCI or not (0- detected / 1 - dtx )
-    uint8_t  nUciCrc;            // for polar coded UCI, CRC flag to indicate if error detected:0: CRC error ,1: CRC correct
+    uint16_t nPduUciCsiP1Len;       // The total length (in bits) of UlSch UCI CsiP1 PDU payload, without the padding bytes.
+    uint8_t  nUciCsiP1Detected;     // Indicates if L1 was able to decode UCI or not (0- detected / 1 - dtx ), for sizes < 11
+    uint8_t  nUciCsiP1Crc;          // for polar coded Csi Part 1, UCI, CRC flag to indicate if error detected:0: CRC error ,1: CRC correct
 
     /**** word 4 *****/
-    uint8_t nUciAckBits[MAX_UCI_BIT_BYTE_LEN];
-    uint8_t nUciRiBits[MAX_UCI_BIT_BYTE_LEN];
-    uint8_t *pUciCqiBits;
+    uint16_t nPduUciCsiP2Len;       // The total length (in bits) of UlSch UCI CsiP2 PDU payload, without the padding bytes.
+    uint8_t  nUciCsiP2Detected;     // Indicates if L1 was able to decode UCI or not (0- detected / 1 - dtx ), for sizes < 11
+    uint8_t  nUciCsiP2Crc;          // for polar coded Csi Part 2, UCI, CRC flag to indicate if error detected:0: CRC error ,1: CRC correct
+
+    /**** word 5 *****/
+    uint8_t nUciAckBits[MAX_UCI_BIT_BYTE_LEN];      //buffer for ACK/NACK bits in UCI over PUSCH
+    uint8_t nUciCsiP1Bits[MAX_UCI_BIT_BYTE_LEN];    //buffer for CSI Part 1 bits in UCI over PUSCH
+    uint8_t nUciCsiP2Bits[MAX_UCI_BIT_BYTE_LEN];    //buffer for CSI Part 2 bits in UCI over PUSCH
 } ULSCHUCIPDUDataStruct, *PULSCHUCIPDUDataStruct;
 
 // Payload for MSG_TYPE_PHY_RX_ULSCH_UCI_IND message
@@ -1145,8 +1159,8 @@ typedef struct tUlUciPduDataStruct
     uint16_t  nPduBitLen;    // The total length (in bits) of PDU Payload, Value: 0~640?
 
     /**** word 3 *****/
-    int16_t  nSNR;          // SNR in dB , estimated by this PUCCH
-    int16_t  nTA;           // Timing advance value in samples ,estimated by this PUCCH
+    int16_t  nSNR;          // Reported SNR in 1/256 dB steps, estimated by this PUCCH
+    int16_t  nTA;           // Reported Timing advance value in samples ,estimated by this PUCCH
 
     uint8_t   nUciBits[MAX_UCI_BIT_BYTE_LEN];//Contents of the ULUCI PDU
 } ULUCIPDUDataStruct, *PULUCIPDUDataStruct;
@@ -1220,9 +1234,13 @@ typedef struct tUlSrsEstStruct
     /**** word 2 *****/
     uint8_t   nNrOfSymbols;      // Number of symbols
     uint8_t   nNrOfBlocks;       // Number of frequency sub block, one sub block covers 4 RBs
+    uint8_t   nNrOfPort;         // Number of SRS ports programmed by MAC for this user
+    uint8_t   nNrOfRxAnt;        // Number of Rx Ant programmed by MAC for this user
+    uint16_t  nNrOfRbs;          // Number of RBs based on numerology and bandwidth for this user
+    uint8_t   nIsChanEstPres;    // If 1, then pSrsChanEst is filled with valid pointers. Will be 0 for non-massive MIMO scenarios
     int8_t    nWideBandSNR[4];   // SNR in db measured within configured SRS bandwidth on each symbols, up to 4 symbols can be configured
     int8_t    nBlockSNR[4][68];  // SNR in db measured within 4 RBs on each symbols, up to 68 blocks in case of SRS bandwidth 272 RBs
-
+    int16_t   *pSrsChanEst[MAX_SRS_PORT_PER_UE][MAX_NUM_ANT];  // Pointer to SRS Channel Estimates for Massive MIMO Configurations
 } ULSRSEstStruct, *PULSRSEstStruct;
 
 //------------------------------------------------------------------------------------------------------------
@@ -1323,13 +1341,16 @@ typedef enum
     CELL_MASK = 0,
     SRS_MASK,
     DLBEAM_MASK,
+    URLLC_MASK,
     MAX_MASK_OPTIONS
 } CORE_MASK_OPTIONS;
 
 typedef enum
 {
     PDSCH_SPLIT = 0,
+    PDSCH_OFDM_SPLT_ENABLE,
     PDSCH_DL_WEIGHT_SPLIT,
+    PUSCH_DECOMP_SPLIT,
     PUSCH_CHANEST_SPLIT,
     PUSCH_MMSE_SPLIT,
     PUSCH_LLR_RX_SPLIT,
@@ -1340,6 +1361,14 @@ typedef enum
     FEC_DEC_SPLIT,
     FEC_DEC_NUM_ITER,
     FEC_DEC_EARLY_TERM_DISABLE,
+    TIMER_MODE_MULTI_CELL_DELAY,
+    BBUPOOL_SLEEP_ENABLE,
+    CE_INTERP_METHOD,
+    LINEAR_INTERP_ENABLE,
+    EBBU_POOL_NUM_QUEUE,
+    EBBU_POOL_QUEUE_SIZE,
+    EBBU_POOL_NUM_CONTEXT,
+    EBBU_POOL_MAX_CONTEXT_FETCH,
     NUM_SPLIT_OPTIONS
 } CHANNEL_SPLIT_OPTIONS;
 
