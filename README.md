@@ -1,6 +1,6 @@
 # FlexRAN
 ============
-Copyright (C) 2019-2020 Intel Corporation
+Copyright (C) 2019-2021 Intel Corporation
 
 Introduction
 ============
@@ -8,9 +8,9 @@ FlexRAN is Intel 4G and 5G baseband PHY Reference Design, which uses Xeon® seri
 
 L1 Application Overview
 ============
-The L1 application itself support pravite interface, togther with the translate layer application, FAPI interface was supported. FAPI was defined in small cell forum, you can download through https://www.smallcellforum.org/. the FAPI version 222.10.02 was adopted in current release. Details of FAPI and pravite API mapping, you could refer the FAPI document in O-RAN software community O-DU low document https://gerrit.o-ran-sc.org/r/o-du/phy. 
+The L1 application itself support private interface, togther with the translate layer application, FAPI interface was supported. FAPI was defined in small cell forum, you can download through https://www.smallcellforum.org/. the FAPI version 222.10.02 was adopted in current release. Details of FAPI and pravite API mapping, you could refer the FAPI document in O-RAN software community O-DU low document https://gerrit.o-ran-sc.org/r/o-du/phy. 
 Regard to FEC functionalities, there are two options supported by the application
-   * FEC running in IA with DPDK BBDev associate with specific SW FEC SDKs
+   * FEC running in IA with DPDK BBDev associated with specific SW FEC SDKs 
    * FEC running in FPGA/ASIC with DPDK BBDev interface and associate driver<br>
 Details install guide can be find in below installation section
 
@@ -188,7 +188,7 @@ Update ${ORAN_RELEASE}/phy/setupenv.sh, change DIR_ROOT to /opt/oran_release. Ru
 After the docker build finishes, docker image with oran-release tag will be generated
 
     …
-    Successfully tagged oran-release-du:1.0
+    Successfully tagged oran-release-du:2.0
 
 Run O-DU docker container in Kubernetes cluster
 -------------------------------------------------
@@ -221,7 +221,7 @@ Update the Kubernetes pod yaml configuration for your system configuration
           - infinity
         tty: true
         stdin: true
-        image: oran-release-du:1.0
+        image: oran-release-du:2.0
         name: l1app
         resources:
           requests:
@@ -250,7 +250,7 @@ Update the Kubernetes pod yaml configuration for your system configuration
           - infinity
         tty: true
         stdin: true
-        image: oran-release-du:1.0
+        image: oran-release-du:2.0
         name: oran-fapi
         resources:
           requests:
@@ -279,7 +279,7 @@ Update the Kubernetes pod yaml configuration for your system configuration
           - infinity
         tty: true
         stdin: true
-        image: oran-release-du:1.0
+        image: oran-release-du:2.0
         name: testmac
         resources:
           requests:
