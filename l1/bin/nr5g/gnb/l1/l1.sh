@@ -1,70 +1,80 @@
-#######################################################################
-#
-# GPL LICENSE SUMMARY
+########################################################################
+#   Copyright (2021) Intel Corporation.                                                                                                                        
+#                                                                                                                                                              
+#   Redistribution. Redistribution and use in binary form, without modification, are permitted provided that the following conditions are met:                
+#                                                                                                                                                             
+#  * Redistributions must reproduce the above copyright notice and the following disclaimer in the documentation and/or other materials provided with       
+#    the distribution.                                                                                                                                         
+#  * Neither the name of Intel Corporation nor the names of its suppliers may be used to endorse or promote products derived from this software             
+#   without specific prior written permission.                                                                                                                
+#  * No reverse engineering, decompilation, or disassembly of this software is permitted.                                                                   
+#                                                                                                                                                             
+#   Limited patent license.  Intel Corporation grants a world-wide, royalty-free, non-exclusive license under patents it now or hereafter                     
+#   owns or controls to make, have made, use, import, offer to sell and sell ("Utilize") this software, but solely to the extent that any                     
+#   such patent is necessary to Utilize the software in the form provided by Intel. The patent license shall not apply to any combinations which include      
+#   this software.  No hardware per se is licensed hereunder.                                                                                                 
 # 
-#   Copyright(c) 2007-2019 Intel Corporation. All rights reserved.
-# 
-#   This program is free software; you can redistribute it and/or modify
-#   it under the terms of version 2 of the GNU General Public License as
-#   published by the Free Software Foundation.
-# 
-#   This program is distributed in the hope that it will be useful, but
-#   WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#   General Public License for more details.
-# 
-#   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
-#   The full GNU General Public License is included in this distribution
-#   in the file called LICENSE.GPL.
-# 
-#   Contact Information:
-#   Intel Corporation
-# 
-#  version: O-RAN Bronze release V1.1
-#
-#######################################################################
+#######################################################################                                                                                                                                                            
 #!/bin/bash
 #echo off
 export RTE_WLS=$DIR_WIRELESS_WLS
 
 l1Binary="./l1app"
-#l1Binary="gdb --args ./l1app $@"
-cfgxmlfile=
+phycfg_xml_file=
+xrancfg_xml_file=
 MY_DIR=`pwd`
 WLS_DPDK_MODE=1
 huge_folder="/mnt/huge"
 MACHINE_TYPE=`uname -m`
 
 if [ "x"$1 = "x-xran" ]; then
-    cfgxmlfile="phycfg_xran.xml"
+    phycfg_xml_file="phycfg_xran.xml"
+    xrancfg_xml_file="xrancfg_sub6.xml"
     echo "Radio mode with XRAN - Sub6 100Mhz"
     ./dpdk.sh
+elif [ "x"$1 = "x-xranurllc" ]; then
+    phycfg_xml_file="phycfg_xran_urllc_gnb.xml"
+    xrancfg_xml_file="xrancfg_sub6_urllc_gnb.xml"
+    echo "Radio mode with XRAN - URLLC GNB Mode"
+elif [ "x"$1 = "x-xranurllctue" ]; then
+    phycfg_xml_file="phycfg_xran_urllc_tue.xml"
+    xrancfg_xml_file="xrancfg_sub6_urllc_tue.xml"
+    echo "Radio mode with XRAN - URLLC TestUE Mode"
+elif [ "x"$1 = "x-xranmmimo" ]; then
+    phycfg_xml_file="phycfg_xran.xml"
+    xrancfg_xml_file="xrancfg_sub6_mmimo.xml"
+    echo "Radio mode with XRAN - Sub6 100Mhz Massive-MIMO (CatB)"
+    ./dpdk.sh
 elif [ "x"$1 = "x-xranmmw" ]; then
-    cfgxmlfile="phycfg_xran_mmw.xml"
+    phycfg_xml_file="phycfg_xran_mmw.xml"
+    xrancfg_xml_file="xrancfg_mmw.xml"
     echo "Radio mode with XRAN - mmWave 100Mhz"
     ./dpdk.sh
+elif [ "x"$1 = "x-custom" ]; then
+    phycfg_xml_file=$2
+    xrancfg_xml_file=$3
+    echo "Radio mode with XRAN - Custom Mode"
+    ./dpdk.sh
 elif [ "x"$1 = "x-fb" ]; then
-    cfgxmlfile="phycfg_fb.xml"
+    phycfg_xml_file="phycfg_fb.xml"
     echo "Radio mode with Ferry Bridge - Sub3 20Mhz"
     ./dpdk.sh
 elif [ "x"$1 = "x-rsub6" ]; then
-    cfgxmlfile="phycfg_radio_sub6.xml"
+    phycfg_xml_file="phycfg_radio_sub6.xml"
     echo "Radio mode with Terasic Front Hual FPGA - Sub6 100Mhz"
     echo "Inserting Driver"
 	cd ../../../../libs/cpa/sub6/rec
 	./run.sh install
 	cd $MY_DIR
 elif [ "x"$1 = "x-rmmw" ]; then
-    cfgxmlfile="phycfg_radio_mmw.xml"
+    phycfg_xml_file="phycfg_radio_mmw.xml"
     echo "Radio mode with Terasic Front Hual FPGA - MMWave"
     echo "Inserting Driver"
 	cd ../../../../libs/cpa/mmw/rec
 	./run.sh install
 	cd $MY_DIR
 elif [ "x"$1 = "x-e" ]; then
-    cfgxmlfile="phycfg_timer.xml"
+    phycfg_xml_file="phycfg_timer.xml"
     echo "TIMER Mode"
 else
     echo "Invlaid mode. Options are - ./l1.sh followed by:"
@@ -74,6 +84,9 @@ else
     echo "-rmmw: Radio mode with Terasic Front Hual FPGA - MMWave"
     echo "-xran: Radio mode with XRAN - Sub6 100Mhz"
     echo "-xranmmw: Radio mode with XRAN - mmWave 100Mhz"
+    echo "-xranmmimo: Radio mode with XRAN - Massive MIMO"
+    echo "-xranurllc: Radio mode with XRAN - URLLC GNB"
+    echo "-xranurllctue: Radio mode with XRAN - URLLC TestUE"
     exit -1
 fi
 
@@ -123,14 +136,19 @@ else
 fi
 
 cd $MY_DIR
-if [ -f "$cfgxmlfile" ]; then
-    echo "using configuration file $cfgxmlfile"
+if [ -f "$phycfg_xml_file" ]; then
+    echo "using configuration file $phycfg_xml_file"
+    l1Cmd="$l1Binary table 0 1 --cfgfile=$phycfg_xml_file"
 else
-    echo "configuration file $cfgxmlfile is not found"
+    echo "configuration file $phycfg_xml_file is not found"
     exit 1
 fi
 
-l1Cmd="$l1Binary table 0 1 --cfgfile=$cfgxmlfile"
+if [ -f "$xrancfg_xml_file" ]; then
+    echo "using configuration file $xrancfg_xml_file"
+    l1Cmd="$l1Binary table 0 1 --cfgfile=$phycfg_xml_file --xranfile=$xrancfg_xml_file"
+fi
+
 echo ">> Running... "${l1Cmd}
 
 eval $l1Cmd

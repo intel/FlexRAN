@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--                                                                                                                                                              -->
-<!--   Copyright (2019) Intel Corporation.                                                                                                                        -->
+<!--   Copyright (2021) Intel Corporation.                                                                                                                        -->
 <!--                                                                                                                                                              -->
 <!--   Redistribution. Redistribution and use in binary form, without modification, are permitted provided that the following conditions are met:                 -->
 <!--                                                                                                                                                              -->
@@ -16,18 +16,18 @@
 <!--   this software.  No hardware per se is licensed hereunder.                                                                                                  -->
 <!--                                                                                                                                                              -->
 
-
-
 <PhyConfig>
-    <version>oran_bronze_release_v1.1</version>
+    <version>oran_e_maintenance_release_v1.0</version>
 
     <Api>
         <!--  Maximum number of successive missing API allowed before triggering PHY stop (-1 is infinite) -->
         <successiveNoApi>15</successiveNoApi>
         <!--  Full path to wls device used for transport of MAC-PHY API (e.g. wls0 )-->
-        <wls_dev_name>wls0</wls_dev_name>
-        <!-- WLS Memory size. Default is 1GB. Leave 10MB for structure that is also shared within this 1GB -->
-        <wlsMemorySize>0x7ec00000</wlsMemorySize>
+        <wls_dev_name>wls_f0</wls_dev_name>
+        <!-- MAC managed WLS Memory size. This is used for all API buffer allocations -->
+        <wlsMacMemorySize>0x7FE00000</wlsMacMemorySize>
+        <!-- L1 managed WLS Memory size. This is used for SRS weight storage. For 64x64 usecase and 6 cells (with 512 users per cell) use 0x18000000 -->
+        <wlsPhyMemorySize>0x18000000</wlsPhyMemorySize>
     </Api>
 
     <PhyLogs>
@@ -43,20 +43,22 @@
         </IqLogs>
         <DebugLogs>
             <phyMlog>1</phyMlog>
-            <phyStats>1</phyStats>
+            <phyStats>0</phyStats>
         </DebugLogs>
     </PhyLogs>
 
     <!-- This section defines all DPDK related parameters used for DPDK initialization -->
     <DPDK>
+        <!--  name of DPDK memory zone, needs to align between primary and secondary process -->
+        <dpdkFilePrefix>gnb_f0</dpdkFilePrefix>
         <!--  DPDK memory size allocated from hugepages [MB]  [default: 2048] -->
-        <dpdkMemorySize>2048</dpdkMemorySize>
+        <dpdkMemorySize>6144</dpdkMemorySize>
         <!--  DPDK IOVA Mode used for DPDK initialization. If 0, then PA mode. Else VA Mode -->
         <dpdkIovaMode>0</dpdkIovaMode>
-        <!--  DPDK FEC BBDEV to use             [0 - SW, 1 - FPGA, 2 - Both] -->
-        <dpdkBasebandFecMode>0</dpdkBasebandFecMode>
-        <!--  DPDK BBDev name added to the whitelist. The argument format is <[domain:]bus:devid.func> -->
-        <dpdkBasebandDevice>0000:1f:00.1</dpdkBasebandDevice>
+        <!--  DPDK FEC BBDEV to use             [0 - SW, 1 - HW accelerator, 2 - Both] -->
+        <dpdkBasebandFecMode>2</dpdkBasebandFecMode>
+        <!--  DPDK BBDev name added to the passlist. The argument format is <[domain:]bus:devid.func> -->
+        <dpdkBasebandDevice>0000:19:00.0</dpdkBasebandDevice>
     </DPDK>
 
     <!-- This section is used with FerryBridge FPGA and 5GNR code -->
@@ -86,6 +88,12 @@
             <radioCfg0RxAnt>4</radioCfg0RxAnt>
             <!--  Rx AGC configuration         [0 - Rx AGC disabled, 1 - Rx AGC enabled (default for fpga release 1.3.1)] -->
             <radioCfg0RxAgc>0</radioCfg0RxAgc>
+            <!--  Number of Rx Antenna Vertiacl elements    [4, 8, 64] -->
+            <radioCfg0RxAntVertical>1</radioCfg0RxAntVertical>
+            <!--  Number of Rx Antenna Horizontal elements  [4, 8, 64] -->
+            <radioCfg0RxAntHorizontal>1</radioCfg0RxAntHorizontal>
+            <!--  Number of Rx Antenna Polarization Setting [1, 2] -->
+            <radioCfg0RxAntPolarization>1</radioCfg0RxAntPolarization>
             <!--  Number of cells running on this port   [1 - Cell , 2 - Cells, 3 - Cells , 4 - Cells ] -->
             <radioCfg0NumCell>1</radioCfg0NumCell>
             <!-- First Phy instance ID mapped to this port    [0-7 - valid range of PHY instance for first cell ] -->
@@ -121,6 +129,12 @@
             <radioCfg1RxAnt>4</radioCfg1RxAnt>
             <!--  Rx AGC configuration         [0 - Rx AGC disabled, 1 - Rx AGC enabled (default for fpga release 1.3.1)] -->
             <radioCfg1RxAgc>0</radioCfg1RxAgc>
+            <!--  Number of Rx Antenna Vertiacl elements    [4, 8, 64] -->
+            <radioCfg1RxAntVertical>1</radioCfg1RxAntVertical>
+            <!--  Number of Rx Antenna Horizontal elements  [4, 8, 64] -->
+            <radioCfg1RxAntHorizontal>1</radioCfg1RxAntHorizontal>
+            <!--  Number of Rx Antenna Polarization Setting [1, 2] -->
+            <radioCfg1RxAntPolarization>1</radioCfg1RxAntPolarization>
             <!--  Number of cells running on this port   [1 - Cell , 2 - Cells ] -->
             <radioCfg1NumCell>1</radioCfg1NumCell>
             <!-- First Phy instance ID mapped to this port    [0-7 - valid range of PHY instance for first cell ] -->
@@ -152,6 +166,12 @@
             <radioCfg2RxAnt>4</radioCfg2RxAnt>
             <!--  Rx AGC configuration         [0 - Rx AGC disabled, 1 - Rx AGC enabled (default for fpga release 1.3.1)] -->
             <radioCfg2RxAgc>0</radioCfg2RxAgc>
+            <!--  Number of Rx Antenna Vertiacl elements    [4, 8, 64] -->
+            <radioCfg2RxAntVertical>1</radioCfg2RxAntVertical>
+            <!--  Number of Rx Antenna Horizontal elements  [4, 8, 64] -->
+            <radioCfg2RxAntHorizontal>1</radioCfg2RxAntHorizontal>
+            <!--  Number of Rx Antenna Polarization Setting [1, 2] -->
+            <radioCfg2RxAntPolarization>1</radioCfg2RxAntPolarization>
             <!--  Number of cells running on this port   [1 - Cell , 2 - Cells ] -->
             <radioCfg2NumCell>2</radioCfg2NumCell>
             <!-- First Phy instance ID mapped to this port    [0-7 - valid range of PHY instance for first cell ] -->
@@ -183,6 +203,12 @@
             <radioCfg3RxAnt>4</radioCfg3RxAnt>
             <!--  Rx AGC configuration         [0 - Rx AGC disabled, 1 - Rx AGC enabled (default for fpga release 1.3.1)] -->
             <radioCfg3RxAgc>0</radioCfg3RxAgc>
+            <!--  Number of Rx Antenna Vertiacl elements    [4, 8, 64] -->
+            <radioCfg3RxAntVertical>1</radioCfg3RxAntVertical>
+            <!--  Number of Rx Antenna Horizontal elements  [4, 8, 64] -->
+            <radioCfg3RxAntHorizontal>1</radioCfg3RxAntHorizontal>
+            <!--  Number of Rx Antenna Polarization Setting [1, 2] -->
+            <radioCfg3RxAntPolarization>1</radioCfg3RxAntPolarization>
             <!--  Number of cells running on this port   [1 - Cell , 2 - Cells ] -->
             <radioCfg3NumCell>2</radioCfg3NumCell>
             <!-- First Phy instance ID mapped to this port    [0-7 - valid range of PHY instance for first cell ] -->
@@ -214,6 +240,12 @@
             <radioCfg4RxAnt>4</radioCfg4RxAnt>
             <!--  Rx AGC configuration         [0 - Rx AGC disabled, 1 - Rx AGC enabled (default for fpga release 1.3.1)] -->
             <radioCfg4RxAgc>0</radioCfg4RxAgc>
+            <!--  Number of Rx Antenna Vertiacl elements    [4, 8, 64] -->
+            <radioCfg4RxAntVertical>1</radioCfg4RxAntVertical>
+            <!--  Number of Rx Antenna Horizontal elements  [4, 8, 64] -->
+            <radioCfg4RxAntHorizontal>1</radioCfg4RxAntHorizontal>
+            <!--  Number of Rx Antenna Polarization Setting [1, 2] -->
+            <radioCfg4RxAntPolarization>1</radioCfg4RxAntPolarization>
             <!--  Number of cells running on this port   [1 - Cell , 2 - Cells ] -->
             <radioCfg4NumCell>2</radioCfg4NumCell>
             <!-- First Phy instance ID mapped to this port    [0-7 - valid range of PHY instance for first cell ] -->
@@ -245,6 +277,12 @@
             <radioCfg5RxAnt>4</radioCfg5RxAnt>
             <!--  Rx AGC configuration         [0 - Rx AGC disabled, 1 - Rx AGC enabled (default for fpga release 1.3.1)] -->
             <radioCfg5RxAgc>0</radioCfg5RxAgc>
+            <!--  Number of Rx Antenna Vertiacl elements    [4, 8, 64] -->
+            <radioCfg5RxAntVertical>1</radioCfg5RxAntVertical>
+            <!--  Number of Rx Antenna Horizontal elements  [4, 8, 64] -->
+            <radioCfg5RxAntHorizontal>1</radioCfg5RxAntHorizontal>
+            <!--  Number of Rx Antenna Polarization Setting [1, 2] -->
+            <radioCfg5RxAntPolarization>1</radioCfg5RxAntPolarization>
             <!--  Number of cells running on this port   [1 - Cell , 2 - Cells ] -->
             <radioCfg5NumCell>2</radioCfg5NumCell>
             <!-- First Phy instance ID mapped to this port    [0-7 - valid range of PHY instance for first cell ] -->
@@ -276,6 +314,12 @@
             <radioCfg6RxAnt>4</radioCfg6RxAnt>
             <!--  Rx AGC configuration         [0 - Rx AGC disabled, 1 - Rx AGC enabled (default for fpga release 1.3.1)] -->
             <radioCfg1RxAgc>0</radioCfg1RxAgc>
+            <!--  Number of Rx Antenna Vertiacl elements    [4, 8, 64] -->
+            <radioCfg6RxAntVertical>1</radioCfg6RxAntVertical>
+            <!--  Number of Rx Antenna Horizontal elements  [4, 8, 64] -->
+            <radioCfg6RxAntHorizontal>1</radioCfg6RxAntHorizontal>
+            <!--  Number of Rx Antenna Polarization Setting [1, 2] -->
+            <radioCfg6RxAntPolarization>1</radioCfg6RxAntPolarization>
             <!--  Number of cells running on this port   [1 - Cell , 2 - Cells ] -->
             <radioCfg6NumCell>2</radioCfg6NumCell>
             <!-- First Phy instance ID mapped to this port    [0-7 - valid range of PHY instance for first cell ] -->
@@ -307,6 +351,12 @@
             <radioCfg7RxAnt>4</radioCfg7RxAnt>
             <!--  Rx AGC configuration         [0 - Rx AGC disabled, 1 - Rx AGC enabled (default for fpga release 1.3.1)] -->
             <radioCfg7RxAgc>0</radioCfg7RxAgc>
+            <!--  Number of Rx Antenna Vertiacl elements    [4, 8, 64] -->
+            <radioCfg7RxAntVertical>1</radioCfg7RxAntVertical>
+            <!--  Number of Rx Antenna Horizontal elements  [4, 8, 64] -->
+            <radioCfg7RxAntHorizontal>1</radioCfg7RxAntHorizontal>
+            <!--  Number of Rx Antenna Polarization Setting [1, 2] -->
+            <radioCfg7RxAntPolarization>1</radioCfg7RxAntPolarization>
             <!--  Number of cells running on this port   [1 - Cell , 2 - Cells ] -->
             <radioCfg7NumCell>2</radioCfg7NumCell>
             <!-- First Phy instance ID mapped to this port    [0-7 - valid range of PHY instance for first cell ] -->
@@ -351,9 +401,18 @@
 
     <PhyVars>
         <!-- The below variables can be modified in file here and it will take effect when PHY is brought up after reboot of system -->
+        <!-- Memory init threshold scheme switch-->
+        <!-- 0: disable, 1: enable -->
+        <MemInitThEnable>0</MemInitThEnable>
+        <!-- Memory init threshold value -->
+        <!-- value with 1-99 in percentage about downlink non-used RB-->
+        <MemInitThInLoad>70</MemInitThInLoad>
         <Pdsch>
             <!-- Split PDSCH symbol processing -->
             <PdschSymbolSplit>0</PdschSymbolSplit>
+
+            <!-- Enable the PDSCH symbol process to OFDM symbol based split, otherwise UE group/UE based split. 0 disable, 1 enable -->
+            <PdschOfdmSplitEnable>0</PdschOfdmSplitEnable>
 
             <!-- Split PDSCH DL beamforiming weight generation processing -->
             <PdschDlWeightSplit>0</PdschDlWeightSplit>
@@ -363,6 +422,8 @@
             <FecEncSplit>4</FecEncSplit>
         </Pdsch>
         <Pusch>
+            <!-- Split processing for ULDecompression for PUSCH -->
+            <PuschDecompSplit>0</PuschDecompSplit>
             <!-- Split processing for Channel Estimation for PUSCH -->
             <PuschChanEstSplit>0</PuschChanEstSplit>
 
@@ -375,7 +436,7 @@
             <!-- Split PUSCH UL beamforiming weight generation processing -->
             <PuschUlWeightSplit>0</PuschUlWeightSplit>
 
-            <!-- Software FEC Decoder Early Termination disabled. If 1, then programmed number of iterations are run from MAC PHY API regardless of CRC PASS -->
+            <!-- BBDEV FEC Decoder Early Termination disabled. If 1, then programmed number of iterations are run from MAC PHY API regardless of CRC PASS -->
             <FecDecEarlyTermDisable>0</FecDecEarlyTermDisable>
 
             <!-- FEC LDPC Decoder Number of iterations. If 0 then Number of iterations is set to 10. Else this value is used -->
@@ -388,11 +449,43 @@
             <!-- Only for terasic. Number of decimal digits of LLR fixed point output. If 0 then this value is set to 2, which means LLR is 8S2. Else this value is used -->
             <llrOutDecimalDigit>2</llrOutDecimalDigit>
 
-            <!-- SNR Threshold for IRC -->
+            <!-- SNR Threshold for IRC. If -100, then IRC will be disabled -->
             <IrcEnableThreshold>-10</IrcEnableThreshold>
 
-            <!-- interpolation method for PUSCH CE 0: 1RB sinc interpolation 1: 4RB sinc interpolation-->
+            <!-- PUSCH Noise Scaling -->
+            <!-- Used to scale measured noise to account for ChanEst errors for mu=0 and 2 layers. -->
+            <!-- Valid values = 1, 2, 3, 4 -->
+            <PuschNoiseScale>2</PuschNoiseScale>
+
+            <!-- frequency interpolation method for PUSCH CE -->
+            <!-- bit 0: 0: 1RB sinc interpolation 1: 4RB sinc interpolation -->
+            <!-- bit 1: 0: disable pre - interpolation 1: enable pre - interpolation -->
             <CEInterpMethod>0</CEInterpMethod>
+
+            <!-- frequency offset compensation -->
+            <!-- 0: disable, 1: enable -->
+            <CEFocEnable>0</CEFocEnable>
+
+            <!-- frequency offset compensation granularity in terms of RE-->
+            <CEFocGranularity>768</CEFocGranularity>
+
+            <!-- time domain linear interpolation for PUSCH enable = 1, disable = 0-->
+            <PuschLinearInterpEnable>0</PuschLinearInterpEnable>
+
+            <!-- time domain linear interpolation granularity for PUSCH cell0, cell1 and cell2 respectively -->
+            <!-- 0 - Linear, 1 - Linear2 ... 4 - Linear6, 99 - nearest -->
+            <!-- use comma to separte the values if want to apply differnt granularity for differnt UE groups -->
+            <PuschLinearInterpGranularity0>99</PuschLinearInterpGranularity0>
+            <PuschLinearInterpGranularity1>0,1,2,3,4</PuschLinearInterpGranularity1>
+            <PuschLinearInterpGranularity2>0,1,2,3,4</PuschLinearInterpGranularity2>
+            <PuschLinearInterpGranularity3>0,1,2,3,4</PuschLinearInterpGranularity3>
+
+            <!-- beamforming weight matrix gen algo choose-->
+            <!-- 0: ZF based weight gen algo, 1: dftcodebook based weight gen algo-->
+            <DFTBfWeightGenEnable>0</DFTBfWeightGenEnable>
+
+            <!-- beamforming weight matrix gen RB pick granularity-->
+            <BfWeightGenGranularity>2</BfWeightGenGranularity>
         </Pusch>
         <Pucch>
             <!-- Split processing for PUCCH -->
@@ -405,14 +498,26 @@
         <Prach>
             <!-- Prach Detection Threshold. If non zero, computed value is used. -->
             <prachDetectThreshold>0</prachDetectThreshold>
+            <!-- prach detect fo check -->
+            <!-- 0: disable, 1: enable -->
+            <prachDetectFoCheck>0</prachDetectFoCheck>
         </Prach>
+
+        <Urllc>
+            <!-- For URLLC cells, setting this field to 1 will split the FEC processing by 2 (half in software and half in hardware). Default: 0 Disabled -->
+            <UrllcPuschFecSplit>0</UrllcPuschFecSplit>
+
+            <!-- If there are URLLC Cells, this field indicates how many BBDEV Queue Ids to allocate for URLLC. All others are for eMBB. Default: 0 Disabled -->
+            <!-- The lower the queue ID, the higher the priority to process these -->
+            <UrllcBbdevIdEnd>0</UrllcBbdevIdEnd>
+        </Urllc>
     </PhyVars>
 
     <MlogVars>
         <!-- Number of subframes are logged into Mlog. Needs to be a power of 2 -->
         <MlogSubframes>128</MlogSubframes>
         <!-- Number of Cores being logged into Mlog -->
-        <MlogCores>28</MlogCores>
+        <MlogCores>40</MlogCores>
         <!-- Size of each subframe (in bytes) -->
         <MlogSize>10000</MlogSize>
     </MlogVars>
@@ -424,12 +529,6 @@
 
         <!-- Timer Thread (Single core id value): Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
         <timerThread>2, 96, 0</timerThread>
-
-        <!-- XRAN Thread (core where the XRAN polling function is pinned: Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
-        <xRANThread>0, 96, 0</xRANThread>
-
-        <!-- core mask for XRAN Packets Worker (core where the XRAN packet processing is pinned): Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
-        <xRANWorker>0, 96, 0</xRANWorker>
 
         <!-- FPGA for LDPC Thread (Single core id value): Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
         <FpgaDriverCpuInfo>3, 96, 0</FpgaDriverCpuInfo>
@@ -455,19 +554,37 @@
         <!-- BBUPool Worker Thread Cores (Bit mask of all cores that are used for BBU Pool in Decimal or Hex [needs to start with "0x"]) -->
         <BbuPoolThreadDefault_0_63>0xF0</BbuPoolThreadDefault_0_63>
         <BbuPoolThreadDefault_64_127>0x0</BbuPoolThreadDefault_64_127>
+        <BbuPoolThreadDefault_128_191>0x0</BbuPoolThreadDefault_128_191>
+        <BbuPoolThreadDefault_192_255>0x0</BbuPoolThreadDefault_192_255>
 
         <!-- BBUPool Worker Thread Cores dedicated for SRS processing in case of Massive MIMO Configs. Mask needs to be a subset of BbuPoolThreadDefault_0_63 or BbuPoolThreadDefault_64_127 -->
         <!-- (Bit mask of all cores that are used for BBU Pool in Decimal or Hex [needs to start with "0x"]) -->
         <BbuPoolThreadSrs_0_63>0x0</BbuPoolThreadSrs_0_63>
         <BbuPoolThreadSrs_64_127>0x0</BbuPoolThreadSrs_64_127>
+        <BbuPoolThreadSrs_128_191>0x0</BbuPoolThreadSrs_128_191>
+        <BbuPoolThreadSrs_192_255>0x0</BbuPoolThreadSrs_192_255>
 
         <!-- BBUPool Worker Thread Cores dedicated for DL beam  processing in case of Massive MIMO Configs. Mask needs to be a subset of BbuPoolThreadDefault_0_63 or BbuPoolThreadDefault_64_127 -->
         <!-- (Bit mask of all cores that are used for BBU Pool in Decimal or Hex [needs to start with "0x"]) -->
         <BbuPoolThreadDlbeam_0_63>0x0</BbuPoolThreadDlbeam_0_63>
         <BbuPoolThreadDlbeam_64_127>0x0</BbuPoolThreadDlbeam_64_127>
+        <BbuPoolThreadDlbeam_128_191>0x0</BbuPoolThreadDlbeam_128_191>
+        <BbuPoolThreadDlbeam_192_255>0x0</BbuPoolThreadDlbeam_192_255>
 
-        <!-- URLLC Processing Thread (Single core id value) -->
-        <BbuPoolThreadUrllc>8</BbuPoolThreadUrllc>
+        <!-- URLLC Processing Thread (Bit mask of all cores that are used in Decimal or Hex [needs to start with "0x"]) -->
+        <BbuPoolThreadUrllc>0x100</BbuPoolThreadUrllc>
+
+        <!-- The number of elements per queue (for new scheduler only). Values need to be comma seperated and a max of 10 queues. -->
+        <eBbuPoolNumQueue>512, 512, 512, 512</eBbuPoolNumQueue>
+
+        <!-- Number of ping pong context to use for scheduler. THis is needed mainly for TDD scenarios so UL is prioritized over DL. Range [1-4] -->
+        <eBbuPoolNumContext>1</eBbuPoolNumContext>
+
+        <!-- Maximum Number of contexts to fetch by each consumer thread. This is used only if eBbuPoolNumContext>1. Range [1-eBbuPoolNumContext] -->
+        <eBbuPoolMaxContextFetch>1</eBbuPoolMaxContextFetch>
+
+        <!-- Enable internal print of statistics from New Scheduler Library. 0: Off, 1: On. -->
+        <eBbuPoolPrintFlag>0</eBbuPoolPrintFlag>
     </BbuPoolConfig>
 
     <Fpga>
@@ -484,7 +601,7 @@
         <nFecFpgaVersionMu3>0x20010900</nFecFpgaVersionMu3>
 
         <!-- FEC Version for sub3 and sub6 -->
-        <nFecFpgaVersionMu0_1>0x0319d420</nFecFpgaVersionMu0_1>
+        <nFecFpgaVersionMu0_1>0x0423D420</nFecFpgaVersionMu0_1>
 
         <!-- Front Haul Version for mmWave -->
         <nFhFpgaVersionMu3>0x8001000F</nFhFpgaVersionMu3>
@@ -492,97 +609,6 @@
         <!-- Front Haul Version for sub3 and sub6 -->
         <nFhFpgaVersionMu0_1>0x90010008</nFhFpgaVersionMu0_1>
     </Fpga>
-
-    <xRAN>
-        <!--  DPDK NIC card VF for C-plane added to the whitelist. The argument format is <[domain:]bus:devid.func> -->
-        <dpdkXranDeviceCP>0000:d8:02.1</dpdkXranDeviceCP>
-        <!--  DPDK NIC card VF for C-plane   added to the whitelist. The argument format is <[domain:]bus:devid.func> -->
-        <dpdkXranDeviceUP>0000:d8:02.0</dpdkXranDeviceUP>
-        <!-- XRAN: Mac address of O-DU -->
-        <DuMac>00:11:22:33:44:66</DuMac>
-        <!-- XRAN: Mac address of O-RU -->
-        <RuMac>00:11:22:33:44:55</RuMac>
-
-        <!-- XRAN: Category of O-RU 0 - Category A, 1 - Category B -->
-        <Category>1</Category>
-
-        <!-- XRAN: enabble sleep on PMD cores -->
-        <xranPmdSleep>1</xranPmdSleep>
-
-        <!-- RU Settings -->
-        <Tadv_cp_dl>25</Tadv_cp_dl>
-        <!-- Reception Window C-plane DL-->
-        <T2a_min_cp_dl>50</T2a_min_cp_dl>
-        <T2a_max_cp_dl>140</T2a_max_cp_dl>
-        <!-- Reception Window C-plane UL-->
-        <T2a_min_cp_ul>50</T2a_min_cp_ul>
-        <T2a_max_cp_ul>140</T2a_max_cp_ul>
-        <!-- Reception Window U-plane -->
-        <T2a_min_up>25</T2a_min_up>
-        <T2a_max_up>140</T2a_max_up>
-        <!-- Transmission Window U-plane -->
-        <Ta3_min>20</Ta3_min>
-        <Ta3_max>32</Ta3_max>
-
-        <!-- O-DU Settings -->
-        <!-- MTU size -->
-        <MTU>9600</MTU>
-        <!-- VLAN Tag used for C-Plane -->
-        <c_plane_vlan_tag>1</c_plane_vlan_tag>
-        <u_plane_vlan_tag>2</u_plane_vlan_tag>
-
-        <!-- Transmission Window Fast C-plane DL -->
-        <T1a_min_cp_dl>70</T1a_min_cp_dl>
-        <T1a_max_cp_dl>100</T1a_max_cp_dl>
-        <!-- Transmission Window Fast C-plane UL -->
-        <T1a_min_cp_ul>80</T1a_min_cp_ul>
-        <T1a_max_cp_ul>90</T1a_max_cp_ul>
-        <!-- Transmission Window U-plane -->
-        <T1a_min_up>35</T1a_min_up>
-        <T1a_max_up>50</T1a_max_up>
-        <!-- Reception Window U-Plane-->
-        <Ta4_min>0</Ta4_min>
-        <Ta4_max>45</Ta4_max>
-        <DynamicSectionEna>0</DynamicSectionEna>
-        <xRANSFNWrap>0</xRANSFNWrap>
-        <!-- Total Number of DL PRBs per symbol (starting from RB 0) that is transmitted (used for testing. If 0, then value is used from PHY_CONFIG_API) -->
-        <xRANNumDLPRBs>0</xRANNumDLPRBs>
-        <!-- Total Number of UL PRBs per symbol (starting from RB 0) that is received (used for testing. If 0, then value is used from PHY_CONFIG_API) -->
-        <xRANNumULPRBs>0</xRANNumULPRBs>
-        <!-- refer to alpha as defined in section 9.7.2 of ORAN spec. this value should be alpha*(1/1.2288ns), range 0 - 1e7 (ns) -->
-        <Gps_Alpha>0</Gps_Alpha>
-        <!-- beta value as defined in section 9.7.2 of ORAN spec. range -32767 ~ +32767 -->
-        <Gps_Beta>0</Gps_Beta>
-
-        <!-- XRAN: Compression mode on O-DU <-> O-RU 0 - no comp 1 - BFP -->
-        <xranCompMethod>0</xranCompMethod>
-
-        <nPrbElemDl>0</nPrbElemDl>
-        <!--nRBStart, nRBSize, nStartSymb, numSymb, nBeamIndex, bf_weight_update, compMethod, iqWidth, BeamFormingType -->
-        <!-- weight base beams -->
-        <PrbElemDl0>0,48,0,14,1,1,1,9,1</PrbElemDl0>
-        <PrbElemDl1>48,48,0,14,2,1,1,9,1</PrbElemDl1>
-        <PrbElemDl2>96,48,0,14,3,1,1,9,1</PrbElemDl2>
-        <PrbElemDl3>144,48,0,14,4,1,1,9,1</PrbElemDl3>
-        <PrbElemDl4>144,36,0,14,5,1,1,9,1</PrbElemDl4>
-        <PrbElemDl5>180,36,0,14,6,1,1,9,1</PrbElemDl5>
-        <PrbElemDl6>216,36,0,14,7,1,1,9,1</PrbElemDl6>
-        <PrbElemDl7>252,21,0,14,8,1,1,9,1</PrbElemDl7>
-
-
-        <nPrbElemUl>0</nPrbElemUl>
-        <!--nRBStart, nRBSize, nStartSymb, numSymb, nBeamIndex, bf_weight_update, compMethod, iqWidth, BeamFormingType -->
-        <!-- weight base beams -->
-        <PrbElemUl0>0,48,0,14,1,1,1,9,1</PrbElemUl0>
-        <PrbElemUl1>48,48,0,14,2,1,1,9,1</PrbElemUl1>
-        <PrbElemUl2>72,36,0,14,3,1,1,9,1</PrbElemUl2>
-        <PrbElemUl3>108,36,0,14,4,1,1,9,1</PrbElemUl3>
-        <PrbElemUl4>144,36,0,14,5,1,1,9,1</PrbElemUl4>
-        <PrbElemUl5>180,36,0,14,6,1,1,9,1</PrbElemUl5>
-        <PrbElemUl6>216,36,0,14,7,1,1,9,1</PrbElemUl6>
-        <PrbElemUl7>252,21,0,14,8,1,1,9,1</PrbElemUl7>
-
-    </xRAN>
 
     <StreamStats>
         <!-- If this is set to 1, L1 statistics are streamed over UDP to the desitnation address and port -->

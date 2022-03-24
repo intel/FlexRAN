@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--                                                                                                                                                              -->
-<!--   Copyright (2019) Intel Corporation.                                                                                                                        -->
+<!--   Copyright (2021) Intel Corporation.                                                                                                                        -->
 <!--                                                                                                                                                              -->
 <!--   Redistribution. Redistribution and use in binary form, without modification, are permitted provided that the following conditions are met:                 -->
 <!--                                                                                                                                                              -->
@@ -17,18 +17,20 @@
 <!--                                                                                                                                                              -->
 
 <TestMacConfig>
-    <version>oran_bronze_release_v1.1</version>
+    <version>oran_e_maintenance_release_v1.0</version>
 
     <Api>
         <!-- Full path to wls device used for transport of MAC-PHY API (e.g. wls0 )-->
-        <wls_dev_name>wls0</wls_dev_name>
+        <wls_dev_name>wls_f0</wls_dev_name>
 
-        <!-- WLS Memory size. Default is 1GB. Leave 10MB for structure that is also shared within this 1GB -->
-        <wlsMemorySize>0x7ec00000</wlsMemorySize>
+        <!-- WLS Memory Block size used to send and receive APIs between L1 and Testmac. Must be multiple of 2 -->
+        <wlsBlockSize>0x40000</wlsBlockSize>
     </Api>
 
     <!-- This section defines all DPDK related parameters used for DPDK initialization -->
     <DPDK>
+        <!--  name of DPDK memory zone, needs to align between primary and secondary process -->
+        <dpdkFilePrefix>gnb_f0</dpdkFilePrefix>
         <!--  DPDK IOVA Mode used for DPDK initialization. If 0, then PA mode. Else VA Mode. This needs to match whatever is in phycfg xml files -->
         <dpdkIovaMode>0</dpdkIovaMode>
     </DPDK>
@@ -52,6 +54,9 @@
         <MlogSize>2048</MlogSize>
     </MlogVars>
 
+    <!-- Latency Measurement Test: 0 -> Disable, 1 -> Enable -->
+    <latencyTest>0</latencyTest>
+
     <!-- CPU Binding to Application Threads -->
     <Threads>
         <!-- Wireless Subsystem Thread: Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
@@ -64,7 +69,109 @@
         <runThread>0, 89, 0</runThread>
 
         <!-- Thread to send / receive URLLC APIS to / from testmac to Phy. It will be created only when the phy_config has URLLC Support added to it: Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
-        <urllcThread>19, 90, 0</urllcThread>
+        <urllcThread>17, 90, 0</urllcThread>
     </Threads>
+
+    <StreamStats>
+        <!-- If this is set to 1, L1 statistics are streamed over UDP to the desitnation address and port -->
+        <StreamStats>0</StreamStats>
+
+        <!-- Destination IP Address to stream the stats -->
+        <StreamIp>127.0.0.1</StreamIp>
+
+        <!-- IP Port used to create UDP socket -->
+        <StreamPort>4000</StreamPort>
+    </StreamStats>
+
+    <SteamPackets>
+        <!-- If this is set to 1, then packets are intercepted from network and sent to L1 in DL and vice versa in UL -->
+        <StreamPacket>0</SteamPackets>
+
+        <!-- Number of UEs to stream the packets. Based on this appropriate Dst IP address are setup to appropriate ports -->
+        <StreamPacketNumStreams>1</StreamPacketNumStreams>
+
+        <!-- This params tells how to split the Streams. 0: All streams on cell 0. 1: -->
+        <!-- 0: All streams on cell 0. -->
+        <!-- 1: Split streams per cell. -->
+        <StreamPacketType>0</StreamPacketType>
+
+        <!-- Network to Phy Stream Threads: Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
+        <StreamNet2PhyThread>10, 0, 0</StreamNet2PhyThread>
+
+        <!-- Phy to Network Stream Threads: Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
+        <StreamPhy2NetThread>10, 0, 0</StreamPhy2NetThread>
+
+        <!-- Destination IP Address to stream the stats (UE 0) -->
+        <StreamDstIp0>127.0.0.1</StreamDstIp0>
+        <!-- IP Port used to create UDP socket (UE 0) -->
+        <StreamSrcPort0>2234</StreamSrcPort0>
+        <StreamDstPort0>1234</StreamDstPort0>
+
+        <!-- Destination IP Address to stream the stats (UE 1) -->
+        <StreamDstIp1>127.0.0.2</StreamDstIp1>
+        <!-- IP Port used to create UDP socket (UE 1) -->
+        <StreamSrcPort1>2235</StreamSrcPort1>
+        <StreamDstPort1>1235</StreamDstPort1>
+
+        <!-- Destination IP Address to stream the stats (UE 2) -->
+        <StreamDstIp2>127.0.0.3</StreamDstIp2>
+        <!-- IP Port used to create UDP socket (UE 2) -->
+        <StreamSrcPort2>2236</StreamSrcPort2>
+        <StreamDstPort2>1236</StreamDstPort2>
+
+        <!-- Destination IP Address to stream the stats (UE 3) -->
+        <StreamDstIp3>127.0.0.4</StreamDstIp3>
+        <!-- IP Port used to create UDP socket (UE 3) -->
+        <StreamSrcPort3>2237</StreamSrcPort3>
+        <StreamDstPort3>1237</StreamDstPort3>
+
+        <!-- Destination IP Address to stream the stats (UE 4) -->
+        <StreamDstIp4>127.0.0.5</StreamDstIp4>
+        <!-- IP Port used to create UDP socket (UE 4) -->
+        <StreamSrcPort4>2238</StreamSrcPort4>
+        <StreamDstPort4>1238</StreamDstPort4>
+
+        <!-- Destination IP Address to stream the stats (UE 5) -->
+        <StreamDstIp5>127.0.0.6</StreamDstIp5>
+        <!-- IP Port used to create UDP socket (UE 5) -->
+        <StreamSrcPort5>2239</StreamSrcPort5>
+        <StreamDstPort5>1239</StreamDstPort5>
+
+        <!-- Destination IP Address to stream the stats (UE 6) -->
+        <StreamDstIp6>127.0.0.7</StreamDstIp6>
+        <!-- IP Port used to create UDP socket (UE 6) -->
+        <StreamSrcPort6>2240</StreamSrcPort6>
+        <StreamDstPort6>1240</StreamDstPort6>
+
+        <!-- Destination IP Address to stream the stats (UE 7) -->
+        <StreamDstIp7>127.0.0.8</StreamDstIp7>
+        <!-- IP Port used to create UDP socket (UE 7) -->
+        <StreamSrcPort7>2241</StreamSrcPort7>
+        <StreamDstPort7>1241</StreamDstPort7>
+
+        <!-- Destination IP Address to stream the stats (UE 8) -->
+        <StreamDstIp8>127.0.0.9</StreamDstIp8>
+        <!-- IP Port used to create UDP socket (UE 8) -->
+        <StreamSrcPort8>2242</StreamSrcPort8>
+        <StreamDstPort8>1242</StreamDstPort8>
+
+        <!-- Destination IP Address to stream the stats (UE 9) -->
+        <StreamDstIp9>127.0.0.10</StreamDstIp9>
+        <!-- IP Port used to create UDP socket (UE 9) -->
+        <StreamSrcPort9>2243</StreamSrcPort9>
+        <StreamDstPort9>1243</StreamDstPort9>
+
+        <!-- Destination IP Address to stream the stats (UE 10) -->
+        <StreamDstIp10>127.0.0.11</StreamDstIp10>
+        <!-- IP Port used to create UDP socket (UE 10) -->
+        <StreamSrcPort10>2244</StreamSrcPort10>
+        <StreamDstPort10>1244</StreamDstPort10>
+
+        <!-- Destination IP Address to stream the stats (UE 11) -->
+        <StreamDstIp11>127.0.0.12</StreamDstIp11>
+        <!-- IP Port used to create UDP socket (UE 11) -->
+        <StreamSrcPort12>2245</StreamSrcPort11>
+        <StreamDstPort11>1245</StreamDstPort11>
+    </SteamPackets>
 
 </TestMacConfig>

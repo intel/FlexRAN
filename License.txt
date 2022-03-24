@@ -1,4 +1,4 @@
-Copyright (2019) Intel Corporation. 
+Copyright (2021) Intel Corporation. 
 
 Redistribution. Redistribution and use in binary form, without modification, are permitted provided that the following conditions are met:
 

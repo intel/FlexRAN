@@ -23,5 +23,5 @@ sudo docker build \
     --build-arg https_proxy=$https_proxy \
     --build-arg no_proxy=$no_proxy \
     -f $ORAN_RELEASE/FlexRAN/docker/Dockerfile \
-    -t oran-release-du:1.0 .
+    -t oran-release-du:2.0 .
 
