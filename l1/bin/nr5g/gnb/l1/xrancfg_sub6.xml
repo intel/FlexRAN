@@ -191,10 +191,16 @@
 
     <!-- XRAN: Compression mode on O-DU <-> O-RU 0 - no comp 1 - BFP -->
     <xranCompMethod>1</xranCompMethod>
+    <!-- XRAN: Uplane Compression Header type 0 - dynamic 1 - static -->
+    <xranCompHdrType>0</xranCompHdrType>    
     <!-- XRAN: iqWidth when DynamicSectionEna and BFP Compression enabled -->
-    <xraniqWidth>8</xraniqWidth>
+    <xraniqWidth>9</xraniqWidth>
     <!-- Whether Modulation Compression mode is enabled or not for DL only -->
     <xranModCompEna>0</xranModCompEna>
+    <!-- XRAN: Prach Compression mode on O-DU <-> O-RU 0 - no comp 1 - BFP -->
+    <xranPrachCompMethod>0</xranPrachCompMethod>
+    <!-- Whether Prach iqWidth when DynamicSectionEna and BFP Compression enabled -->
+    <xranPrachiqWidth>16</xranPrachiqWidth>
 
     <oRu0nPrbElemDl>1</oRu0nPrbElemDl>
     <!--nRBStart, nRBSize, nStartSymb, numSymb, nBeamIndex, bf_weight_update, compMethod, iqWidth, BeamFormingType, Scalefactor, REMask -->

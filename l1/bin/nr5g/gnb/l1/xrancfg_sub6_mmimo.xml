@@ -18,7 +18,7 @@
 <!--                                                                                                                                                              -->
                                                                                     -->
 <XranConfig>
-    <version>oran_e_maintenance_release_v1.0<</version>
+    <version>oran_e_maintenance_release_v1.0</version>
     <!-- numbers of O-RU connected to O-DU. All O-RUs are the same capabilities. Max O-RUs is per XRAN_PORTS_NUM i.e. 4 -->
     <oRuNum>3</oRuNum>
     <!--  # 10G,25G,40G,100G speed of Physical connection on O-RU -->
@@ -177,8 +177,14 @@
 
     <!-- XRAN: Compression mode on O-DU <-> O-RU 0 - no comp 1 - BFP -->
     <xranCompMethod>1</xranCompMethod>
+    <!-- XRAN: Uplane Compression Header type 0 - dynamic 1 - static -->
+    <xranCompHdrType>0</xranCompHdrType    
     <!-- XRAN: iqWidth when DynamicSectionEna and BFP Compression enabled -->
     <xraniqWidth>9</xraniqWidth>
+    <!-- XRAN: Prach Compression mode on O-DU <-> O-RU 0 - no comp 1 - BFP -->
+    <xranPrachCompMethod>0</xranPrachCompMethod>
+    <!-- Whether Prach iqWidth when DynamicSectionEna and BFP Compression enabled -->
+    <xranPrachiqWidth>9</xranPrachiqWidth>    
 
     <!-- M-plane values of O-RU configuration */ -->
     <oRu0MaxSectionsPerSlot>6<oRu0MaxSectionsPerSlot>
