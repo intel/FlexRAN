@@ -17,11 +17,12 @@
 #######################################################################                                                                                                                                                            
 #!/bin/bash
 #echo off
-export RTE_WLS=$DIR_WIRELESS_WLS
+export RTE_WLS=${DIR_WIRELESS_WLS}
 
 l1Binary="./l1app"
 phycfg_xml_file=
 xrancfg_xml_file=
+l1Cmd=
 MY_DIR=`pwd`
 WLS_DPDK_MODE=1
 huge_folder="/mnt/huge"
@@ -32,14 +33,6 @@ if [ "x"$1 = "x-xran" ]; then
     xrancfg_xml_file="xrancfg_sub6.xml"
     echo "Radio mode with XRAN - Sub6 100Mhz"
     ./dpdk.sh
-elif [ "x"$1 = "x-xranurllc" ]; then
-    phycfg_xml_file="phycfg_xran_urllc_gnb.xml"
-    xrancfg_xml_file="xrancfg_sub6_urllc_gnb.xml"
-    echo "Radio mode with XRAN - URLLC GNB Mode"
-elif [ "x"$1 = "x-xranurllctue" ]; then
-    phycfg_xml_file="phycfg_xran_urllc_tue.xml"
-    xrancfg_xml_file="xrancfg_sub6_urllc_tue.xml"
-    echo "Radio mode with XRAN - URLLC TestUE Mode"
 elif [ "x"$1 = "x-xranmmimo" ]; then
     phycfg_xml_file="phycfg_xran.xml"
     xrancfg_xml_file="xrancfg_sub6_mmimo.xml"
@@ -55,17 +48,6 @@ elif [ "x"$1 = "x-custom" ]; then
     xrancfg_xml_file=$3
     echo "Radio mode with XRAN - Custom Mode"
     ./dpdk.sh
-elif [ "x"$1 = "x-fb" ]; then
-    phycfg_xml_file="phycfg_fb.xml"
-    echo "Radio mode with Ferry Bridge - Sub3 20Mhz"
-    ./dpdk.sh
-elif [ "x"$1 = "x-rsub6" ]; then
-    phycfg_xml_file="phycfg_radio_sub6.xml"
-    echo "Radio mode with Terasic Front Hual FPGA - Sub6 100Mhz"
-    echo "Inserting Driver"
-	cd ../../../../libs/cpa/sub6/rec
-	./run.sh install
-	cd $MY_DIR
 elif [ "x"$1 = "x-rmmw" ]; then
     phycfg_xml_file="phycfg_radio_mmw.xml"
     echo "Radio mode with Terasic Front Hual FPGA - MMWave"
@@ -77,16 +59,12 @@ elif [ "x"$1 = "x-e" ]; then
     phycfg_xml_file="phycfg_timer.xml"
     echo "TIMER Mode"
 else
-    echo "Invlaid mode. Options are - ./l1.sh followed by:"
+    echo "Invalid mode. Options are - ./l1.sh followed by:"
     echo "-e: Timer Mode"
-    echo "-fb: Radio mode with Ferry Bridge - Sub3 20Mhz"
-    echo "-rsub6: Radio mode with Terasic Front Hual FPGA - Sub6 100Mhz"
     echo "-rmmw: Radio mode with Terasic Front Hual FPGA - MMWave"
     echo "-xran: Radio mode with XRAN - Sub6 100Mhz"
     echo "-xranmmw: Radio mode with XRAN - mmWave 100Mhz"
     echo "-xranmmimo: Radio mode with XRAN - Massive MIMO"
-    echo "-xranurllc: Radio mode with XRAN - URLLC GNB"
-    echo "-xranurllctue: Radio mode with XRAN - URLLC TestUE"
     exit -1
 fi
 
@@ -138,7 +116,19 @@ fi
 cd $MY_DIR
 if [ -f "$phycfg_xml_file" ]; then
     echo "using configuration file $phycfg_xml_file"
-    l1Cmd="$l1Binary table 0 1 --cfgfile=$phycfg_xml_file"
+    core=`grep -o -P '(?<=systemThread>).*(?=, 0, 0)' $phycfg_xml_file`
+    if [ -n "$core" ]; then
+        l1Cmd="taskset -c $core"
+    fi
+    if [ "$2" = "-g" ]; then
+        shift
+        if [ "$RTE_TARGET" == "x86_64-native-linuxapp-icx"]; then
+            l1Cmd="$l1Cmd /opt/intel/oneapi/debugger/10.2.4/gdb/intel64/bin/gdb-oneapi --args"
+        else
+            l1Cmd="$l1Cmd /home/opt/intel/system_studio_2019/bin/gdb-ia --args"
+        fi
+    fi
+    l1Cmd="$l1Cmd $l1Binary --cfgfile=$phycfg_xml_file"
 else
     echo "configuration file $phycfg_xml_file is not found"
     exit 1
@@ -146,7 +136,7 @@ fi
 
 if [ -f "$xrancfg_xml_file" ]; then
     echo "using configuration file $xrancfg_xml_file"
-    l1Cmd="$l1Binary table 0 1 --cfgfile=$phycfg_xml_file --xranfile=$xrancfg_xml_file"
+    l1Cmd="$l1Cmd --xranfile=$xrancfg_xml_file"
 fi
 
 echo ">> Running... "${l1Cmd}

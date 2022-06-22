@@ -652,61 +652,61 @@
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[4] sym[0] carrier[0] chanId[82] len[4]
-      #ta[85] cqi[-6.00] stat[2] srdet[0]
+      #ta[0] cqi[-8.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[4] sym[0] carrier[0] chanId[83] len[4]
-      #ta[85] cqi[-6.00] stat[2] srdet[0]
+      #ta[0] cqi[-8.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[4] sym[0] carrier[0] chanId[84] len[4]
-      #ta[85] cqi[-6.00] stat[2] srdet[0]
+      #ta[0] cqi[-8.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[4] sym[0] carrier[0] chanId[85] len[4]
-      #ta[85] cqi[-6.00] stat[2] srdet[0]
+      #ta[0] cqi[-8.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[4] sym[0] carrier[0] chanId[86] len[4]
-      #ta[85] cqi[-6.00] stat[2] srdet[0]
+      #ta[0] cqi[-8.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[4] sym[0] carrier[0] chanId[87] len[4]
-      #ta[85] cqi[-6.00] stat[2] srdet[0]
+      #ta[0] cqi[-8.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[4] sym[0] carrier[0] chanId[88] len[4]
-      #ta[85] cqi[-6.00] stat[2] srdet[0]
+      #ta[0] cqi[-8.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[4] sym[0] carrier[0] chanId[89] len[4]
-      #ta[85] cqi[-6.00] stat[2] srdet[0]
+      #ta[0] cqi[-8.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[4] sym[0] carrier[0] chanId[90] len[4]
-      #ta[85] cqi[-6.00] stat[2] srdet[0]
+      #ta[0] cqi[-8.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[4] sym[0] carrier[0] chanId[91] len[4]
-      #ta[85] cqi[-6.00] stat[2] srdet[0]
+      #ta[0] cqi[-8.00] stat[2] srdet[0]
       #data[
               0,
            ]
@@ -2110,61 +2110,61 @@
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[14] sym[0] carrier[0] chanId[82] len[4]
-      #ta[170] cqi[-8.00] stat[2] srdet[0]
+      #ta[0] cqi[-2.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[14] sym[0] carrier[0] chanId[83] len[4]
-      #ta[170] cqi[-8.00] stat[2] srdet[0]
+      #ta[0] cqi[-2.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[14] sym[0] carrier[0] chanId[84] len[4]
-      #ta[170] cqi[-8.00] stat[2] srdet[0]
+      #ta[0] cqi[-2.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[14] sym[0] carrier[0] chanId[85] len[4]
-      #ta[170] cqi[-8.00] stat[2] srdet[0]
+      #ta[0] cqi[-2.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[14] sym[0] carrier[0] chanId[86] len[4]
-      #ta[170] cqi[-8.00] stat[2] srdet[0]
+      #ta[0] cqi[-2.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[14] sym[0] carrier[0] chanId[87] len[4]
-      #ta[170] cqi[-8.00] stat[2] srdet[0]
+      #ta[0] cqi[-2.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[14] sym[0] carrier[0] chanId[88] len[4]
-      #ta[170] cqi[-8.00] stat[2] srdet[0]
+      #ta[0] cqi[-2.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[14] sym[0] carrier[0] chanId[89] len[4]
-      #ta[170] cqi[-8.00] stat[1] srdet[0]
+      #ta[0] cqi[-2.00] stat[2] srdet[0]
       #data[
-            128,
+              0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[14] sym[0] carrier[0] chanId[90] len[4]
-      #ta[170] cqi[-8.00] stat[2] srdet[0]
+      #ta[0] cqi[-2.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[14] sym[0] carrier[0] chanId[91] len[4]
-      #ta[170] cqi[-8.00] stat[2] srdet[0]
+      #ta[0] cqi[-2.00] stat[2] srdet[0]
       #data[
               0,
            ]
@@ -2835,61 +2835,61 @@
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[15] sym[0] carrier[0] chanId[82] len[4]
-      #ta[-127] cqi[-9.00] stat[2] srdet[0]
+      #ta[0] cqi[-5.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[15] sym[0] carrier[0] chanId[83] len[4]
-      #ta[-127] cqi[-9.00] stat[2] srdet[0]
+      #ta[0] cqi[-5.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[15] sym[0] carrier[0] chanId[84] len[4]
-      #ta[-127] cqi[-9.00] stat[2] srdet[0]
+      #ta[0] cqi[-5.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[15] sym[0] carrier[0] chanId[85] len[4]
-      #ta[-127] cqi[-9.00] stat[2] srdet[0]
+      #ta[0] cqi[-5.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[15] sym[0] carrier[0] chanId[86] len[4]
-      #ta[-127] cqi[-9.00] stat[2] srdet[0]
+      #ta[0] cqi[-5.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[15] sym[0] carrier[0] chanId[87] len[4]
-      #ta[-127] cqi[-9.00] stat[2] srdet[0]
+      #ta[0] cqi[-5.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[15] sym[0] carrier[0] chanId[88] len[4]
-      #ta[-127] cqi[-9.00] stat[2] srdet[0]
+      #ta[0] cqi[-5.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[15] sym[0] carrier[0] chanId[89] len[4]
-      #ta[-127] cqi[-9.00] stat[2] srdet[0]
+      #ta[0] cqi[-5.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[15] sym[0] carrier[0] chanId[90] len[4]
-      #ta[-127] cqi[-9.00] stat[2] srdet[0]
+      #ta[0] cqi[-5.00] stat[2] srdet[0]
       #data[
               0,
            ]
 ----------------------------------------------------------------------------
 #type[PUCCH] fn[0] slot[15] sym[0] carrier[0] chanId[91] len[4]
-      #ta[-127] cqi[-9.00] stat[2] srdet[0]
+      #ta[0] cqi[-5.00] stat[2] srdet[0]
       #data[
               0,
            ]

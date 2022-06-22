@@ -24,7 +24,7 @@
 #########################################################################################*/
 /*
  * @file common_typedef.h
- * @ingroup group_lte_source_common
+ * @ingroup group_source_common
  * @author Intel Corporation
  **/
 
