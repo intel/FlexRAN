@@ -15,7 +15,11 @@
 #   this software.  No hardware per se is licensed hereunder.                                                                                                 
 # 
 #######################################################################         
+testmacCmd=
+testmac_cfg_xml_file="testmac_cfg.xml"
 
+export RTE_WLS=${DIR_WIRELESS_WLS}
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$RTE_WLS
 
 MACHINE_TYPE=`uname -m`
 
@@ -37,11 +41,28 @@ if [ ${MACHINE_TYPE} == 'x86_64' ]; then
 #	done
 fi
 
-echo start 5GNR Test MAC
+if [ -f "$testmac_cfg_xml_file" ]; then
+    echo "using configuration file $testmac_cfg_xml_file"
+    core=`grep -o -P '(?<=systemThread>).*(?=, 0, 0)' $testmac_cfg_xml_file`
+    if [ -n "$core" ]; then
+        testmacCmd="taskset -c $core"
+    fi
 if [ "$1" = "-g" ]; then
     shift
-    #gdb-ia --args ./testmac DIR_WIRELESS_TEST=$DIR_WIRELESS_TEST_5G $@
-    gdb --args ./testmac DIR_WIRELESS_TEST=$DIR_WIRELESS_TEST_5G $@
+        if [ "$RTE_TARGET" == "x86_64-native-linuxapp-icx"]; then
+            testmacCmd="$testmacCmd /opt/intel/oneapi/debugger/10.2.4/gdb/intel64/bin/gdb-oneapi --args"
 else
-    ./testmac DIR_WIRELESS_TEST=$DIR_WIRELESS_TEST_5G $@
+            testmacCmd="$testmacCmd /home/opt/intel/system_studio_2019/bin/gdb-ia --args"
 fi
+    fi
+    testmacCmd="$testmacCmd ./testmac DIR_WIRELESS_TEST_4G=$DIR_WIRELESS_TEST_4G DIR_WIRELESS_TEST_5G=$DIR_WIRELESS_TEST_5G $@"
+else
+    echo "configuration file $testmac_cfg_xml_file is not found"
+    exit 1
+fi
+
+echo start 5GNR Test MAC
+
+echo ">> Running... "${testmacCmd}
+
+eval $testmacCmd

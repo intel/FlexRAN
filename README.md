@@ -1,6 +1,6 @@
 # FlexRAN
-============
-Copyright (C) 2019-2021 Intel Corporation
+
+Copyright (C) 2019-2022 Intel Corporation
 
 Introduction
 ============
@@ -169,7 +169,7 @@ Follow the steps in O-RAN SC O-DU Low project document to run L1 and associate t
 Testing in Container
 ===========
 
-Build O-DU docker image
+Build O-DU docker image   (build-oran-l1-image.sh will be updated to support the OneAPI compiler which is preferred over icc)
 -------------------------
 
 Please follow the build procedures on baremetal host to build FAPI/WLS/FH and copy the code/binaries to the oran_release folder on your build server. The docker build will just copy the pre-built binaries to docker image.
@@ -188,7 +188,7 @@ Update ${ORAN_RELEASE}/phy/setupenv.sh, change DIR_ROOT to /opt/oran_release. Ru
 After the docker build finishes, docker image with oran-release tag will be generated
 
     …
-    Successfully tagged oran-release-du:2.0
+    Successfully tagged oran-release-du:4.0
 
 Run O-DU docker container in Kubernetes cluster
 -------------------------------------------------
@@ -221,7 +221,7 @@ Update the Kubernetes pod yaml configuration for your system configuration
           - infinity
         tty: true
         stdin: true
-        image: oran-release-du:2.0
+        image: oran-release-du:4.0
         name: l1app
         resources:
           requests:
@@ -250,7 +250,7 @@ Update the Kubernetes pod yaml configuration for your system configuration
           - infinity
         tty: true
         stdin: true
-        image: oran-release-du:2.0
+        image: oran-release-du:4.0
         name: oran-fapi
         resources:
           requests:
@@ -279,7 +279,7 @@ Update the Kubernetes pod yaml configuration for your system configuration
           - infinity
         tty: true
         stdin: true
-        image: oran-release-du:2.0
+        image: oran-release-du:4.0
         name: testmac
         resources:
           requests:

@@ -17,11 +17,11 @@
 <!--                                                                                                                                                              -->
 
 <TestMacConfig>
-    <version>oran_e_maintenance_release_v1.0</version>
+    <version>oran_f_release_v1.0</version>
 
     <Api>
         <!-- Full path to wls device used for transport of MAC-PHY API (e.g. wls0 )-->
-        <wls_dev_name>wls_f0</wls_dev_name>
+        <wls_dev_name>wls0</wls_dev_name>
 
         <!-- WLS Memory Block size used to send and receive APIs between L1 and Testmac. Must be multiple of 2 -->
         <wlsBlockSize>0x40000</wlsBlockSize>
@@ -30,7 +30,7 @@
     <!-- This section defines all DPDK related parameters used for DPDK initialization -->
     <DPDK>
         <!--  name of DPDK memory zone, needs to align between primary and secondary process -->
-        <dpdkFilePrefix>gnb_f0</dpdkFilePrefix>
+        <dpdkFilePrefix>gnb0</dpdkFilePrefix>
         <!--  DPDK IOVA Mode used for DPDK initialization. If 0, then PA mode. Else VA Mode. This needs to match whatever is in phycfg xml files -->
         <dpdkIovaMode>0</dpdkIovaMode>
     </DPDK>
@@ -69,7 +69,7 @@
         <runThread>0, 89, 0</runThread>
 
         <!-- Thread to send / receive URLLC APIS to / from testmac to Phy. It will be created only when the phy_config has URLLC Support added to it: Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
-        <urllcThread>17, 90, 0</urllcThread>
+        <urllcThread>15, 90, 0</urllcThread>
     </Threads>
 
     <StreamStats>
@@ -83,9 +83,9 @@
         <StreamPort>4000</StreamPort>
     </StreamStats>
 
-    <SteamPackets>
+    <StreamPackets>
         <!-- If this is set to 1, then packets are intercepted from network and sent to L1 in DL and vice versa in UL -->
-        <StreamPacket>0</SteamPackets>
+        <StreamPacket>0</StreamPacket>
 
         <!-- Number of UEs to stream the packets. Based on this appropriate Dst IP address are setup to appropriate ports -->
         <StreamPacketNumStreams>1</StreamPacketNumStreams>
@@ -101,77 +101,110 @@
         <!-- Phy to Network Stream Threads: Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
         <StreamPhy2NetThread>10, 0, 0</StreamPhy2NetThread>
 
-        <!-- Destination IP Address to stream the stats (UE 0) -->
+        <!-- How to stream the packets 0: Linux UDP Socket, 1: DPDK -->
+        <StreamSocketType>0</StreamSocketType>
+
+        <!-- If StreamSocketType, then which NIC port to use for streaming -->
+        <StreamDpdkInterface>0000:bb:aa.0</StreamDpdkInterface>
+
+        <!-- If StreamSocketType, then shared mempool name between L1 and MAC that can be used to create packet buffers -->
+        <StreamSharedMemPoolName>testmac_pkt</StreamSharedMemPoolName>
+
+        <!-- Src IP Address on interface to receive packets on. If 0.0.0.0, then INADDR_ANY is used (UE 0) -->
+        <StreamSrcIp0>0.0.0.0</StreamSrcIp0>
+        <!-- Destination IP of interface to send packets to. If 127.0.0.1, then will use local host (UE 0) -->
         <StreamDstIp0>127.0.0.1</StreamDstIp0>
-        <!-- IP Port used to create UDP socket (UE 0) -->
+        <!-- IP Port used to create Linux socket (UE 0) -->
         <StreamSrcPort0>2234</StreamSrcPort0>
         <StreamDstPort0>1234</StreamDstPort0>
 
-        <!-- Destination IP Address to stream the stats (UE 1) -->
-        <StreamDstIp1>127.0.0.2</StreamDstIp1>
-        <!-- IP Port used to create UDP socket (UE 1) -->
+        <!-- Src IP Address on interface to receive packets on. If 0.0.0.0, then INADDR_ANY is used (UE 1) -->
+        <StreamSrcIp1>0.0.0.0</StreamSrcIp1>
+        <!-- Destination IP of interface to send packets to. If 127.0.0.1, then will use local host (UE 1) -->
+        <StreamDstIp1>127.0.0.1</StreamDstIp1>
+        <!-- IP Port used to create Linux socket (UE 1) -->
         <StreamSrcPort1>2235</StreamSrcPort1>
         <StreamDstPort1>1235</StreamDstPort1>
 
-        <!-- Destination IP Address to stream the stats (UE 2) -->
-        <StreamDstIp2>127.0.0.3</StreamDstIp2>
-        <!-- IP Port used to create UDP socket (UE 2) -->
+        <!-- Src IP Address on interface to receive packets on. If 0.0.0.0, then INADDR_ANY is used (UE 2) -->
+        <StreamSrcIp2>0.0.0.0</StreamSrcIp2>
+        <!-- Destination IP of interface to send packets to. If 127.0.0.1, then will use local host (UE 2) -->
+        <StreamDstIp2>127.0.0.1</StreamDstIp2>
+        <!-- IP Port used to create Linux socket (UE 2) -->
         <StreamSrcPort2>2236</StreamSrcPort2>
         <StreamDstPort2>1236</StreamDstPort2>
 
-        <!-- Destination IP Address to stream the stats (UE 3) -->
-        <StreamDstIp3>127.0.0.4</StreamDstIp3>
-        <!-- IP Port used to create UDP socket (UE 3) -->
+        <!-- Src IP Address on interface to receive packets on. If 0.0.0.0, then INADDR_ANY is used (UE 3) -->
+        <StreamSrcIp3>0.0.0.0</StreamSrcIp3>
+        <!-- Destination IP of interface to send packets to. If 127.0.0.1, then will use local host (UE 3) -->
+        <StreamDstIp3>127.0.0.1</StreamDstIp3>
+        <!-- IP Port used to create Linux socket (UE 3) -->
         <StreamSrcPort3>2237</StreamSrcPort3>
         <StreamDstPort3>1237</StreamDstPort3>
 
-        <!-- Destination IP Address to stream the stats (UE 4) -->
-        <StreamDstIp4>127.0.0.5</StreamDstIp4>
-        <!-- IP Port used to create UDP socket (UE 4) -->
+        <!-- Src IP Address on interface to receive packets on. If 0.0.0.0, then INADDR_ANY is used (UE 4) -->
+        <StreamSrcIp4>0.0.0.0</StreamSrcIp4>
+        <!-- Destination IP of interface to send packets to. If 127.0.0.1, then will use local host (UE 4) -->
+        <StreamDstIp4>127.0.0.1</StreamDstIp4>
+        <!-- IP Port used to create Linux socket (UE 4) -->
         <StreamSrcPort4>2238</StreamSrcPort4>
         <StreamDstPort4>1238</StreamDstPort4>
 
-        <!-- Destination IP Address to stream the stats (UE 5) -->
-        <StreamDstIp5>127.0.0.6</StreamDstIp5>
-        <!-- IP Port used to create UDP socket (UE 5) -->
+        <!-- Src IP Address on interface to receive packets on. If 0.0.0.0, then INADDR_ANY is used (UE 5) -->
+        <StreamSrcIp5>0.0.0.0</StreamSrcIp5>
+        <!-- Destination IP of interface to send packets to. If 127.0.0.1, then will use local host (UE 5) -->
+        <StreamDstIp5>127.0.0.1</StreamDstIp5>
+        <!-- IP Port used to create Linux socket (UE 5) -->
         <StreamSrcPort5>2239</StreamSrcPort5>
         <StreamDstPort5>1239</StreamDstPort5>
 
-        <!-- Destination IP Address to stream the stats (UE 6) -->
-        <StreamDstIp6>127.0.0.7</StreamDstIp6>
-        <!-- IP Port used to create UDP socket (UE 6) -->
+        <!-- Src IP Address on interface to receive packets on. If 0.0.0.0, then INADDR_ANY is used (UE 6) -->
+        <StreamSrcIp6>0.0.0.0</StreamSrcIp6>
+        <!-- Destination IP of interface to send packets to. If 127.0.0.1, then will use local host (UE 6) -->
+        <StreamDstIp6>127.0.0.1</StreamDstIp6>
+        <!-- IP Port used to create Linux socket (UE 6) -->
         <StreamSrcPort6>2240</StreamSrcPort6>
         <StreamDstPort6>1240</StreamDstPort6>
 
-        <!-- Destination IP Address to stream the stats (UE 7) -->
-        <StreamDstIp7>127.0.0.8</StreamDstIp7>
-        <!-- IP Port used to create UDP socket (UE 7) -->
+        <!-- Src IP Address on interface to receive packets on. If 0.0.0.0, then INADDR_ANY is used (UE 7) -->
+        <StreamSrcIp7>0.0.0.0</StreamSrcIp7>
+        <!-- Destination IP of interface to send packets to. If 127.0.0.1, then will use local host (UE 7) -->
+        <StreamDstIp7>127.0.0.1</StreamDstIp7>
+        <!-- IP Port used to create Linux socket (UE 7) -->
         <StreamSrcPort7>2241</StreamSrcPort7>
         <StreamDstPort7>1241</StreamDstPort7>
 
-        <!-- Destination IP Address to stream the stats (UE 8) -->
-        <StreamDstIp8>127.0.0.9</StreamDstIp8>
-        <!-- IP Port used to create UDP socket (UE 8) -->
+        <!-- Src IP Address on interface to receive packets on. If 0.0.0.0, then INADDR_ANY is used (UE 8) -->
+        <StreamSrcIp8>0.0.0.0</StreamSrcIp8>
+        <!-- Destination IP of interface to send packets to. If 127.0.0.1, then will use local host (UE 8) -->
+        <StreamDstIp8>127.0.0.1</StreamDstIp8>
+        <!-- IP Port used to create Linux socket (UE 8) -->
         <StreamSrcPort8>2242</StreamSrcPort8>
         <StreamDstPort8>1242</StreamDstPort8>
 
-        <!-- Destination IP Address to stream the stats (UE 9) -->
-        <StreamDstIp9>127.0.0.10</StreamDstIp9>
-        <!-- IP Port used to create UDP socket (UE 9) -->
+        <!-- Src IP Address on interface to receive packets on. If 0.0.0.0, then INADDR_ANY is used (UE 9) -->
+        <StreamSrcIp9>0.0.0.0</StreamSrcIp9>
+        <!-- Destination IP of interface to send packets to. If 127.0.0.1, then will use local host (UE 9) -->
+        <StreamDstIp9>127.0.0.1</StreamDstIp9>
+        <!-- IP Port used to create Linux socket (UE 9) -->
         <StreamSrcPort9>2243</StreamSrcPort9>
         <StreamDstPort9>1243</StreamDstPort9>
 
-        <!-- Destination IP Address to stream the stats (UE 10) -->
-        <StreamDstIp10>127.0.0.11</StreamDstIp10>
-        <!-- IP Port used to create UDP socket (UE 10) -->
+        <!-- Src IP Address on interface to receive packets on. If 0.0.0.0, then INADDR_ANY is used (UE 10) -->
+        <StreamSrcIp10>0.0.0.0</StreamSrcIp10>
+        <!-- Destination IP of interface to send packets to. If 127.0.0.1, then will use local host (UE 10) -->
+        <StreamDstIp10>127.0.0.1</StreamDstIp10>
+        <!-- IP Port used to create Linux socket (UE 10) -->
         <StreamSrcPort10>2244</StreamSrcPort10>
         <StreamDstPort10>1244</StreamDstPort10>
 
-        <!-- Destination IP Address to stream the stats (UE 11) -->
-        <StreamDstIp11>127.0.0.12</StreamDstIp11>
-        <!-- IP Port used to create UDP socket (UE 11) -->
-        <StreamSrcPort12>2245</StreamSrcPort11>
+        <!-- Src IP Address on interface to receive packets on. If 0.0.0.0, then INADDR_ANY is used (UE 11) -->
+        <StreamSrcIp11>0.0.0.0</StreamSrcIp11>
+        <!-- Destination IP of interface to send packets to. If 127.0.0.1, then will use local host (UE 11) -->
+        <StreamDstIp11>127.0.0.1</StreamDstIp11>
+        <!-- IP Port used to create Linux socket (UE 11) -->
+        <StreamSrcPort11>2245</StreamSrcPort11>
         <StreamDstPort11>1245</StreamDstPort11>
-    </SteamPackets>
+    </StreamPackets>
 
 </TestMacConfig>

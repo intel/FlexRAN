@@ -16,15 +16,16 @@
 <!--   such patent is necessary to Utilize the software in the form provided by Intel. The patent license shall not apply to any combinations which include       -->
 <!--   this software.  No hardware per se is licensed hereunder.                                                                                                  -->
 <!--                                                                                                                                                              -->
-
 <XranConfig>
-    <version>oran_e_maintenance_release_v1.0</version>
+    <version>oran_f_release_v1.0</version>
     <!-- numbers of O-RU connected to O-DU. All O-RUs are the same capabilities. Max O-RUs is per XRAN_PORTS_NUM i.e. 4 -->
     <oRuNum>1</oRuNum>
     <!--  # 10G,25G,40G,100G speed of Physical connection on O-RU -->
     <oRuEthLinkSpeed>25</oRuEthLinkSpeed>
     <!--  # 1, 2, 3 total number of links per O-RU (Fronthaul Ethernet link in IOT spec) -->
     <oRuLinesNumber>1</oRuLinesNumber>
+    <!--  # C,U plane on same VF or different VF. 0--different VF, 1--same VF -->
+    <oRuCUon1Vf>0</oRuCUon1Vf>
 
     <!-- O-RU 0 -->
     <PciBusAddoRu0Vf0>0000:51:01.0</PciBusAddoRu0Vf0>
@@ -51,32 +52,32 @@
     <PciBusAddoRu3Vf3>0000:00:00.0</PciBusAddoRu3Vf3>
 
     <!-- remote O-RU 0 Eth Link 0 VF0, VF1-->
-    <oRuRem0Mac0>00:11:22:33:00:01<oRuRem0Mac0>
-    <oRuRem0Mac1>00:11:22:33:00:11<oRuRem0Mac1>
+    <oRuRem0Mac0>00:11:22:33:00:01</oRuRem0Mac0>
+    <oRuRem0Mac1>00:11:22:33:00:11</oRuRem0Mac1>
     <!-- remote O-RU 0 Eth Link 1 VF2, VF3 -->
-    <oRuRem0Mac2>00:11:22:33:00:21<oRuRem0Mac2>
-    <oRuRem0Mac3>00:11:22:33:00:31<oRuRem0Mac3>
+    <oRuRem0Mac2>00:11:22:33:00:21</oRuRem0Mac2>
+    <oRuRem0Mac3>00:11:22:33:00:31</oRuRem0Mac3>
 
     <!-- remote O-RU 1 Eth Link 0 VF4, VF5-->
-    <oRuRem1Mac0>00:11:22:33:01:01<oRuRem1Mac0>
-    <oRuRem1Mac1>00:11:22:33:01:11<oRuRem1Mac1>
+    <oRuRem1Mac0>00:11:22:33:01:01</oRuRem1Mac0>
+    <oRuRem1Mac1>00:11:22:33:01:11</oRuRem1Mac1>
     <!-- remote O-RU 1 Eth Link 1 VF6, VF7 -->
-    <oRuRem1Mac2>00:11:22:33:01:21<oRuRem1Mac2>
-    <oRuRem1Mac3>00:11:22:33:01:31<oRuRem1Mac3>
+    <oRuRem1Mac2>00:11:22:33:01:21</oRuRem1Mac2>
+    <oRuRem1Mac3>00:11:22:33:01:31</oRuRem1Mac3>
 
     <!-- remote O-RU 2 Eth Link 0 VF8, VF9 -->
-    <oRuRem2Mac0>00:11:22:33:02:01<oRuRem2Mac0>
-    <oRuRem2Mac1>00:11:22:33:02:11<oRuRem2Mac1>
+    <oRuRem2Mac0>00:11:22:33:02:01</oRuRem2Mac0>
+    <oRuRem2Mac1>00:11:22:33:02:11</oRuRem2Mac1>
     <!-- remote O-RU 2 Eth Link 1 VF10, VF11-->
-    <oRuRem2Mac2>00:11:22:33:02:21<oRuRem2Mac2>
-    <oRuRem2Mac3>00:11:22:33:02:31<oRuRem2Mac3>
+    <oRuRem2Mac2>00:11:22:33:02:21</oRuRem2Mac2>
+    <oRuRem2Mac3>00:11:22:33:02:31</oRuRem2Mac3>
 
     <!-- remote O-RU 2 Eth Link 0 VF12, VF13 -->
-    <oRuRem3Mac0>00:11:22:33:03:01<oRuRem3Mac0>
-    <oRuRem3Mac1>00:11:22:33:03:11<oRuRem3Mac1>
+    <oRuRem3Mac0>00:11:22:33:03:01</oRuRem3Mac0>
+    <oRuRem3Mac1>00:11:22:33:03:11</oRuRem3Mac1>
     <!-- remote O-RU 2 Eth Link 1 VF14, VF15-->
-    <oRuRem3Mac2>00:11:22:33:03:21<oRuRem3Mac2>
-    <oRuRem3Mac3>00:11:22:33:03:31<oRuRem3Mac3>
+    <oRuRem3Mac2>00:11:22:33:03:21</oRuRem3Mac2>
+    <oRuRem3Mac3>00:11:22:33:03:31</oRuRem3Mac3>
 
     <!--  Number of cells (CCs) running on this O-RU  [1 - Cell , 2 - Cells, 3 - Cells , 4 - Cells ] -->
     <oRu0NumCc>12</oRu0NumCc>
@@ -101,7 +102,7 @@
     <!-- Second Phy instance ID mapped to this O-RU CC1 -->
     <oRu0Cc9PhyId>9</oRu0Cc9PhyId>
     <!-- Third Phy instance ID mapped to this O-RU CC2  -->
-    <oRu0Cc10PhyId>10</oRuCc10PhyId>
+    <oRu0Cc10PhyId>10</oRu0Cc10PhyId>
     <!-- Forth Phy instance ID mapped to this O-RU CC3  -->
     <oRu0Cc11PhyId>11</oRu0Cc11PhyId>
 
@@ -127,13 +128,30 @@
     <!-- Forth Phy instance ID mapped to this O-RU CC3  -->
     <oRu2Cc3PhyId>3</oRu2Cc3PhyId>
 
+<!--  Number of cells (CCs) running on this O-RU  [1 - Cell , 2 - Cells, 3 - Cells , 4 - Cells ] -->
+    <oRu3NumCc>1</oRu3NumCc>
+    <!-- First Phy instance ID mapped to this O-RU CC0  -->
+    <oRu3Cc0PhyId>3</oRu3Cc0PhyId>
+    <!-- Second Phy instance ID mapped to this O-RU CC1 -->
+    <oRu3Cc1PhyId>1</oRu3Cc1PhyId>
+    <!-- Third Phy instance ID mapped to this O-RU CC2  -->
+    <oRu3Cc2PhyId>2</oRu3Cc2PhyId>
+    <!-- Forth Phy instance ID mapped to this O-RU CC3  -->
+    <oRu3Cc3PhyId>3</oRu3Cc3PhyId>
+
+
     <!-- XRAN Thread (core where the XRAN polling function is pinned: Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
     <xRANThread>19, 96, 0</xRANThread>
 
     <!-- core mask for XRAN Packets Worker (core where the XRAN packet processing is pinned): Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
     <xRANWorker>0x8000000000, 96, 0</xRANWorker>
+    <xRANWorker_64_127>0x0000000000, 96, 0</xRANWorker_64_127>
     <!-- XRAN: Category of O-RU 0 - Category A, 1 - Category B -->
     <Category>0</Category>
+    <!-- Slot setup processing offload to pipeline BBU cores: [0: USE XRAN CORES 1: USE BBU CORES] -->
+    <xRANOffload>0</xRANOffload>
+    <!-- XRAN MLOG: [0: DISABLE 1: ENABLE] -->
+    <xRANMLog>0</xRANMLog>
 
     <!-- XRAN: enable sleep on PMD cores -->
     <xranPmdSleep>0</xranPmdSleep>
@@ -179,6 +197,9 @@
     <DynamicSectionEna>0</DynamicSectionEna>
     <!-- Enable Dynamic section allocation for UL -->
     <DynamicSectionEnaUL>0</DynamicSectionEnaUL>
+    <!-- Enable muti section for C-Plane -->
+    <DynamicMultiSectionEna>0</DynamicMultiSectionEna>
+
     <xRANSFNWrap>1</xRANSFNWrap>
     <!-- Total Number of DL PRBs per symbol (starting from RB 0) that is transmitted (used for testing. If 0, then value is used from PHY_CONFIG_API) -->
     <xRANNumDLPRBs>0</xRANNumDLPRBs>
@@ -202,10 +223,12 @@
     <!-- Whether Prach iqWidth when DynamicSectionEna and BFP Compression enabled -->
     <xranPrachiqWidth>16</xranPrachiqWidth>
 
+   <oRu0MaxSectionsPerSlot>6</oRu0MaxSectionsPerSlot>
+   <oRu0MaxSectionsPerSymbol>6</oRu0MaxSectionsPerSymbol>
     <oRu0nPrbElemDl>1</oRu0nPrbElemDl>
     <!--nRBStart, nRBSize, nStartSymb, numSymb, nBeamIndex, bf_weight_update, compMethod, iqWidth, BeamFormingType, Scalefactor, REMask -->
     <!-- weight base beams -->
-    <oRu0PrbElemDl0>0,273,0,14,0,0,1,8,0,0,0</oRu0PrbElemDl0>
+    <oRu0PrbElemDl0>0,273,0,14,0,0,1,9,0,0,0</oRu0PrbElemDl0>
     <oRu0PrbElemDl1>50,25,0,14,1,1,0,16,1,0,0</oRu0PrbElemDl1>
     <oRu0PrbElemDl2>72,36,0,14,3,1,1,9,1,0,0</oRu0PrbElemDl2>
     <oRu0PrbElemDl3>144,48,0,14,4,1,1,9,1,0,0</oRu0PrbElemDl3>
@@ -218,8 +241,8 @@
     <oRu0nPrbElemUl>1</oRu0nPrbElemUl>
     <!--nRBStart, nRBSize, nStartSymb, numSymb, nBeamIndex, bf_weight_update, compMethod, iqWidth, BeamFormingType, Scalefactor, REMask-->
     <!-- weight base beams -->
-    <oRu0PrbElemUl0>0,273,0,14,0,0,1,8,0,0,0</oRu0PrbElemUl0>
-    <oRu0PrbElemUl1>0,273,0,14,0,0,1,8,0,0,0</oRu0PrbElemUl1>
+    <oRu0PrbElemUl0>0,273,0,14,0,0,1,9,0,0,0</oRu0PrbElemUl0>
+    <oRu0PrbElemUl1>0,273,0,14,0,0,1,9,0,0,0</oRu0PrbElemUl1>
     <oRu0PrbElemUl2>72,36,0,14,3,1,1,9,1,0,0</oRu0PrbElemUl2>
     <oRu0PrbElemUl3>108,36,0,14,4,1,1,9,1,0,0</oRu0PrbElemUl3>
     <oRu0PrbElemUl4>144,36,0,14,5,1,1,9,1,0,0</oRu0PrbElemUl4>
@@ -231,21 +254,30 @@
     <oRu1MaxSectionsPerSlot>6</oRu1MaxSectionsPerSlot>
     <oRu1MaxSectionsPerSymbol>6</oRu1MaxSectionsPerSymbol>
     <oRu1nPrbElemDl>1</oRu1nPrbElemDl>
-    <oRu1PrbElemDl0>0,273,0,14,0,0,1,8,0,0,0</oRu1PrbElemDl0>
+    <oRu1PrbElemDl0>0,273,0,14,0,0,1,9,0,0,0</oRu1PrbElemDl0>
     <oRu1PrbElemDl1>53,53,0,14,2,1,1,8,1,0,0</oRu1PrbElemDl1>
     <oRu1nPrbElemUl>1</oRu1nPrbElemUl>
-    <oRu1PrbElemUl0>0,273,0,14,0,0,1,8,0,0,0</oRu1PrbElemUl0>
+    <oRu1PrbElemUl0>0,273,0,14,0,0,1,9,0,0,0</oRu1PrbElemUl0>
     <oRu1PrbElemUl1>53,53,0,14,2,1,1,8,1,0,0</oRu1PrbElemUl1>
 
     <oRu2MaxSectionsPerSlot>6</oRu2MaxSectionsPerSlot>
     <oRu2MaxSectionsPerSymbol>6</oRu2MaxSectionsPerSymbol>
     <oRu2nPrbElemDl>1</oRu2nPrbElemDl>
-    <oRu2PrbElemDl0>0,273,0,14,0,0,1,8,0,0,0</oRu2PrbElemDl0>
+    <oRu2PrbElemDl0>0,273,0,14,0,0,1,9,0,0,0</oRu2PrbElemDl0>
     <oRu2PrbElemDl1>53,53,0,14,2,1,1,8,1,0,0</oRu2PrbElemDl1>
     <oRu2nPrbElemUl>1</oRu2nPrbElemUl>
-    <oRu2PrbElemUl0>0,273,0,14,0,0,1,8,0,0,0</oRu2PrbElemUl0>
+    <oRu2PrbElemUl0>0,273,0,14,0,0,1,9,0,0,0</oRu2PrbElemUl0>
     <oRu2PrbElemUl1>53,53,0,14,2,1,1,8,1,0,0</oRu2PrbElemUl1>
 
+
+    <oRu3MaxSectionsPerSlot>6</oRu3MaxSectionsPerSlot>
+    <oRu3MaxSectionsPerSymbol>6</oRu3MaxSectionsPerSymbol>
+    <oRu3nPrbElemDl>1</oRu3nPrbElemDl>
+    <oRu3PrbElemDl0>0,273,0,14,0,0,1,9,0,0,0</oRu3PrbElemDl0>
+    <oRu3PrbElemDl1>53,53,0,14,2,1,1,8,1,0,0</oRu3PrbElemDl1>
+    <oRu3nPrbElemUl>1</oRu3nPrbElemUl>
+    <oRu3PrbElemUl0>0,273,0,14,0,0,1,9,0,0,0</oRu3PrbElemUl0>
+    <oRu3PrbElemUl1>53,53,0,14,2,1,1,8,1,0,0</oRu3PrbElemUl1>
 
 </XranConfig>
 

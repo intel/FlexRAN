@@ -1,8 +1,7 @@
-
 /*########################################################################################
 ###   Copyright (2021) Intel Corporation.                                              ###
 ###                                                                                    ###
-###   Redistribution. Redistribution and use in binary form, without modification,     ###
+###   Redistribution. Redistribution and use in binary form, without modification,     ## 
 ###   are permitted provided that the following conditions are met:                    ###
 ###                                                                                    ###
 ###    * Redistributions must reproduce the above copyright notice and the following   ###
@@ -25,19 +24,20 @@
 /**
  *
  * @brief API Definitions exhanged between MAC and PHY
- * @file gnb_l1_l2_api.h
- * @ingroup group_source_nr5g_api
+ * @file nr5g_mac_phy_api.h
+ * @ingroup group_common_mac_phy_api
  * @author Intel Corporation
  **/
 
-#ifndef _NR5G_PHYAPI_H_
-#define _NR5G_PHYAPI_H_
+#ifndef _NR5G_MAC_PHY_API_H_
+#define _NR5G_MAC_PHY_API_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "common_typedef.h"
+#include "common_mac_phy_api.h"
 
 #define MAX_MIMO_GROUP_NUM          (16)
 
@@ -53,19 +53,20 @@ extern "C" {
 
 #define MAX_DCI_BIT_BYTE_LEN              (32)
 #define MAX_UCI_BIT_BYTE_LEN              (256)
-#define MAX_DL_INPUT_TRANSPORT_BYTE_SIZE  (175000)
+#define MAX_DL_INPUT_TRANSPORT_BYTE_SIZE_NR5G  (175000)
 #define MAX_NUM_DL_LAYERS                 (8)
 #define MAX_DL_HARQ_PROCESS_ID            (16)
 #define MAX_UL_PDU_NUM                    (200)
-#define MAX_UL_INPUT_TRANSPORT_BYTE_SIZE  (131000)      //have to check this
+#define MAX_UE_MANAGEMENT_NUM             ( 64 )
+#define MAX_UL_INPUT_TRANSPORT_BYTE_SIZE_NR5G  (131000)      //have to check this
 #define MAX_UL_HARQ_PROCESS_ID            (16)          //have to check this
 #define PRERESERVED_DATA_HEADER_LEN       (32)
 #define MAX_TDD_PERIODICITY               (80)
 #define MAX_NUM_OF_SYMBOL_PER_SLOT        (14)
 #define MAX_TXRU_NUM                      (4)
 #define MAX_RXRU_NUM                      (16)
-#define MAX_NUM_ANT                       (64)
-#define MAX_SRS_PORT_PER_UE               (2)
+#define MAX_NUM_ANT_NR5G                  (64)
+#define MAX_UL_PORTS_PER_UE               (2)
 #define MAX_PANEL_NUM                     (4)
 #define SINR_STEP_SIZE                    (256.0)
 
@@ -99,17 +100,11 @@ extern "C" {
 // WLS operation with PUSCH Payload
 #define MSG_PHY_ZBC_BLOCK_IND         (32)
 
-#define MSG_TYPE_PHY_DL_IQ_SAMPLES          (200)
-#define MSG_TYPE_PHY_UL_IQ_SAMPLES          (201)
-#define MSG_TYPE_PHY_UL_UNCODED_BITS        (202)
-#define MSG_TYPE_PHY_ADD_REMOVE_CORE        (203)
-#define MSG_TYPE_PHY_UL_PRACH_IQ_SAMPLES    (204)
-#define MSG_TYPE_PHY_UL_MMIMO_SRS_IQ_SAMPLES    (205)
 
-#define RUN_TIME_APIS_FROM_MAC   ((1<<MSG_TYPE_PHY_DL_CONFIG_REQ) | \
-                                 (1 << MSG_TYPE_PHY_UL_CONFIG_REQ) | \
-                                 (1 << MSG_TYPE_PHY_UL_DCI_REQ) | \
-                                 (1 << MSG_TYPE_PHY_TX_REQ))
+#define RUN_TIME_APIS_FROM_MAC_NR5G   ((1<<MSG_TYPE_PHY_DL_CONFIG_REQ) | \
+                                       (1 << MSG_TYPE_PHY_UL_CONFIG_REQ) | \
+                                       (1 << MSG_TYPE_PHY_UL_DCI_REQ) | \
+                                       (1 << MSG_TYPE_PHY_TX_REQ))
 
 /*****DL PDU type*******/
 #define DL_PDU_TYPE_DCI       (0)
@@ -124,23 +119,12 @@ extern "C" {
 #define UL_PDU_TYPE_SRS       (7)
 #define UL_PDU_TYPE_PRACH     (8)
 
+#define UE_MANAGEMENT_PDU     (9)
+
 /******ERROR indication*******/
 #define MSG_OK               (0x00)
 #define MSG_INVALID_STATE    (0x01)
 #define MSG_INVALID_CONFIG   (0x02)
-
-//------------------------------------------------------------------------------------------------------------
-// Linked list header prent at the top of all messages
-typedef struct tMac2PhyApiQueueElem
-{
-    struct tMac2PhyApiQueueElem* pNext;          // 0-7 byte
-    uint8_t  nMessageType;                       // 8
-    uint32_t nMessageLen;                        // 9-12
-    uint8_t  nNumMessageInBlock;                 // 13
-    uint32_t nAlignOffset;                       // 14-17
-    uint64_t nTimeStamp;                         // 18-25
-    uint8_t  reserved[6];                        // 26-31
-} MAC2PHY_QUEUE_EL, *PMAC2PHY_QUEUE_EL;
 
 // General Message header that is present at the top of each message
 typedef struct tL1L2MessageHeader
@@ -206,7 +190,7 @@ typedef struct tConfigReq
     /*absoluteFrequencySSB in KHz*/
     uint32_t     nSSBAbsFre;
 
-    /**** word 9,10 *****/
+    /**** word 9-11 *****/
     /*SSB periodicity in msec, Value:0->5
     0: ms5,   1: ms10    2: ms20
     3: ms40   4: ms80    5: ms160 */
@@ -225,22 +209,23 @@ typedef struct tConfigReq
     /*L1 parameter k0 for DL(see 38.211, section 5.3.1) */
     uint8_t      nDLK0;
     uint8_t      nULK0;
-    /**** word 11,12 *****/
+    uint8_t      rsv1[3];
+    /**** word 12,13 *****/
     /*Bitmap for actually transmitted SSB. */
     uint32_t     nSSBMask[2];
 
-    /**** word 13 *****/
+    /**** word 14 *****/
     /*Number of transmission antennas*/
     uint8_t      nNrOfTxAnt;
      /*Number of receiving antennas */
     uint8_t      nNrOfRxAnt;
 
-     /* Max Number of transmission ports (1 - 16) */
-     uint8_t      nNrOfDLPorts;
-     /* Max Number of receiving Virtual ports (1 - 16). There maybe more than 1 virtual port mapped to a physical port transmitted by UE */
-     uint8_t      nNrOfULPorts;
+    /* Max Number of transmission ports (1 - 16) */
+    uint8_t      nNrOfDLPorts;
+    /* Max Number of receiving Virtual ports (1 - 16). There maybe more than 1 virtual port mapped to a physical port transmitted by UE */
+    uint8_t      nNrOfULPorts;
 
-    /**** word 14 *****/
+    /**** word 15 *****/
     /*Number of total carriers present*/
     uint8_t      nCarrierAggregationLevel;
     /*Frame Duplex type:  0 -> FDD, 1 -> TDD*/
@@ -251,23 +236,23 @@ typedef struct tConfigReq
     /* TDD Period - If nFrameDuplexType = TDD(1), then this config defines the TDD periodicity */
     uint8_t      nTddPeriod;
 
-    /**** word 15 - 335 *****/
+    /**** word 16 - 336 *****/
     /* TDD Slot configuration - If nFrameDuplexType = TDD(1), then this config defines the slot config type for each slot.*/
     /* The number of slots need to be equal to nTddPeriod */
     SLOTCONFIGStruct sSlotConfig[MAX_TDD_PERIODICITY];
 
-    /**** word 336 - 432 *****/
+    /**** word 337 - 433 *****/
     /*According to SSB Mask, beam index filled. For example, if SSB mask bit 26 set to 1, then nBeamId[26] will be used to indicate beam ID of SSB 26.
     value: 0~63*/
-    uint8_t nBeamId[MAX_NUM_ANT];
-    /*According to nBeamId[MAX_NUM_ANT], if nBeamId[26] is used, nNrofTxRUPerBeam[26] indicates the number of TxRU.
+    uint8_t nBeamId[MAX_NUM_ANT_NR5G];
+    /*According to nBeamId[MAX_NUM_ANT_NR5G], if nBeamId[26] is used, nNrofTxRUPerBeam[26] indicates the number of TxRU.
     Value: 1~4*/
-    uint8_t nNrofTxRUPerBeam[MAX_NUM_ANT];
+    uint8_t nNrofTxRUPerBeam[MAX_NUM_ANT_NR5G];
     /*TxRU index for SSB beam, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3
     value:0~15*/
-    uint8_t nTxRUIdx[MAX_NUM_ANT][MAX_TXRU_NUM];
+    uint8_t nTxRUIdx[MAX_NUM_ANT_NR5G][MAX_TXRU_NUM];
 
-    /**** word 433 *****/
+    /**** word 434 *****/
     /* PRACH config*/
     /*PRACH Configuration Index*/
     uint8_t      nPrachConfIdx;
@@ -282,13 +267,13 @@ typedef struct tConfigReq
     /*PRACH restrictedSetConfig */
     uint8_t      nPrachRestrictSet;
 
-    /**** word 434 *****/
+    /**** word 435 *****/
     /*PRACH Root Sequence Index */
     uint16_t     nPrachRootSeqIdx;
     /*PRACH prach-frequency-start  (in RBs)*/
     uint16_t     nPrachFreqStart;
 
-    /**** word 435 *****/
+    /**** word 436 *****/
     /*PRACH-FDM Range: 1->8*/
     uint8_t      nPrachFdm;
     /*PRACH SSB-per-rach-occasion  */
@@ -298,15 +283,15 @@ typedef struct tConfigReq
     /*0 for normal, 1 for extended cyclic prefix*/
     uint8_t      nCyclicPrefix;
 
-    /**** word 436 *****/
+    /**** word 437 *****/
     /* group hopping flag, Value: 0 or 1*/
     uint8_t    nGroupHopFlag;
-    /**** word 436 *****/
     /* sequence hopping flag, Value: 0 or 1 */
     uint8_t    nSequenceHopFlag;
     /* Cell-Specific scrambling ID for group hopping and sequence hopping*/
     uint16_t   nHoppingId;
 
+    /**** word 438 *****/
     /* If 1, then this cell is a URLLC cell */
     uint16_t   nUrllcCapable;
     /* Bit Mask (14 Bits) which indicate which symbol numbers to send SLOT_IND to L2 */
@@ -330,7 +315,7 @@ typedef struct tStartReq
 {
     L1L2MessageHdr sMsgHdr;
     SFN_SlotStruct sSFN_Slot;
-    uint32_t nMode;             // 0 = Radio (non-oran compliant), 1 = timer mode, 3 = Radio (with ferrybridge front haul), 4 = Radio (oran/xran compliant)
+    uint32_t nMode;             // 0 = Radio (non-oran compliant), 1 = timer mode, 4 = Radio (oran/xran compliant)
     uint32_t nCount;
     uint32_t nPeriod;
 } STARTREQUESTStruct, *PSTARTREQUESTStruct;
@@ -467,53 +452,57 @@ typedef struct tDlSchPdu
     uint8_t   rsv;
 
 
-    /**** word 15 -> 19 *****/
-    uint32_t  nRBGIndex[MAX_DL_RBG_BIT_NUM];//For resource allocation type 0.RBG index allocated for this DLSCH.	The maximum number is 138 with 275 RBs and RBG size 2.
+    /**** word 15 *****/
+    uint32_t  nRBGIndex;//For resource allocation type 0.RBG index allocated for this DLSCH.	The maximum number is 138 with 275 RBs and RBG size 2.
 
-    /**** word 20 *****/
+    /**** word 16 *****/
     uint8_t   nMappingType;      // PDSCH mapping Type,	0: mapping type A,	1: mapping type B
     uint8_t   nDMRSConfigType;   // DL DMRS config type,0: type 1,1: type2
     uint8_t   nNrOfCDMs;         // Number of DM-RS CDM groups without data
     uint8_t   nNrOfDMRSSymbols;  // DL DMRS symbol number,1: single symbol,2: double symbol
 
-    /**** word 21 *****/
+    /**** word 17 *****/
     uint8_t   nDMRSAddPos;       // DL additional DMRS position,DL-DMRS-add-pos,Value: 0->3
     uint8_t   nPTRSPresent;      // DL-PTRS-present,0: PT-RS is not present,1: PT-RS is present
     uint8_t   nNrOfPTRSPorts;    // Up to 2 ports,DL-PTRS-ports.Value: 1->2
     uint8_t   nPTRSTimeDensity;  // PT-RS time density,Value: 0,1, 2 or 4,0 means PT-RS is not present
 
-    /**** word 22 *****/
+    /**** word 18 *****/
     uint8_t   nPTRSPortIndex[MAX_DL_PER_UE_PTRS_PORT_NUM];  //0: port 1000,1: port 1001. 11: port 1011
     uint8_t   nNrOfDMRSAssPTRS[MAX_DL_PER_UE_PTRS_PORT_NUM];//The number of DM-RS ports associated to PT-RS  Value: 1->6
 
-    /**** word 23 *****/
-    uint8_t   nPTRSFreqDensity;  // PT-RS frequency density,Value: 0, 2 or 4,0 means PT-RS is not present
-    uint8_t   nPTRSReOffset;     // DL-PTRS-RE-offset,
+    /**** word 19 *****/
+    uint8_t   nPTRSFreqDensity;         // PT-RS frequency density,Value: 0, 2 or 4,0 means PT-RS is not present
+    uint8_t   nPTRSReOffset;            // DL-PTRS-RE-offset,
     uint8_t   nEpreRatioOfPDSCHToPTRS;
-    uint8_t   rv1;
+    uint8_t   nMMimoMode;               // 0->non Massive Mimo PDU, 1->SRS based Massive MIMO
 
-    /**** word 24 *****/
-    uint8_t   nTransmissionScheme; // 0: static precoder; 1: codebook-based transmission
-    uint8_t   nCodebookType;     // 0: single-panel type1;1: multi-panel type1;2: type2;3: port selection port2;
-    uint8_t   nCodebookMode;     // 0: codebook mode 1; 1: codebook mode 2
-    uint8_t   nPMI;              // pmi, maximun 63 for 4 ports Tx
+    /**** word 20 *****/
+    uint8_t   nTransmissionScheme;      // 0: static precoder; 1: codebook-based transmission
+    uint8_t   nCodebookType;            // 0: single-panel type1;1: multi-panel type1;2: type2;3: port selection port2;
+    uint8_t   nCodebookMode;            // 0: codebook mode 1; 1: codebook mode 2
+    uint8_t   nPMI;                     // pmi, maximun 63 for 4 ports Tx
 
-    /**** word 25 *****/
-    uint16_t  n1n2;             // n1_n2=n1<<8+n2,n1 n2 values are according to table 5.2.2.2.1-2 in 38.214
-    uint16_t  nEpreRatioOfDmrsToSSB;  // ratio of PDSCH EPRE to DMRS EPRE,Value :1->20000,0.001 dB step, -6dB to 14 dB
+    /**** word 21 *****/
+    uint16_t  n1n2;                     // n1_n2=n1<<8+n2,n1 n2 values are according to table 5.2.2.2.1-2 in 38.214
+    uint16_t  nEpreRatioOfDmrsToSSB;    // ratio of PDSCH EPRE to DMRS EPRE,Value :1->20000,0.001 dB step, -6dB to 14 dB
 
-    /**** word 26 *****/
-    uint16_t   nNid;             // Data-scrambling-IdentityValue : 0->1023
+    /**** word 22 *****/
+    uint16_t   nNid;                    // Data-scrambling-IdentityValue : 0->1023
     /* Beam index value:0~63 */
     uint8_t    nBeamId;
     /*Number of TxRU value:1~4*/
     uint8_t    nNrofTxRU;
 
-    /**** word 27 *****/
-    uint16_t  nEpreRatioOfPDSCHToSSB;    //ratio of PDSCH EPRE to DATA EPRE,Value :1->20000,0.001 dB step, -6dB to 14 dB
-    uint16_t  rv2;
+    /**** word 23 *****/
+    /*ratio of PDSCH EPRE to DATA EPRE,Value :1->20000,0.001 dB step, -6dB to 14 dB */
+    uint16_t   nEpreRatioOfPDSCHToSSB;
+    /* Bit ID for SRS Chan Est ports to be for beam weight generation.  bit0=port0, bit1=port1, bit2=port2, bit3=port3 */
+    uint8_t    nPortInfoBitMap;
+    /* SRS Channel Estimation Buffer Index to be used for beam weight generation */
+    uint8_t    nSRSChanEstBufferIndx;
 
-    /**** word 28-32 *****/
+    /**** word 24-28 *****/
     /*TxRU index, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 value:0~15*/
     uint8_t    nTxRUIdx[MAX_TXRU_NUM];
 
@@ -597,6 +586,19 @@ typedef struct tDciPduStruct
     uint8_t      nTxRUIdx[MAX_TXRU_NUM];
 } DCIPDUStruct, *PDCIPDUStruct;
 
+typedef struct tUeManagementPduStruct
+{
+    /**** word 1 *****/
+    PDUStruct  sPDUHdr;
+
+    /**** word 2 *****/
+    uint16_t   nNumUE;                   /* Number of UEs included in this PDU whose SRS buffers and UE context can be cleared. */
+    uint16_t   nRsv;
+
+    /**** word 3 -> *****/
+    uint16_t   nRntiList[MAX_UE_MANAGEMENT_NUM];    /* List of RNTIs for UEs whose SRS buffers and context to be cleared */
+} UEMANAGEMENTPDUStruct,*PUEMANAGEMENTPDUStruct;
+
 typedef struct  tSrsPduStruct
 {
     /**** word 1 *****/
@@ -619,18 +621,18 @@ typedef struct  tSrsPduStruct
     /**** word 5 *****/
     uint8_t    nComb;                   /* Transmission Comb, KTC , 3GPP 38.211, Sec 6.4.1.4.3, Table 2.  Values: 2, 4 */
     uint8_t    nCombOffset;             /* Comb Offset, 3GPP 38.211, Sec 6.4.1.4.3, Table 2.  Values: 0 -> 3 */
-    uint8_t    nNrOfSrsPorts;           /* port number could be {1,2,4}*/
+    uint8_t    nNrOfSrsPorts;           /* port number could be {1,2,4} */
     uint8_t    nCyclicShift;            /* Cyclic Shift, 3GPP 38.211, Sec 6.4.1.4.3, Table 2.  Values: 0 -> 11 */
 
     /**** word 6 *****/
     uint8_t    nBsrs;                   /* b-SRS, SRS bandwidth index, 3GPP 38.211, Sec 6.4.1.4.3, Table 2.  Values: 0 -> 3 */
     uint8_t    nCsrs;                   /* c-SRS, SRS bandwidth config index, 3GPP 38.211, Sec 6.4.1.4.3, Table 2.  Values: 0 -> 63 */
     uint8_t    nBHop;                   /* b-hop, freqHopping, 3GPP 38.211, Sec 6.4.1.4.3, Table 2.  Values: 0 -> 3 */
-    uint8_t    nHopping;                /* groupOrSequenceHopping, value:0->2, 0: neither, 1: groupHopping, 2: sequenceHopping*/
+    uint8_t    nHopping;                /* groupOrSequenceHopping, value:0->2, 0: neither, 1: groupHopping, 2: sequenceHopping */
 
     /**** word 7 *****/
     uint8_t    nFreqPos;                /* RRC Config message, SRS-Resource.freqDomainPosition, n_rrc  value: 0 -> 67 */
-    uint8_t    nResourceType;           /* 0: aperiodic, 1: semi-persistent, 2: periodic*/
+    uint8_t    nResourceType;           /* 0: aperiodic, 1: semi-persistent, 2: periodic */
     uint16_t   nFreqShift;              /* RRC config message, SRS-Resource.freqDomainShift, nShift   value: 0 -> 268 */
 
     /**** word 8 *****/
@@ -648,7 +650,9 @@ typedef struct  tSrsPduStruct
     uint8_t    nBeamId;
     /* Number of RxRU value:1~4*/
     uint8_t    nNrofRxRU;
-    uint8_t    rsv2[2];
+    /* Bit ID for SRS ports to be updated.  bit0=port0, bit1=port1, bit2=port2, bit3=port3 */
+    uint8_t    nPortInfoBitMap;
+    uint8_t    rsv2[1];
 
     /**** word 11 *****/
     /*RxRU index, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 value:0~15*/
@@ -690,8 +694,13 @@ typedef struct tDlBchPdu
     uint8_t      nSSBSubcOffset;
     /*ssb-PrbOffset  */
     uint8_t      nSSBPrbOffset;
+    /*Beam index value:0~63*/
+    uint8_t    nBeamId;
+    uint8_t    nRsv1;
+
     /* MIB payload */
     uint8_t      nMIB[3];
+    uint8_t      nRsv2;
 
 } BCHPDUStruct, *PBCHPDUStruct;
 
@@ -801,56 +810,64 @@ typedef struct tUlSchPduInfo
     uint16_t   nRBStart;            // For resource allocation type 0.The starting resource block for this ULSCH allocation.
     uint16_t   nRBSize;             // For resource allocation type 0.The number of resource block allocated to this ULSCH grant.This should match the value sent in the DCI Format 0 PDU which allocated this grant.
 
-    /**** word 11 -> 15 *****/
-    uint32_t   nRBGIndex[MAX_UL_RBG_BIT_NUM];//For resource allocation type 1.RBG index allocated for this ULSCH.The maximum number is 138 with 275 RBs and RBG size 4.
+    /**** word 11 *****/
+    uint32_t   nRBGIndex;//For resource allocation type 1.RBG index allocated for this ULSCH.The maximum number is 138 with 275 RBs and RBG size 4.
 
-    /**** word 16 *****/
+    /**** word 12 *****/
     uint32_t   nTBSize;             // transmit block size (in bytes)
 
-    /**** word 17 *****/
+    /**** word 13 *****/
     uint8_t    nRBGSize;            // For resource allocation type 1.RBG size,Value: 2,4,8,16
     uint8_t    nRV;                 // Redundancy version,Value: 0 -> 3
     uint8_t    nHARQID;             // HARQ Process number.
     uint8_t    nNDI;                // Specify whether this received PUSCH is a new transmission from UE. This should match the value sent in the DCI Format 0 PDU which allocated this grant.
 
-    /**** word 18 *****/
+    /**** word 14 *****/
     uint8_t    nMappingType;        //.PUSCH mapping Type,0: mapping type A,1: mapping type B
     uint8_t    nDMRSConfigType;     // UL DMRS config type,0: type 1,1: type2
-    uint8_t    nNrOfCDMs;           //Number of DM-RS CDM groups without data, it determines the ratio of PUSCH EPRE to DM-RS EPRE.  refer to Table 6.2.2-1 in [5]
+    uint8_t    nNrOfCDMs;           // Number of DM-RS CDM groups without data, it determines the ratio of PUSCH EPRE to DM-RS EPRE.  refer to Table 6.2.2-1 in [5]
     uint8_t    nNrOfDMRSSymbols;    // Number of UL DMRS symbols,1: single symbol,2: double symbol
 
-    /**** word 19 *****/
+    /**** word 15 *****/
     uint8_t    nDMRSAddPos;         // UL additional DMRS position,UL-DMRS-add-pos,Value: 0->3
     uint8_t    nPTRSPresent;        //.UL-PTRS-present,0: PT-RS is not present,1: PT-RS is present
     uint8_t    nNrOfPTRSPorts;      //.UL-PTRS-ports. Up to 2 ports,Value: 1->2
     uint8_t    nPTRSTimeDensity;    //.PT-RS time density,Value: 0,1, 2 or 4,0 means PT-RS is not present
 
-    /**** word 20 *****/
+    /**** word 16 *****/
     uint8_t    nPTRSPortIndex[MAX_UL_PER_UE_PTRS_PORT_NUM];//0: port 1000,1: port 1001 . 11: port 1011
     uint8_t    nPTRSFreqDensity;    // PT-RS frequency density,Value: 0, 2 or 4,0 means PT-RS is not present
     uint8_t    nPTRSReOffset;       // UL-PTRS-RE-offset , refer to Table 6.4.1.2.2.1-1 in [2] Value: 0->3
     uint8_t    nTpPi2BPSK;          //TP with Pi2BPSK .0 : TpPi2BPSK disable ,1 : TpPi2BPSK enable
 
-    /**** word 21 *****/
+    /**** word 17 *****/
     uint16_t   nNid;                // Data-scrambling-IdentityValue : 0->1023
     uint8_t    nAlphaScaling;       // configured by higher parameter scaling, ENUMERATED for UCI-onPUSCH RRC { f0p5, f0p65, f0p8, f1 }, Value 0->3
     uint8_t    nBetaOffsetACKIndex; // BetaoffsetAck index
 
-    /**** word 22 *****/
-    uint16_t   nAck;        //number of HARQ bits
+    /**** word 18 *****/
+    uint16_t   nAck;                    // number of HARQ bits
     uint8_t    nBetaOffsetCSIP1Index;   // BetaoffsetCsi-part1 index
     uint8_t    nBetaOffsetCSIP2Index;   // BetaoffsetCsi-part2 index
 
-    /**** word 23 *****/
+    /**** word 19 *****/
     uint16_t   nCSIPart1;             // number of CSI part1 bits
     uint16_t   nCSIPart2;             // number of CSI part2 bits
 
-    /**** word 24 *****/
+    /**** word 20 *****/
     uint8_t    nBeamId;               // Beam index value:0~63
     uint8_t    nNrofRxRU;             // Number of RxRU value:1~4*/
-    uint16_t   nTPPuschID;           //nPUSCH-Identity
+    uint16_t   nTPPuschID;            // nPUSCH-Identity
 
-    /**** word 25 *****/
+    /**** word 21 *****/
+    uint8_t   nMMimoMode;             // 0->non Massive Mimo PDU, 1->SRS based Massive MIMO
+    /* Bit ID for SRS Chan Est ports to be for beam weight generation.  bit0=port0, bit1=port1, bit2=port2, bit3=port3 */
+    uint8_t    nPortInfoBitMap;
+    /* SRS Channel Estimation Buffer Index to be used for beam weight generation */
+    uint8_t    nSRSChanEstBufferIndx;
+    uint8_t    nRsv1;
+
+    /**** word 22 *****/
     uint8_t    nRxRUIdx[MAX_RXRU_NUM];
 } ULSCHPDUStruct, *PULSCHPDUStruct;
 
@@ -1055,6 +1072,10 @@ typedef struct tUlCrcStruct
     uint8_t  nChanDetected; //Channel Detected flag. 0: possible DTX detected for channel, 1: channel detected
     uint8_t  nDtxDetected;  //DTX detected.  0: channel present, 1: DTX detected for channel
     uint8_t  rsv1[1];
+
+    /**** word 4 *****/
+    int16_t  nDMRSPwrDBFS;  //receive DMRS amplitude in dBFS, 0.01 dB step
+    uint8_t  rsv2[2];
 } ULCRCStruct, *PULCRCStruct;
 
 //------------------------------------------------------------------------------------------------------------
@@ -1111,7 +1132,7 @@ typedef struct tUlSchUciPduDataStruct
     uint16_t nRNTI;        // The RNTI associated with the UE,Value: 1 -> 65535
 
     /**** word 2 *****/
-    uint16_t nPduUciAckLen;      // The total length (in bits) of UlSch UCI Ack/Nack PDU payload, without the padding bytes.
+    uint16_t nPduUciAckLen;         // The total length (in bits) of UlSch UCI Ack/Nack PDU payload, without the padding bytes.
     uint8_t  nUciDetected;          // Indicates if L1 was able to decode Ack UCI or not (0- detected / 1 - dtx ), for sizes < 11
     uint8_t  nUciCrc;               // for polar coded Ack UCI, CRC flag to indicate if error detected:0: CRC error ,1: CRC correct
 
@@ -1146,6 +1167,48 @@ typedef struct tRxUlSchUciIndicationStruct
 
     ULSCHUCIPDUDataStruct sULSCHUCIPDUDataStruct[];
 } RXULSCHUCIIndicationStruct, *PRXULSCHUCIIndicationStruct;
+
+// Only used for 5GNR Test App for debugging purposes to gather statistics
+typedef struct tUlPuschChanEstStruct
+{
+    /**** word 1 *****/
+    uint16_t  nUEId;             // UE index in the sector;Value:0 -> 1199
+    uint16_t  nRNTI;             // The RNTI associated with the UE,Value: 1 -> 65535
+
+    /**** word 2 *****/
+    uint8_t   nNrOfSymbols;      // Number of DMRS symbols
+    uint8_t   nNrOfUePort;       // Number of UE ports or number of layers for this user
+    uint8_t   nNrOfRxPort;       // Number of Rx Ports programmed by MAC for this user
+    uint8_t   nLinearInterMode;  // Linear interpolation granularity
+
+    /**** word 3 *****/
+    uint16_t  nNrOfRbs;          // Number of RBs based on numerology and bandwidth for this user
+    uint16_t  nChanAlignOffset;  // Offset in bytes to the next DMRS ChanEst for each layer,port index
+
+    /**** word 4-5 *****/
+    uint16_t  nDmrsSymbolIdx[MAX_UL_PER_UE_DMRS_PORT_NUM];  //dmrs symbol indexes
+
+    /**** word 6 - *****/
+    int16_t   *pPuschChanEst[MAX_UL_PORTS_PER_UE][MAX_RXRU_NUM];  // Pointer to PUSCH Channel Estimates, each buffer contains ChanEst for all DMRS
+} ULPUSCHChanEstStruct, *PULPUSCHChanEstStruct;
+
+//------------------------------------------------------------------------------------------------------------
+// Payload for MSG_TYPE_PHY_RX_CHAN_EST_OUTPUT_IND message
+// Only used for 5GNR Test App for debugging purposes to gather statistics
+typedef struct tRxPuschChanEstIndicationStruct
+{
+    /**** word 1 *****/
+    L1L2MessageHdr sMsgHdr;
+
+    /**** word 2 *****/
+    SFN_SlotStruct sSFN_Slot;
+
+    /**** word 3 *****/
+    uint8_t    nUlsch;     // Number of Pusch
+    uint8_t    rsv1[3];
+
+    ULPUSCHChanEstStruct    sULPuschChanEstStruct[];
+} RXPUSCHChanEstIndicationStruct, *PRXPUSCHChanEstIndicationStruct;
 
 typedef struct tUlUciPduDataStruct
 {
@@ -1204,7 +1267,9 @@ typedef struct tPreambleStruct
     0 : normal carrier
     1 : SUL carrier*/
     uint8_t     nUlCarrier;
-    uint8_t     rsv1[3];
+    /*the occasion ID of PRACH detected*/
+    uint8_t     nOccasionId;
+    uint8_t     rsv1[2];
 } PreambleStruct, *PPreambleStruct;
 
 //------------------------------------------------------------------------------------------------------------
@@ -1224,7 +1289,6 @@ typedef struct tRxPrachIndicationStruct
     PreambleStruct    sPreambleStruct[];
 } RXRACHIndicationStruct, *PRXRACHIndicationStruct;
 
-
 typedef struct tUlSrsEstStruct
 {
     /**** word 1 *****/
@@ -1236,11 +1300,16 @@ typedef struct tUlSrsEstStruct
     uint8_t   nNrOfBlocks;       // Number of frequency sub block, one sub block covers 4 RBs
     uint8_t   nNrOfPort;         // Number of SRS ports programmed by MAC for this user
     uint8_t   nNrOfRxAnt;        // Number of Rx Ant programmed by MAC for this user
-    uint16_t  nNrOfRbs;          // Number of RBs based on numerology and bandwidth for this user
-    uint8_t   nIsChanEstPres;    // If 1, then pSrsChanEst is filled with valid pointers. Will be 0 for non-massive MIMO scenarios
+
+    /**** word 3 *****/
+    uint16_t  nNrOfRbs;                 // Number of RBs based on numerology and bandwidth for this user
+    uint8_t   nIsChanEstPres;           // If 1, then pSrsChanEst is filled with valid pointers.
+    uint8_t   nSRSChanEstBufferIndx;    // SRS Channel Estimation Buffer Index updated
+
+    /**** word 4 -> *****/
     int8_t    nWideBandSNR[4];   // SNR in db measured within configured SRS bandwidth on each symbols, up to 4 symbols can be configured
     int8_t    nBlockSNR[4][68];  // SNR in db measured within 4 RBs on each symbols, up to 68 blocks in case of SRS bandwidth 272 RBs
-    int16_t   *pSrsChanEst[MAX_SRS_PORT_PER_UE][MAX_NUM_ANT];  // Pointer to SRS Channel Estimates for Massive MIMO Configurations
+    int16_t   *pSrsChanEst[MAX_UL_PORTS_PER_UE][MAX_NUM_ANT_NR5G];  // Pointer to SRS Channel Estimates
 } ULSRSEstStruct, *PULSRSEstStruct;
 
 //------------------------------------------------------------------------------------------------------------
@@ -1258,44 +1327,48 @@ typedef struct tRxSrsIndicationStruct
     uint8_t    rsv1[3];
 
     ULSRSEstStruct    sULSRSEstStruct[];
-
 } RXSRSIndicationStruct, *PRXSRSIndicationStruct;
 
-enum FrTypDuplex
+enum FrTypDuplexNr5g
 {
-    FDD = 0, TDD
+    NR5G_FDD = 0, NR5G_TDD
 };
 
-enum CyclicPrefixTypeOptions
+enum CyclicPrefixTypeOptionsNr5g
 {
-    NORMAL = 0, EXTENDED
+    NR5G_NORMAL = 0, NR5G_EXTENDED
 };
 
-enum ChBwOptions
+enum
 {
-    BW_5_0_MHZ = 5,   BW_10_0_MHZ = 10, BW_15_0_MHZ = 15, BW_20_0_MHZ = 20, BW_25_0_MHZ = 25,
-    BW_30_0_MHZ = 30, BW_40_0_MHZ = 40, BW_50_0_MHZ = 50, BW_60_0_MHZ = 60, BW_70_0_MHZ = 70,
-    BW_80_0_MHZ = 80, BW_90_0_MHZ = 90, BW_100_0_MHZ = 100, BW_200_0_MHZ = 200, BW_400_0_MHZ = 400
+    NUMEROLOGY_0 = 0, NUMEROLOGY_1 = 1, NUMEROLOGY_2 = 2, NUMEROLOGY_3 = 3, NUMEROLOGY_4 = 4, NUMEROLOGY_MAX
 };
 
-enum PhyResBw
+enum ChBwOptionsNr5g
 {
-    PRB_12 = 12, PRB_24 = 24
+    NR5G_BW_5_0_MHZ = 5,   NR5G_BW_10_0_MHZ = 10, NR5G_BW_15_0_MHZ = 15, NR5G_BW_20_0_MHZ = 20, NR5G_BW_25_0_MHZ = 25,
+    NR5G_BW_30_0_MHZ = 30, NR5G_BW_40_0_MHZ = 40, NR5G_BW_50_0_MHZ = 50, NR5G_BW_60_0_MHZ = 60, NR5G_BW_70_0_MHZ = 70,
+    NR5G_BW_80_0_MHZ = 80, NR5G_BW_90_0_MHZ = 90, NR5G_BW_100_0_MHZ = 100, NR5G_BW_200_0_MHZ = 200, NR5G_BW_400_0_MHZ = 400
 };
 
-enum ModulationOptions
+enum PhyResBwNr5g
 {
-    BPSK, QPSK, QAM16, QAM64, QAM256
+    NR5G_PRB_12 = 12, NR5G_PRB_24 = 24
 };
 
-enum Direction
+enum ModulationOptionsNr5g
 {
-    DL = 0, UL, SPECIAL
+    NR5G_BPSK, NR5G_QPSK, NR5G_QAM16, NR5G_QAM64, NR5G_QAM256
 };
 
-enum PucchFormatOptions
+enum DirectionNr5g
 {
-    FORMAT1 = 0, FORMAT1A, FORMAT1B, FORMAT2, FORMAT2A, FORMAT2B, SPATIALBUNDLING, FORMAT3
+    NR5G_DL = 0, NR5G_UL, NR5G_SPECIAL
+};
+
+enum PucchFormatOptionsNr5g
+{
+    NR5G_FORMAT0 = 0, NR5G_FORMAT1, NR5G_FORMAT2, NR5G_FORMAT3, NR5G_FORMAT4
 };
 
 enum BchPeriodOptions
@@ -1323,56 +1396,7 @@ enum TddSymbolType
     SYMBOL_TYPE_DL = 0, SYMBOL_TYPE_UL = 1, SYMBOL_TYPE_GUARD = 2
 };
 
-//------------------------------------------------------------------------------------------------------------
-typedef enum
-{
-    BBU_CORE_ADD = 0,  /*! add core(s) to BBU Pool */
-    BBU_CORE_REMOVE,   /*! remove core(s) to BBU Pool */
-    BBU_CORE_SUSPEND,  /*! suspend core(s) that are already added to BBU Pool */
-    BBU_CORE_RESUME,   /*! wake up core(s) that have been suspended */
-    BBU_CORE_SET_CORE, /*! wake up core(s) that have been suspended */
-} BBUPOOL_CORE_OPERATION;
-
-//------------------------------------------------------------------------------------------------------------
-// Payload for MSG_TYPE_PHY_ADD_REMOVE_CORE message
-#define MAX_NUM_SET_CORE_MASK ( 4 )
-typedef enum
-{
-    CELL_MASK = 0,
-    SRS_MASK,
-    DLBEAM_MASK,
-    URLLC_MASK,
-    MAX_MASK_OPTIONS
-} CORE_MASK_OPTIONS;
-
-typedef enum
-{
-    PDSCH_SPLIT = 0,
-    PDSCH_OFDM_SPLT_ENABLE,
-    PDSCH_DL_WEIGHT_SPLIT,
-    PUSCH_DECOMP_SPLIT,
-    PUSCH_CHANEST_SPLIT,
-    PUSCH_MMSE_SPLIT,
-    PUSCH_LLR_RX_SPLIT,
-    PUSCH_UL_WEIGHT_SPLIT,
-    PUCCH_SPLIT,
-    SRS_SPLIT,
-    FEC_ENC_SPLIT,
-    FEC_DEC_SPLIT,
-    FEC_DEC_NUM_ITER,
-    FEC_DEC_EARLY_TERM_DISABLE,
-    TIMER_MODE_MULTI_CELL_DELAY,
-    BBUPOOL_SLEEP_ENABLE,
-    CE_INTERP_METHOD,
-    LINEAR_INTERP_ENABLE,
-    EBBU_POOL_NUM_QUEUE,
-    EBBU_POOL_QUEUE_SIZE,
-    EBBU_POOL_NUM_CONTEXT,
-    EBBU_POOL_MAX_CONTEXT_FETCH,
-    NUM_SPLIT_OPTIONS
-} CHANNEL_SPLIT_OPTIONS;
-
-typedef struct tAddRemoveBbuCores
+typedef struct tAddRemoveBbuCoresNr5g
 {
     /**** word 1 *****/
     L1L2MessageHdr sMsgHdr;
@@ -1380,15 +1404,12 @@ typedef struct tAddRemoveBbuCores
     /**** word 2 *****/
     SFN_SlotStruct sSFN_Slot;
 
-    BBUPOOL_CORE_OPERATION eOption;
-    uint64_t nCoreMask[MAX_MASK_OPTIONS][MAX_NUM_SET_CORE_MASK];
-    uint32_t nMacOptions[NUM_SPLIT_OPTIONS];
-} ADD_REMOVE_BBU_CORES, *PADD_REMOVE_BBU_CORES;
-//------------------------------------------------------------------------------------------------------------
+    ADD_REMOVE_BBU_CORES sAddRemoveBbuCores;
+} ADD_REMOVE_BBU_CORES_NR5G, *PADD_REMOVE_BBU_CORES_NR5G;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  /* #ifndef _NR5G_PHYAPI_H_ */
+#endif  /* #ifndef _NR5G_MAC_PHY_API_H_ */
 

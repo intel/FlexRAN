@@ -17,8 +17,9 @@
 <!--   this software.  No hardware per se is licensed hereunder.                                                                                                  -->
 <!--                                                                                                                                                              -->
 
+<!--                                                                                         -->
 <XranConfig>
-    <version>oran_e_maintenance_release_v1.0</version>
+    <version>oran_f_release_v1.0</version>
     <!-- numbers of O-RU connected to O-DU. All O-RUs are the same capabilities. Max O-RUs is per XRAN_PORTS_NUM i.e. 4 -->
     <oRuNum>1</oRuNum>
     <!--  # 10G,25G,40G,100G speed of Physical connection on O-RU -->
@@ -51,32 +52,32 @@
     <PciBusAddoRu3Vf3>0000:00:00.0</PciBusAddoRu3Vf3>
 
     <!-- remote O-RU 0 Eth Link 0 VF0, VF1-->
-    <oRuRem0Mac0>00:11:22:33:00:01<oRuRem0Mac0>
-    <oRuRem0Mac1>00:11:22:33:00:11<oRuRem0Mac1>
+    <oRuRem0Mac0>00:11:22:33:00:01</oRuRem0Mac0>
+    <oRuRem0Mac1>00:11:22:33:00:11</oRuRem0Mac1>
     <!-- remote O-RU 0 Eth Link 1 VF2, VF3 -->
-    <oRuRem0Mac2>00:11:22:33:00:21<oRuRem0Mac2>
-    <oRuRem0Mac3>00:11:22:33:00:31<oRuRem0Mac3>
+    <oRuRem0Mac2>00:11:22:33:00:21</oRuRem0Mac2>
+    <oRuRem0Mac3>00:11:22:33:00:31</oRuRem0Mac3>
 
     <!-- remote O-RU 1 Eth Link 0 VF4, VF5-->
-    <oRuRem1Mac0>00:11:22:33:01:01<oRuRem1Mac0>
-    <oRuRem1Mac1>00:11:22:33:01:11<oRuRem1Mac1>
+    <oRuRem1Mac0>00:11:22:33:01:01</oRuRem1Mac0>
+    <oRuRem1Mac1>00:11:22:33:01:11</oRuRem1Mac1>
     <!-- remote O-RU 1 Eth Link 1 VF6, VF7 -->
-    <oRuRem1Mac2>00:11:22:33:01:21<oRuRem1Mac2>
-    <oRuRem1Mac3>00:11:22:33:01:31<oRuRem1Mac3>
+    <oRuRem1Mac2>00:11:22:33:01:21</oRuRem1Mac2>
+    <oRuRem1Mac3>00:11:22:33:01:31</oRuRem1Mac3>
 
     <!-- remote O-RU 2 Eth Link 0 VF8, VF9 -->
-    <oRuRem2Mac0>00:11:22:33:02:01<oRuRem2Mac0>
-    <oRuRem2Mac1>00:11:22:33:02:11<oRuRem2Mac1>
+    <oRuRem2Mac0>00:11:22:33:02:01</oRuRem2Mac0>
+    <oRuRem2Mac1>00:11:22:33:02:11</oRuRem2Mac1>
     <!-- remote O-RU 2 Eth Link 1 VF10, VF11-->
-    <oRuRem2Mac2>00:11:22:33:02:21<oRuRem2Mac2>
-    <oRuRem2Mac3>00:11:22:33:02:31<oRuRem2Mac3>
+    <oRuRem2Mac2>00:11:22:33:02:21</oRuRem2Mac2>
+    <oRuRem2Mac3>00:11:22:33:02:31</oRuRem2Mac3>
 
     <!-- remote O-RU 2 Eth Link 0 VF12, VF13 -->
-    <oRuRem3Mac0>00:11:22:33:03:01<oRuRem3Mac0>
-    <oRuRem3Mac1>00:11:22:33:03:11<oRuRem3Mac1>
+    <oRuRem3Mac0>00:11:22:33:03:01</oRuRem3Mac0>
+    <oRuRem3Mac1>00:11:22:33:03:11</oRuRem3Mac1>
     <!-- remote O-RU 2 Eth Link 1 VF14, VF15-->
-    <oRuRem3Mac2>00:11:22:33:03:21<oRuRem3Mac2>
-    <oRuRem3Mac3>00:11:22:33:03:31<oRuRem3Mac3>
+    <oRuRem3Mac2>00:11:22:33:03:21</oRuRem3Mac2>
+    <oRuRem3Mac3>00:11:22:33:03:31</oRuRem3Mac3>
 
     <!--  Number of cells (CCs) running on this O-RU  [1 - Cell , 2 - Cells, 3 - Cells , 4 - Cells ] -->
     <oRu0NumCc>1</oRu0NumCc>
@@ -101,7 +102,7 @@
     <!-- Second Phy instance ID mapped to this O-RU CC1 -->
     <oRu0Cc9PhyId>9</oRu0Cc9PhyId>
     <!-- Third Phy instance ID mapped to this O-RU CC2  -->
-    <oRu0Cc10PhyId>10</oRuCc10PhyId>
+    <oRu0Cc10PhyId>10</oRu0Cc10PhyId>
     <!-- Forth Phy instance ID mapped to this O-RU CC3  -->
     <oRu0Cc11PhyId>11</oRu0Cc11PhyId>
 
@@ -132,6 +133,7 @@
 
     <!-- core mask for XRAN Packets Worker (core where the XRAN packet processing is pinned): Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
     <xRANWorker>0x0, 96, 0</xRANWorker>
+    <xRANWorker_64_127>0x0000000000, 96, 0</xRANWorker_64_127>
     <!-- XRAN: Category of O-RU 0 - Category A, 1 - Category B -->
     <Category>0</Category>
 
@@ -190,7 +192,7 @@
     <Gps_Beta>0</Gps_Beta>
 
     <!-- XRAN: Compression mode on O-DU <-> O-RU 0 - no comp 1 - BFP -->
-    <xranCompMethod>1</xranCompMethod>
+    <xranCompMethod>0</xranCompMethod>
     <!-- XRAN: Uplane Compression Header type 0 - dynamic 1 - static -->
     <xranCompHdrType>0</xranCompHdrType>   
     <!-- XRAN: iqWidth when DynamicSectionEna and BFP Compression enabled -->
