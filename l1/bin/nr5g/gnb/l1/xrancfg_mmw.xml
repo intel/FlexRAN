@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
-<!--                                                                                         -->
-<!--                                                                                         -->
-<!--   Copyright (2019-2022) Intel Corporation.                                                                                                                        -->
+<!--                                                                                                                                                              -->
+<!--   Copyright (2021) Intel Corporation.                                                                                                                        -->
 <!--                                                                                                                                                              -->
 <!--   Redistribution. Redistribution and use in binary form, without modification, are permitted provided that the following conditions are met:                 -->
 <!--                                                                                                                                                              -->
@@ -16,10 +15,8 @@
 <!--   such patent is necessary to Utilize the software in the form provided by Intel. The patent license shall not apply to any combinations which include       -->
 <!--   this software.  No hardware per se is licensed hereunder.                                                                                                  -->
 <!--                                                                                                                                                              -->
-
-<!--                                                                                         -->
 <XranConfig>
-    <version>oran_f_release_v1.0</version>
+    <version>oran_k_release_v1.0</version>
     <!-- numbers of O-RU connected to O-DU. All O-RUs are the same capabilities. Max O-RUs is per XRAN_PORTS_NUM i.e. 4 -->
     <oRuNum>1</oRuNum>
     <!--  # 10G,25G,40G,100G speed of Physical connection on O-RU -->
@@ -135,7 +132,7 @@
     <xRANWorker>0x0, 96, 0</xRANWorker>
     <xRANWorker_64_127>0x0000000000, 96, 0</xRANWorker_64_127>
     <!-- XRAN: Category of O-RU 0 - Category A, 1 - Category B -->
-    <Category>0</Category>
+    <oRU0Category>0</oRU0Category>
 
     <!-- XRAN: enable sleep on PMD cores -->
     <xranPmdSleep>0</xranPmdSleep>
@@ -158,9 +155,6 @@
     <!-- O-DU Settings -->
     <!-- MTU size -->
     <MTU>9600</MTU>
-    <!-- VLAN Tag used for C-Plane -->
-    <c_plane_vlan_tag>1</c_plane_vlan_tag>
-    <u_plane_vlan_tag>2</u_plane_vlan_tag>
 
     <!-- Transmission Window Fast C-plane DL -->
     <T1a_min_cp_dl>70</T1a_min_cp_dl>
@@ -192,11 +186,11 @@
     <Gps_Beta>0</Gps_Beta>
 
     <!-- XRAN: Compression mode on O-DU <-> O-RU 0 - no comp 1 - BFP -->
-    <xranCompMethod>0</xranCompMethod>
+    <xranCompMethod>1</xranCompMethod>
     <!-- XRAN: Uplane Compression Header type 0 - dynamic 1 - static -->
-    <xranCompHdrType>0</xranCompHdrType>   
+    <xranCompHdrType>0</xranCompHdrType>
     <!-- XRAN: iqWidth when DynamicSectionEna and BFP Compression enabled -->
-    <xraniqWidth>9</xraniqWidth>   
+    <xraniqWidth>9</xraniqWidth>
     <!-- XRAN: Prach Compression mode on O-DU <-> O-RU 0 - no comp 1 - BFP -->
     <xranPrachCompMethod>0</xranPrachCompMethod>
     <!-- Whether Prach iqWidth when DynamicSectionEna and BFP Compression enabled -->
@@ -215,7 +209,7 @@
     <oRu0PrbElemDl7>252,21,0,14,8,1,1,9,1,0,0</oRu0PrbElemDl7>
 
 
-    <oRu0nPrbElemUl>1</nPrbElemUl>
+    <oRu0nPrbElemUl>1</oRu0nPrbElemUl>
     <!--nRBStart, nRBSize, nStartSymb, numSymb, nBeamIndex, bf_weight_update, compMethod, iqWidth, BeamFormingType, Scalefactor, REMask -->
     <!-- weight base beams -->
     <oRu0PrbElemUl0>0,48,0,14,1,1,1,9,1,0,0</oRu0PrbElemUl0>
@@ -226,6 +220,9 @@
     <oRu0PrbElemUl5>180,36,0,14,6,1,1,9,1,0,0</oRu0PrbElemUl5>
     <oRu0PrbElemUl6>216,36,0,14,7,1,1,9,1,0,0</oRu0PrbElemUl6>
     <oRu0PrbElemUl7>252,21,0,14,8,1,1,9,1,0,0</oRu0PrbElemUl7>
+
+    <!-- eAxC ID subfield bitwidth config: DU port, BandSector, CC, RU port. Sum of All Field length need to be 16 bits-->
+    <oRu0eAxCbitwidth>4,4,4,4</oRu0eAxCbitwidth>
 
 </XranConfig>
 

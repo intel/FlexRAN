@@ -1,4 +1,3 @@
-
 /*########################################################################################
 ###   Copyright (2019) Intel Corporation.                                              ###
 ###                                                                                    ###
@@ -22,7 +21,9 @@
 ###   The patent license shall not apply to any combinations which include this        ###
 ###   software.  No hardware per se is licensed hereunder.                             ###
 #########################################################################################*/
-/*
+
+/**
+ * @brief This file has the common type definitions and #defines used across the code
  * @file common_typedef.h
  * @ingroup group_source_common
  * @author Intel Corporation
@@ -32,35 +33,57 @@
 #define _COMMON_TYPEDEF_H_
 
 #ifdef __cplusplus
-
-#ifndef _RESTRICT_
-#define _RESTRICT_
-#define RESTRICT __restrict__
-#endif  /* _RESTRICT_ */
-
 extern "C" {
 #endif
 
 #include <stdint.h>
 
-#ifndef _RESTRICT_
-#define _RESTRICT_
-#define RESTRICT restrict
-#endif  /* _RESTRICT_ */
+#ifndef _WIN32
+#ifndef _LTE_FAPI_
+#ifndef NR5G_BS_PHY_STATS_PARSER
+#include <rte_atomic.h>
+#endif
+#endif
+#else
+#ifdef _WIN32
+#define __ATOMIC_RELEASE    0
+#define __ATOMIC_ACQ_REL    1
+#define rte_atomic32_t  int32_t
+#define __assume_aligned
 
-#ifndef _ALIGN_
-#define _ALIGN_
+extern void rte_atomic32_clear(int32_t *pVar);
+extern void rte_atomic32_inc(int32_t *pVar);
+extern void rte_atomic32_dec(int32_t *pVar);
+extern void __atomic_store_n(void *pPtr, int64_t val, int32_t memorder);
+extern void __atomic_fetch_add(void *pPtr, int32_t val, int32_t memorder);
+extern void __atomic_fetch_sub(void *pPtr, int32_t val, int32_t memorder);
+#endif
+#endif
+
+#ifndef RESTRICT
+#ifdef _WIN32
+#define RESTRICT __restrict
+#else
+#if defined(__GNUC__) && !defined(__clang__) && !defined(__ICC)
+#define RESTRICT __restrict__
+#else
+#define RESTRICT __restrict
+#endif
+#endif
+#endif  /* RESTRICT */
+
+#ifndef __align
 #ifdef _WIN64
 #define __align(x) __declspec(align(x))
 #else
 #define __align(x) __attribute__((aligned(x)))
 #endif
-#endif /* _ALIGN_ */
+#endif /* __align */
 
 #ifdef __cplusplus
 #define EXTERNC extern "C"
 #else
-#define EXTERNC
+#define EXTERNC extern
 #endif
 
 #ifndef TRUE
@@ -84,8 +107,7 @@ extern "C" {
 #define FAILURE     1
 #endif /* #ifndef FAILURE */
 
-#ifndef __INLINE__
-#define __INLINE__
+#ifndef INLINE
 #if defined (WIN32)
 #define INLINE
 #elif defined (_MSC_VER)
@@ -93,7 +115,7 @@ extern "C" {
 #else
 #define INLINE                      inline
 #endif
-#endif /* #ifndef __INLINE__ */
+#endif /* #ifndef INLINE */
 
 #ifndef _atomic_t_
 #define _atomic_t_
@@ -106,44 +128,6 @@ typedef volatile unsigned long atomic_t;
 #else
 #define ALIGN64 __attribute__((aligned(64)))
 #endif
-
-
-#ifndef _COMMON_TYPEDEF_SDK_H_
-#define _COMMON_TYPEDEF_SDK_H_
-
-/** complex type for int16_t */
-typedef struct {
-    int8_t re;                      /**< real part */
-    int8_t im;                      /**< imaginary  part */
-}complex_int8_t;
-
-/** complex type for int16_t */
-typedef struct {
-    int16_t re; /*!< 16-bit real part */
-    int16_t im; /*!< 16-bit image part */
-}complex_int16_t;
-
-
-/** complex type for int32_t */
-typedef struct {
-    int32_t re; /*!< 32-bit real part */
-    int32_t im; /*!< 32-bit image part */
-}complex_int32_t;
-
-/** complex type for float */
-typedef struct {
-    float re; /*!< 32-bit real part */
-    float im; /*!< 32-bit image part */
-}complex_float;
-
-/** complex type for double */
-typedef struct {
-    double re; /*!< 64-bit real part */
-    double im; /*!< 64-bit image part */
-}complex_double;
-
-#endif /* #ifndef _COMMON_TYPEDEF_SDK_H_ */
-
 
 #ifdef PHY_GCC
 #define IVDEP "GCC ivdep"

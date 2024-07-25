@@ -1,3 +1,4 @@
+#!/bin/bash
 ########################################################################
 #   Copyright (2021) Intel Corporation.                                                                                                                        
 #                                                                                                                                                              
@@ -14,18 +15,15 @@
 #   such patent is necessary to Utilize the software in the form provided by Intel. The patent license shall not apply to any combinations which include      
 #   this software.  No hardware per se is licensed hereunder.                                                                                                 
 # 
-#######################################################################                                                                                                                                                            
-#!/bin/bash
+#######################################################################    
 #echo off
-export RTE_WLS=${DIR_WIRELESS_WLS}
+export RTE_WLS=../../../../wls_mod
 
 l1Binary="./l1app"
 phycfg_xml_file=
 xrancfg_xml_file=
 l1Cmd=
 MY_DIR=`pwd`
-WLS_DPDK_MODE=1
-huge_folder="/mnt/huge"
 MACHINE_TYPE=`uname -m`
 
 if [ "x"$1 = "x-xran" ]; then
@@ -47,21 +45,21 @@ elif [ "x"$1 = "x-custom" ]; then
     phycfg_xml_file=$2
     xrancfg_xml_file=$3
     echo "Radio mode with XRAN - Custom Mode"
-    ./dpdk.sh
-elif [ "x"$1 = "x-rmmw" ]; then
-    phycfg_xml_file="phycfg_radio_mmw.xml"
-    echo "Radio mode with Terasic Front Hual FPGA - MMWave"
+    #./dpdk.sh
+elif [ "x"$1 = "x-r" ]; then
+    phycfg_xml_file="phycfg_radio.xml"
+    echo "Radio mode with Option 8 Front Hual FPGA"
     echo "Inserting Driver"
-	cd ../../../../libs/cpa/mmw/rec
+	cd ../../../../libs/cpa/rec
 	./run.sh install
 	cd $MY_DIR
 elif [ "x"$1 = "x-e" ]; then
     phycfg_xml_file="phycfg_timer.xml"
     echo "TIMER Mode"
 else
-    echo "Invalid mode. Options are - ./l1.sh followed by:"
+    echo "Invlaid mode. Options are - ./l1.sh followed by:"
     echo "-e: Timer Mode"
-    echo "-rmmw: Radio mode with Terasic Front Hual FPGA - MMWave"
+    echo "-r: Radio mode with Option 8 Front Hual FPGA"
     echo "-xran: Radio mode with XRAN - Sub6 100Mhz"
     echo "-xranmmw: Radio mode with XRAN - mmWave 100Mhz"
     echo "-xranmmimo: Radio mode with XRAN - Massive MIMO"
@@ -75,39 +73,22 @@ ulimit -c unlimited
 if [ ${MACHINE_TYPE} == 'x86_64' ]; then
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$RTE_WLS:../../../../libs/cpa/bin
 
-    if [ $WLS_DPDK_MODE = "0" ]; then
-        echo Non DPDK WLS MODE
-        grep Huge /proc/meminfo
-        [ -d "$huge_folder" ] || mkdir -p $huge_folder
-        if ! mount | grep $huge_folder; then
-            mount none $huge_folder -t hugetlbfs -o rw,mode=0777
-        fi
-    else
-        echo DPDK WLS MODE
-    fi
-
     ulimit -c unlimited
     echo 1 > /proc/sys/kernel/core_uses_pid
     sysctl -w kernel.sched_rt_runtime_us=-1
     sysctl -w kernel.shmmax=2147483648
     sysctl -w kernel.shmall=2147483648
-    chkconfig --level 12345 irqbalance off
+    systemctl stop irqbalance
     echo 0 > /proc/sys/kernel/nmi_watchdog
     echo 1 > /sys/module/rcupdate/parameters/rcu_cpu_stall_suppress
 
+    VAR=`cat /proc/cmdline`
+    VAR1=${VAR#*irqaffinity=}
+    VAR2=${VAR1%% *}
     for i in ` ls /proc/irq |grep -v default_smp_affinity | grep -v 0 |grep -v 2 `
     do
-        echo 1 > /proc/irq/$i/smp_affinity
+        echo ${VAR2} > /proc/irq/$i/smp_affinity_list
     done
-
-    if [ $WLS_DPDK_MODE = "0" ]; then
-        lsmod | grep wls >& /dev/null
-        if [ $? -eq 0 ]; then
-            rmmod wls
-        fi
-
-        insmod $RTE_WLS/wls.ko
-    fi
 else
     echo "Machine type is not supported $MACHINE_TYPE"
     exit -1
@@ -119,14 +100,6 @@ if [ -f "$phycfg_xml_file" ]; then
     core=`grep -o -P '(?<=systemThread>).*(?=, 0, 0)' $phycfg_xml_file`
     if [ -n "$core" ]; then
         l1Cmd="taskset -c $core"
-    fi
-    if [ "$2" = "-g" ]; then
-        shift
-        if [ "$RTE_TARGET" == "x86_64-native-linuxapp-icx"]; then
-            l1Cmd="$l1Cmd /opt/intel/oneapi/debugger/10.2.4/gdb/intel64/bin/gdb-oneapi --args"
-        else
-            l1Cmd="$l1Cmd /home/opt/intel/system_studio_2019/bin/gdb-ia --args"
-        fi
     fi
     l1Cmd="$l1Cmd $l1Binary --cfgfile=$phycfg_xml_file"
 else
@@ -144,7 +117,4 @@ echo ">> Running... "${l1Cmd}
 eval $l1Cmd
 
 echo "Cleanup after [PID] $BASHPID"
-if [ $WLS_DPDK_MODE = "0" ]; then
-    rm -f $huge_folder
-fi
 exit 0

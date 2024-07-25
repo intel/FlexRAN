@@ -1,3 +1,4 @@
+#!/bin/bash
 ########################################################################
 #   Copyright (2021) Intel Corporation.                                                                                                                        
 #                                                                                                                                                              
@@ -14,14 +15,61 @@
 #   such patent is necessary to Utilize the software in the form provided by Intel. The patent license shall not apply to any combinations which include      
 #   this software.  No hardware per se is licensed hereunder.                                                                                                 
 # 
-#######################################################################         
+#######################################################################     
 testmacCmd=
+testmacFile=./testmac
 testmac_cfg_xml_file="testmac_cfg.xml"
 
-export RTE_WLS=${DIR_WIRELESS_WLS}
+export RTE_WLS=../../../../wls_mod
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$RTE_WLS
 
 MACHINE_TYPE=`uname -m`
+
+echo Number of commandline: $#
+while [[ $# -ne 0 ]]
+do
+key="$1"
+
+#echo Parsing: $key
+if [[ "$key" == *"--testcfg"* ]]; then
+    shift
+    testmac_cfg_xml_file=$1
+    echo "testmac_cfg_xml_file = $testmac_cfg_xml_file"
+elif [[ "$key" == *"--r"* ]]; then
+    shift
+    if [[ $# -eq 0 ]]; then
+        echo "Regression test of physical channel for all numerologies and bandwidths. Options are - ./l2.sh --r followed by:"
+        echo "pusch:    PUSCH regression test"
+        echo "srs:      SRS regression test"
+        echo "prach:    PRACH regression test"
+        echo "pucch0:   PUCCH format0 regression test"
+        echo "pucch1:   PUCCH format1 regression test"
+        echo "pucch234: PUCCH format2 and format3 and format4 regression test"
+        echo "pdsch:    PDSCH regression test"
+        echo "ssb:      SSB regression test"
+        echo "csirs:    CSI-RS regression test"
+        echo "pdcch:    PDCCH regression test"
+        exit 1
+    elif [ $1 = "pucch0" ] || [ $1 = "pucch1" ] || [ $1 = "pucch234" ]; then
+        regressionList="${DIR_WIRELESS_TEST_5G}/pucch/$1_regression.cfg"
+    else
+        regressionList="${DIR_WIRELESS_TEST_5G}/$1/$1_regression.cfg"
+    fi
+
+    if [ -f $regressionList ]; then
+        finalList+="--testfile="$regressionList
+        finalList+=" "
+    else
+        echo "configuration file $regressionList is not found"
+        exit 1
+    fi
+else
+    finalList+=$key
+    finalList+=" "
+fi
+
+shift
+done
 
 if [ ${MACHINE_TYPE} == 'x86_64' ]; then
 
@@ -31,7 +79,7 @@ if [ ${MACHINE_TYPE} == 'x86_64' ]; then
 	sysctl -w kernel.sched_rt_runtime_us=-1
 	sysctl -w kernel.shmmax=2147483648
 	sysctl -w kernel.shmall=2147483648
-	chkconfig --level 12345 irqbalance off
+	systemctl stop irqbalance
 	echo 0 > /proc/sys/kernel/nmi_watchdog
 	echo 1 > /sys/module/rcupdate/parameters/rcu_cpu_stall_suppress
 
@@ -47,21 +95,19 @@ if [ -f "$testmac_cfg_xml_file" ]; then
     if [ -n "$core" ]; then
         testmacCmd="taskset -c $core"
     fi
-if [ "$1" = "-g" ]; then
-    shift
-        if [ "$RTE_TARGET" == "x86_64-native-linuxapp-icx"]; then
-            testmacCmd="$testmacCmd /opt/intel/oneapi/debugger/10.2.4/gdb/intel64/bin/gdb-oneapi --args"
-else
-            testmacCmd="$testmacCmd /home/opt/intel/system_studio_2019/bin/gdb-ia --args"
-fi
-    fi
-    testmacCmd="$testmacCmd ./testmac DIR_WIRELESS_TEST_4G=$DIR_WIRELESS_TEST_4G DIR_WIRELESS_TEST_5G=$DIR_WIRELESS_TEST_5G $@"
+    testmacCmd="$testmacCmd $testmacFile DIR_WIRELESS_TEST_4G=$DIR_WIRELESS_TEST_4G DIR_WIRELESS_TEST_5G=$DIR_WIRELESS_TEST_5G --cfgfile $testmac_cfg_xml_file $finalList"
 else
     echo "configuration file $testmac_cfg_xml_file is not found"
     exit 1
 fi
 
-echo start 5GNR Test MAC
+cpuListString=`lscpu | grep "On-line CPU(s) list"`
+if [ -n "$cpuListString" ]; then
+    cpuList=`echo ${cpuListString##* }`
+    testmacCmd="$testmacCmd CORE_LIST=$cpuList"
+fi
+
+echo start LTE Test MAC
 
 echo ">> Running... "${testmacCmd}
 

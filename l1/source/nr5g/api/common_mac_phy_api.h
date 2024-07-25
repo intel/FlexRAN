@@ -43,6 +43,9 @@
 #define MSG_TYPE_PHY_UL_PRACH_IQ_SAMPLES        (204)
 #define MSG_TYPE_PHY_UL_MMIMO_SRS_IQ_SAMPLES    (205)
 #define MSG_TYPE_PHY_RX_CHAN_EST_OUTPUT_IND     (206)
+#define MSG_TYPE_PHY_DL_BEAM_WEIGHTS            (207)
+#define MSG_TYPE_PHY_UL_BEAM_WEIGHTS            (208)
+#define MSG_TYPE_PHY_TEST_CONFIG_INFO           (209)
 
 //------------------------------------------------------------------------------------------------------------
 typedef struct tMac2PhyApiQueueElem
@@ -73,9 +76,10 @@ typedef enum
 typedef enum
 {
     PDSCH_SPLIT = 0,
-    PDSCH_OFDM_SPLT_ENABLE,
+    PDSCH_PROC_TYPE,
     PDSCH_DL_WEIGHT_SPLIT,
     PUSCH_CHANEST_SPLIT,
+    PUSCH_RNN_SPLIT,
     PUSCH_MMSE_SPLIT,
     PUSCH_LLR_RX_SPLIT,
     PUSCH_UL_WEIGHT_SPLIT,
@@ -89,11 +93,42 @@ typedef enum
     BBUPOOL_SLEEP_ENABLE,
     CE_INTERP_METHOD,
     LINEAR_INTERP_ENABLE,
+    DFT_BF_WEIGHT_GEN_ENABLE,
+    RX_ANT_VERTICAL,
+    RX_ANT_HORIZONTAL,
+    RX_ANT_POLARIZATION,
+    IRC_ENABLE_THRESHOLD,
+    IRC_MMSE_SWITCHING_ENABLE,
     REMOVE_MEMCPY_MEMSET,
     EBBU_POOL_NUM_QUEUE,
     EBBU_POOL_QUEUE_SIZE,
     EBBU_POOL_NUM_CONTEXT,
     EBBU_POOL_MAX_CONTEXT_FETCH,
+    BF_WEIGHT_GEN_GRANULARITY,
+    SPR_PIPRLINE,
+    SRS_FFT_FLAG_ENABLE_FLUSH,
+    PRACH_MAX_COMBINE_TYPE,
+    PRACH_THRESHOLD_METHOD,
+    PRACH_IFFT_FLAG_ENABLE_FLUSH,
+    PUSCH_IRC_FORCE,
+    SRS_BYPASS,
+    EBBU_POOL_FEC_ONLY_LIST,
+    SRS_AGC_FLAG_ENABLE_FLUSH,
+    SRS_AGC_TARGET_SET_FLUSH,
+    SRS_DFT_CE_FILL_FULL_BAND,
+    PUCCH_AGC_TARGET_SET_FLUSH,     /*! [R22.11] Add for PUCCH AGC */
+    PUCCH_F0_SPRCVT_SCALE_SET_FLUSH,
+    PUCCH_F1_SPRCVT_SCALE_SET_FLUSH,
+    PUCCH_F2_SPRCVT_SCALE_SET_FLUSH,
+    PUCCH_F3_SPRCVT_SCALE_SET_FLUSH,
+    PUCCH_F4_SPRCVT_SCALE_SET_FLUSH,
+    SRS_AGC_METHOD_CHOOSE,
+    SRS_SPR_CVT_SCALE_SET_FLUSH,    /*! [R23.07] Add for SRS SPR ORAN */
+    SRS_MMIMO_PROC_OFFSET,
+    SRS_TOC_BYPASS_FLUSH,           /*! [R23.07] Add for SRS TOC */
+    PUCCH_F234_DECODER,
+    LTE_TIMER_MODE_FREQ_DOMAIN_INOUT,
+    PUSCH_FOC_ENABLE,
     NUM_SPLIT_OPTIONS
 } CHANNEL_SPLIT_OPTIONS;
 
@@ -107,7 +142,7 @@ typedef enum
 } BBUPOOL_CORE_OPERATION;
 
 
-#define MAX_NUM_CELLS (32)
+#define MAX_NUM_CELLS (64)
 #define MAX_NUM_SET_CORE_MASK ( 4 )
 #define MAX_GROUP_NUM (32)
 
@@ -116,8 +151,15 @@ typedef struct tAddRemoveBbuCoresStruct
     BBUPOOL_CORE_OPERATION eOption;
     uint64_t nCoreMask[MAX_MASK_OPTIONS][MAX_NUM_SET_CORE_MASK];
     uint32_t nMacOptions[NUM_SPLIT_OPTIONS];
+    uint64_t nMacOptionsCellMask[NUM_SPLIT_OPTIONS];
     uint8_t nPuschInterOptions[MAX_NUM_CELLS][MAX_GROUP_NUM];
 } ADD_REMOVE_BBU_CORES, *PADD_REMOVE_BBU_CORES;
+
+typedef struct tTestFileConfig
+{
+    char sTestFileName[512];
+} TEST_FILE_CONFIG, *PTEST_FILE_CONFIG;
+
 //------------------------------------------------------------------------------------------------------------
 
 #define MAX_UL_IQ_SAMPLE_PORTS            ( 16 )
@@ -131,10 +173,12 @@ typedef struct tDlUlIqSamplesStruct
     uint32_t numSubframes;
     uint32_t nIsRadioMode;
     uint32_t TimerModeFreqDomain;
+    uint32_t TimerModeFreqDomainInOut;
     uint32_t PhaseCompensationEnable;
-    uint32_t startFrameNum;
-    uint32_t startSlotNum;
-    uint32_t startSymNum;
+    uint32_t nStartFrameNum;
+    uint32_t nStartSlotNum;
+    uint32_t nStartSymNum;
+    char filename_test_case[MAX_DL_UL_IQ_FILE_NAME_LEN];
     char filename_in_ul_iq[MAX_UL_IQ_SAMPLE_PORTS][MAX_DL_UL_IQ_FILE_NAME_LEN];
     char filename_in_ul_iq_compressed[MAX_UL_IQ_SAMPLE_PORTS][MAX_DL_UL_IQ_FILE_NAME_LEN];
     char filename_in_prach_iq[MAX_UL_IQ_SAMPLE_PORTS][MAX_DL_UL_IQ_FILE_NAME_LEN];
@@ -142,6 +186,7 @@ typedef struct tDlUlIqSamplesStruct
     char filename_out_dl_iq[MAX_DL_UL_IQ_FILE_NAME_LEN];
     char filename_out_dl_beam[MAX_DL_IQ_SAMPLE_PORTS][MAX_DL_UL_IQ_FILE_NAME_LEN];
     char filename_out_ul_beam[MAX_UL_IQ_SAMPLE_PORTS][MAX_DL_UL_IQ_FILE_NAME_LEN];
+    char filename_out_ul_pucch_beam[MAX_UL_IQ_SAMPLE_PORTS][MAX_DL_UL_IQ_FILE_NAME_LEN];
     char filename_out_dl_iq_compressed[MAX_DL_UL_IQ_FILE_NAME_LEN];
 
     /* DL Compression add */
@@ -155,8 +200,21 @@ typedef struct tDlUlIqSamplesStruct
     uint16_t nULDecompressionIdx;
     uint16_t nULDecompiqWidth;
 
+    uint32_t nAvgDLRbs;
+    uint32_t nAvgDLRbLayers;
+    uint64_t nAvgDLTput;
+    uint32_t nAvgULRbs;
+    uint32_t nAvgULRbLayers;
+    uint64_t nAvgULTput;
+
     uint8_t buffer[4096];
 } PHY_DL_UL_IQ_SAMPLES, *PPHY_DL_UL_IQ_SAMPLES;
+
+
+int32_t gnb_l1_init(int32_t argc, char *argv[]);
+int32_t gnb_l1_release();
+int32_t gnb_l1_stop();
+int32_t gnb_l1_ebbupool_handler_set(void *pHandler);
 
 
 #endif  /* #ifndef _COMMON_MAC_PHY_API_H_ */

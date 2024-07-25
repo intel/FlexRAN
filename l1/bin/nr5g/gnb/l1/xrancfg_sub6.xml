@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
-<!--                                                                                         -->
-<!--                                                                                         -->
-<!--   Copyright (2019-2022) Intel Corporation.                                                                                                                        -->
+<!--                                                                                                                                                              -->
+<!--   Copyright (2021) Intel Corporation.                                                                                                                        -->
 <!--                                                                                                                                                              -->
 <!--   Redistribution. Redistribution and use in binary form, without modification, are permitted provided that the following conditions are met:                 -->
 <!--                                                                                                                                                              -->
@@ -17,15 +16,15 @@
 <!--   this software.  No hardware per se is licensed hereunder.                                                                                                  -->
 <!--                                                                                                                                                              -->
 <XranConfig>
-    <version>oran_f_release_v1.0</version>
+    <version>oran_k_release_v1.0</version>
     <!-- numbers of O-RU connected to O-DU. All O-RUs are the same capabilities. Max O-RUs is per XRAN_PORTS_NUM i.e. 4 -->
     <oRuNum>1</oRuNum>
     <!--  # 10G,25G,40G,100G speed of Physical connection on O-RU -->
     <oRuEthLinkSpeed>25</oRuEthLinkSpeed>
     <!--  # 1, 2, 3 total number of links per O-RU (Fronthaul Ethernet link in IOT spec) -->
     <oRuLinesNumber>1</oRuLinesNumber>
-    <!--  # C,U plane on same VF or different VF. 0--different VF, 1--same VF -->
-    <oRuCUon1Vf>0</oRuCUon1Vf>
+    <!--  # C,U plane on same VF or different VF. [0: different VF, 1: same VF] -->
+    <oRuCUon1Vf>1</oRuCUon1Vf>
 
     <!-- O-RU 0 -->
     <PciBusAddoRu0Vf0>0000:51:01.0</PciBusAddoRu0Vf0>
@@ -147,9 +146,9 @@
     <xRANWorker>0x8000000000, 96, 0</xRANWorker>
     <xRANWorker_64_127>0x0000000000, 96, 0</xRANWorker_64_127>
     <!-- XRAN: Category of O-RU 0 - Category A, 1 - Category B -->
-    <Category>0</Category>
+    <oRU0Category>0</oRU0Category>
     <!-- Slot setup processing offload to pipeline BBU cores: [0: USE XRAN CORES 1: USE BBU CORES] -->
-    <xRANOffload>0</xRANOffload>
+    <xRANOffload>1</xRANOffload>
     <!-- XRAN MLOG: [0: DISABLE 1: ENABLE] -->
     <xRANMLog>0</xRANMLog>
 
@@ -174,16 +173,13 @@
     <!-- O-DU Settings -->
     <!-- MTU size -->
     <MTU>9600</MTU>
-    <!-- VLAN Tag used for C-Plane -->
-    <c_plane_vlan_tag>1</c_plane_vlan_tag>
-    <u_plane_vlan_tag>2</u_plane_vlan_tag>
 
     <!-- Transmission Window Fast C-plane DL -->
     <T1a_min_cp_dl>258</T1a_min_cp_dl>
-    <T1a_max_cp_dl>470</T1a_max_cp_dl>
+    <T1a_max_cp_dl>350</T1a_max_cp_dl>
     <!-- Transmission Window Fast C-plane UL -->
     <T1a_min_cp_ul>285</T1a_min_cp_ul>
-    <T1a_max_cp_ul>429</T1a_max_cp_ul>
+    <T1a_max_cp_ul>350</T1a_max_cp_ul>
     <!-- Transmission Window U-plane -->
     <T1a_min_up>50</T1a_min_up>
     <T1a_max_up>196</T1a_max_up>
@@ -213,7 +209,7 @@
     <!-- XRAN: Compression mode on O-DU <-> O-RU 0 - no comp 1 - BFP -->
     <xranCompMethod>1</xranCompMethod>
     <!-- XRAN: Uplane Compression Header type 0 - dynamic 1 - static -->
-    <xranCompHdrType>0</xranCompHdrType>    
+    <xranCompHdrType>0</xranCompHdrType>
     <!-- XRAN: iqWidth when DynamicSectionEna and BFP Compression enabled -->
     <xraniqWidth>9</xraniqWidth>
     <!-- Whether Modulation Compression mode is enabled or not for DL only -->
@@ -223,8 +219,12 @@
     <!-- Whether Prach iqWidth when DynamicSectionEna and BFP Compression enabled -->
     <xranPrachiqWidth>16</xranPrachiqWidth>
 
-   <oRu0MaxSectionsPerSlot>6</oRu0MaxSectionsPerSlot>
-   <oRu0MaxSectionsPerSymbol>6</oRu0MaxSectionsPerSymbol>
+    <!-- Enable independant CSIRS Transmission -->
+    <EnableCsirsTrans>0</EnableCsirsTrans>
+    <oRu0nAeCOffsetCsirs>8</oRu0nAeCOffsetCsirs>
+
+    <oRu0MaxSectionsPerSlot>6</oRu0MaxSectionsPerSlot>
+    <oRu0MaxSectionsPerSymbol>6</oRu0MaxSectionsPerSymbol>
     <oRu0nPrbElemDl>1</oRu0nPrbElemDl>
     <!--nRBStart, nRBSize, nStartSymb, numSymb, nBeamIndex, bf_weight_update, compMethod, iqWidth, BeamFormingType, Scalefactor, REMask -->
     <!-- weight base beams -->
@@ -278,6 +278,9 @@
     <oRu3nPrbElemUl>1</oRu3nPrbElemUl>
     <oRu3PrbElemUl0>0,273,0,14,0,0,1,9,0,0,0</oRu3PrbElemUl0>
     <oRu3PrbElemUl1>53,53,0,14,2,1,1,8,1,0,0</oRu3PrbElemUl1>
+
+    <!-- eAxC ID subfield bitwidth config: DU port, BandSector, CC, RU port. Sum of All Field length need to be 16 bits-->
+    <oRu0eAxCbitwidth>4,4,4,4</oRu0eAxCbitwidth>
 
 </XranConfig>
 
