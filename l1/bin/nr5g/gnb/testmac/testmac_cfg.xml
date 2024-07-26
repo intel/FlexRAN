@@ -15,16 +15,19 @@
 <!--   such patent is necessary to Utilize the software in the form provided by Intel. The patent license shall not apply to any combinations which include       -->
 <!--   this software.  No hardware per se is licensed hereunder.                                                                                                  -->
 <!--                                                                                                                                                              -->
-
 <TestMacConfig>
-    <version>oran_f_release_v1.0</version>
+    <version>oran_k_release_v1.0</version>
 
     <Api>
         <!-- Full path to wls device used for transport of MAC-PHY API (e.g. wls0 )-->
         <wls_dev_name>wls0</wls_dev_name>
 
         <!-- WLS Memory Block size used to send and receive APIs between L1 and Testmac. Must be multiple of 2 -->
-        <wlsBlockSize>0x40000</wlsBlockSize>
+        <wls_block_size>0x40000</wls_block_size>
+
+        <!-- For multiple Testmac applications to single L1 application, what is the total number of cells. -->
+        <!-- Set to 0 if there is only 1 testmac to 1 l1app application mapping -->
+        <wls_carrier_aggregation>0</wls_carrier_aggregation>
     </Api>
 
     <!-- This section defines all DPDK related parameters used for DPDK initialization -->
@@ -43,6 +46,8 @@
         <PhyStartPeriod>40</PhyStartPeriod>
         <!-- PhyStart Count: Number of TTIs to run 0: Length of test from config file 1 <= Period <= 4294967295 -->
         <PhyStartCount>0</PhyStartCount>
+        <!-- In container PHY and testMac may have different views of cores, 1: pass; 0: bypass the testMac side core check -->
+        <PhyCoreCheck>1</PhyCoreCheck>
     </PhyStart>
 
     <MlogVars>
@@ -52,10 +57,39 @@
         <MlogCores>3</MlogCores>
         <!-- Size of each subframe (in bytes) -->
         <MlogSize>2048</MlogSize>
+        <!-- nDbgPrintTime flag -->
+        <nDbgPrintTime>0</nDbgPrintTime>
     </MlogVars>
 
     <!-- Latency Measurement Test: 0 -> Disable, 1 -> Enable -->
     <latencyTest>0</latencyTest>
+
+    <!-- Stagger Cell Addition (test dynamic add / remove cells): 0 -> Disable, 1 -> Enable -->
+    <staggerCells>0</staggerCells>
+
+    <!-- Short API List Mode without DL/ULIQ samples and PHY_STOP message. This is similar to what real L2 will send to the the L1 -->
+    <shortApiMode>0</shortApiMode>
+
+    <!-- Starting Cell Idx (if need to start from some cell other than cell 0): -1 -> Start with 0, else start with value in this field -->
+    <!-- By default if this is set, staggerCells will also be automatically set by testmac -->
+    <startCellIdx>-1</startCellIdx>
+
+    <RadioConfig>
+        <!-- Send RadioConfig as part of PHY_CONFIG: 0 -> Disable, 1 -> Enable -->
+        <sendRadioCfg>0</sendRadioCfg>
+
+        <!-- Config File to read per cell (Max of MAX_PHY_INSTANCES). Each one can be unique file -->
+        <radioCfg0>radio_config/radio_cfg.xml</radioCfg0>
+        <radioCfg1>radio_config/radio_cfg.xml</radioCfg1>
+        <radioCfg2>radio_config/radio_cfg.xml</radioCfg2>
+        <radioCfg3>radio_config/radio_cfg.xml</radioCfg3>
+        <radioCfg4>radio_config/radio_cfg.xml</radioCfg4>
+        <radioCfg5>radio_config/radio_cfg.xml</radioCfg5>
+        <radioCfg6>radio_config/radio_cfg.xml</radioCfg6>
+        <radioCfg7>radio_config/radio_cfg.xml</radioCfg7>
+        <radioCfg8>radio_config/radio_cfg.xml</radioCfg8>
+        <radioCfg9>radio_config/radio_cfg.xml</radioCfg9>
+    </RadioConfig>
 
     <!-- CPU Binding to Application Threads -->
     <Threads>
@@ -88,18 +122,21 @@
         <StreamPacket>0</StreamPacket>
 
         <!-- Number of UEs to stream the packets. Based on this appropriate Dst IP address are setup to appropriate ports -->
-        <StreamPacketNumStreams>1</StreamPacketNumStreams>
+        <StreamPacketNumStreams>12</StreamPacketNumStreams>
 
         <!-- This params tells how to split the Streams. 0: All streams on cell 0. 1: -->
         <!-- 0: All streams on cell 0. -->
         <!-- 1: Split streams per cell. -->
-        <StreamPacketType>0</StreamPacketType>
+        <StreamPacketType>1</StreamPacketType>
+
+        <!-- This params disables Cell API params if there is no traffic. 0: Send L1 Api always. 1: Send L1 API based on traffic -->
+        <StreamPacketDisableL1Api>0</StreamPacketDisableL1Api>
 
         <!-- Network to Phy Stream Threads: Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
-        <StreamNet2PhyThread>10, 0, 0</StreamNet2PhyThread>
+        <StreamNet2PhyThread>3, 0, 0</StreamNet2PhyThread>
 
         <!-- Phy to Network Stream Threads: Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
-        <StreamPhy2NetThread>10, 0, 0</StreamPhy2NetThread>
+        <StreamPhy2NetThread>3, 0, 0</StreamPhy2NetThread>
 
         <!-- How to stream the packets 0: Linux UDP Socket, 1: DPDK -->
         <StreamSocketType>0</StreamSocketType>
@@ -205,6 +242,103 @@
         <!-- IP Port used to create Linux socket (UE 11) -->
         <StreamSrcPort11>2245</StreamSrcPort11>
         <StreamDstPort11>1245</StreamDstPort11>
+
+        <!-- This params enables core consolidation based on traffic. 0: Disable. 1: Changed based on next parameters -->
+        <StreamPacketSetL1Core>0</StreamPacketSetL1Core>
+        <StreamPacketL1CoreCell0>0x3000030, 0x0, 0x0, 0x0</StreamPacketL1CoreCell0>
+        <StreamPacketL1CoreCell1>0x3000030, 0x0, 0x0, 0x0</StreamPacketL1CoreCell1>
+        <StreamPacketL1CoreCell2>0x7000070, 0x0, 0x0, 0x0</StreamPacketL1CoreCell2>
+        <StreamPacketL1CoreCell3>0x1f0001f0, 0x0, 0x0, 0x0</StreamPacketL1CoreCell3>
+        <StreamPacketL1CoreCell4>0x1f0001f0, 0x0, 0x0, 0x0</StreamPacketL1CoreCell4>
+        <StreamPacketL1CoreCell5>0xff000ff0, 0x0, 0x0, 0x0</StreamPacketL1CoreCell5>
+        <StreamPacketL1CoreCell6>0xff000ff0, 0x0, 0x0, 0x0</StreamPacketL1CoreCell6>
+        <StreamPacketL1CoreCell7>0x7ff007ff0, 0x0, 0x0, 0x0</StreamPacketL1CoreCell7>
+        <StreamPacketL1CoreCell8>0xfff00fff0, 0x0, 0x0, 0x0</StreamPacketL1CoreCell8>
+        <StreamPacketL1CoreCell9>0x3fff03fff0, 0x0, 0x0, 0x0</StreamPacketL1CoreCell9>
+        <StreamPacketL1CoreCell10>0x7fff07fff0, 0x0, 0x0, 0x0</StreamPacketL1CoreCell10>
+        <StreamPacketL1CoreCell11>0x7fff07fff0, 0x0, 0x0, 0x0</StreamPacketL1CoreCell11>
     </StreamPackets>
 
+    <!-- This section when enabled will make testmac read scheduling info from files -->
+    <!-- PDSCH / PUSCH will be replaced from these config files rather than the test case config files -->
+    <!-- This is used to run some real world traffic patterns as opposed to static pattern in each slot -->
+    <TestFileConfig>
+        <!-- If this is set to 1, then Testmac will configure L1 in each TTI based on file (Tput and RBs) -->
+        <ConfigFromTestFile>0</ConfigFromTestFile>
+
+        <!-- 0: Simple (Has scheduling information per second), 1: Complex (Has scheduling information per TTI) -->
+        <ConfigFromTestFileType>1</ConfigFromTestFileType>
+
+        <!-- Parameters only valid for ConfigFromTestFileType = 0 -->
+        <ConfigFromTestFileType0>
+            <!-- FileName with Config details -->
+            <TestFileNameType0>traffic_profile/traffic_profile.csv</TestFileNameType0>
+
+            <!-- This params enables core consolidation based on traffic profile above (based on RB util). 0: Disable. 1: Changed based on next parameter -->
+            <TestFileSetL1Core>0</TestFileSetL1Core>
+
+            <!-- FileName with Core Mask details. Used when TestFileSetL1Core = 1 -->
+            <TestFileSetL1CoreName>traffic_profile/core_mask.txt</TestFileSetL1CoreName>
+
+            <!-- How many slots to run each line from config file. Min 1000. -->
+            <TestFileDuration>2000</TestFileDuration>
+        </ConfigFromTestFileType0>
+
+        <!-- Parameters only valid for ConfigFromTestFileType = 1 -->
+        <ConfigFromTestFileType1>
+            <!-- FileName with Config details -->
+            <TestFileNameType1DL>traffic_profile/dl_traffic.csv</TestFileNameType1DL>
+            <TestFileNameType1UL>traffic_profile/ul_traffic.csv</TestFileNameType1UL>
+            <TestFileNumerology>1</TestFileNumerology>
+        </ConfigFromTestFileType1>
+
+        <!-- Offset rows in above file for each. This is to stagger the traffic a bit -->
+        <TestFileOffsetCell0>0</TestFileOffsetCell0>
+        <TestFileOffsetCell1>1000</TestFileOffsetCell1>
+        <TestFileOffsetCell2>2000</TestFileOffsetCell2>
+        <TestFileOffsetCell3>3000</TestFileOffsetCell3>
+        <TestFileOffsetCell4>4000</TestFileOffsetCell4>
+        <TestFileOffsetCell5>5000</TestFileOffsetCell5>
+        <TestFileOffsetCell6>6000</TestFileOffsetCell6>
+        <TestFileOffsetCell7>7000</TestFileOffsetCell7>
+        <TestFileOffsetCell8>8000</TestFileOffsetCell8>
+        <TestFileOffsetCell9>9000</TestFileOffsetCell9>
+        <TestFileOffsetCell10>10000</TestFileOffsetCell10>
+        <TestFileOffsetCell11>11000</TestFileOffsetCell11>
+    </TestFileConfig>
+
+    <TestMacTraceLog>
+        <!-- level and modu mask used to config global variable -->
+        <TestMacTraceLevelModumask>0xE1FF</TestMacTraceLevelModumask>
+
+        <!-- sub-module mask used to config PUSCH global bitmask -->
+        <TestMacTraceSubModumask0>0x1</TestMacTraceSubModumask0>
+
+        <!-- sub-module mask used to config PDSCH global bitmask -->
+        <TestMacTraceSubModumask1>0x1</TestMacTraceSubModumask1>
+
+        <!-- sub-module mask used to config PUCCH global bitmask -->
+        <TestMacTraceSubModumask2>0x1</TestMacTraceSubModumask2>
+
+        <!-- sub-module mask used to config PDCCH global bitmask -->
+        <TestMacTraceSubModumask3>0x1</TestMacTraceSubModumask3>
+
+        <!-- sub-module mask used to config PTRS global bitmask -->
+        <TestMacTraceSubModumask4>0x1</TestMacTraceSubModumask4>
+
+        <!-- sub-module mask used to config CSI-RS global bitmask -->
+        <TestMacTraceSubModumask5>0x1</TestMacTraceSubModumask5>
+
+        <!-- sub-module mask used to config SRS global bitmask -->
+        <TestMacTraceSubModumask6>0x1</TestMacTraceSubModumask6>
+
+        <!-- sub-module mask used to config PRACH global bitmask -->
+        <TestMacTraceSubModumask7>0x1</TestMacTraceSubModumask7>
+
+        <!-- sub-module mask used to config SSB global bitmask -->
+        <TestMacTraceSubModumask8>0x1</TestMacTraceSubModumask8>
+
+        <!-- Tracelog Threads (Single core id value): Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
+        <TestMacTracelogThread>0, 0, 0</TestMacTracelogThread>
+    </TestMacTraceLog>
 </TestMacConfig>

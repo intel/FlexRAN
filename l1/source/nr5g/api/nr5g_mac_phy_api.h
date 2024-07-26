@@ -36,10 +36,12 @@
 extern "C" {
 #endif
 
+#pragma pack (4)
+
 #include "common_typedef.h"
 #include "common_mac_phy_api.h"
 
-#define MAX_MIMO_GROUP_NUM          (16)
+#define MAX_MIMO_GROUP_NUM          (32)
 
 #define MAX_DL_PARIED_UE_NUM        (12)
 #define MAX_UL_PARIED_UE_NUM        (12)
@@ -50,6 +52,7 @@ extern "C" {
 #define MAX_UL_PER_UE_DMRS_PORT_NUM (4)
 #define MAX_DL_PER_UE_PTRS_PORT_NUM (2)
 #define MAX_UL_PER_UE_PTRS_PORT_NUM (2)
+#define MAX_DL_REAL_PORTS           (16)
 
 #define MAX_DCI_BIT_BYTE_LEN              (32)
 #define MAX_UCI_BIT_BYTE_LEN              (256)
@@ -65,10 +68,23 @@ extern "C" {
 #define MAX_NUM_OF_SYMBOL_PER_SLOT        (14)
 #define MAX_TXRU_NUM                      (4)
 #define MAX_RXRU_NUM                      (16)
+#define MAX_DL_CSIRS_PORT_NUM             (32)
+#define MAX_RX_SRS_STREAM_NUM             (32)
 #define MAX_NUM_ANT_NR5G                  (64)
-#define MAX_UL_PORTS_PER_UE               (2)
+#define MAX_UL_PORTS_PER_UE               (4)
 #define MAX_PANEL_NUM                     (4)
 #define SINR_STEP_SIZE                    (256.0)
+#define PWR_INVALID                       (-128.0) // Indicator for invalid power values
+#define MAX_REPORT_UL_PORTS               (8)
+#define MAX_NUM_RBG                       (69)
+#define MAX_NUM_PART1_PARAMS              (4)          // Maximum number of Part 1 parameters that influence the size of this part 2.
+#define MAX_SIZE_CSI_PART2_MAP            (1<<12)      // Maximum depth of each UCI map
+#define BWP_MIN_SIZE                      (20)
+#define BWP_MAX_SIZE                      (275)
+#define BWP_MAX_START                     (254)
+#define MAX_PRACH_FRE_FDM                 (8)          // number of PRACH frequence  occations
+#define MAX_PRACH_TIME_TDM                (7)          // number of PRACH time occations
+
 
 // API Message Type Field coding definitions
 #define MSG_TYPE_PHY_CONFIG_REQ       (0x1)
@@ -80,6 +96,13 @@ extern "C" {
 #define MSG_TYPE_PHY_ERR_IND          (0x7)
 #define MSG_TYPE_PHY_SHUTDOWN_REQ     (0x8)
 #define MSG_TYPE_PHY_SHUTDOWN_RESP    (0x9)
+#define MSG_TYPE_PHY_CELL_INFO_REQ    (0xa)
+#define MSG_TYPE_PHY_EXIT_REQ         (0xb)
+
+/* Using reserved message types Table 3-5 5G FAPI: PHY API specification 222.10.06*/
+#define MSG_TYPE_PHY_OAM_REQ          (0xc)
+#define MSG_TYPE_PHY_OAM_RESP         (0xd)
+#define MSG_TYPE_PHY_OAM_NOTIFICATION (0xe)
 
 #define MSG_TYPE_PHY_SLOT_IND         (0x10)
 #define MSG_TYPE_PHY_DL_CONFIG_REQ    (0x11)
@@ -91,6 +114,7 @@ extern "C" {
 #define MSG_TYPE_PHY_UCI_IND          (0x17)
 #define MSG_TYPE_PHY_RX_RACH_IND      (0x18)
 #define MSG_TYPE_PHY_RX_SRS_IND       (0x19)
+#define MSG_TYPE_UE_MANAGEMENT_REQ    (0x20)
 #define MSG_TYPE_PHY_RX_ULSCH_UCI_IND (0x30)
 
 // WLS operation with PDSCH Payload
@@ -122,9 +146,49 @@ extern "C" {
 #define UE_MANAGEMENT_PDU     (9)
 
 /******ERROR indication*******/
-#define MSG_OK               (0x00)
-#define MSG_INVALID_STATE    (0x01)
-#define MSG_INVALID_CONFIG   (0x02)
+#define MSG_OK                (0x00)
+#define MSG_INVALID_STATE     (0x01)
+#define MSG_INVALID_CONFIG    (0x02)
+#define MSG_LATE_DL           (0x03)
+#define MSG_LATE_UL           (0x04)
+#define MSG_INVALID_DL_CONFIG (0x05)
+#define MSG_INVALID_UL_CONFIG (0x06)
+
+#define MAX_OAM_PDUS_PER_API 10
+typedef enum nr5g_MacPhyOAMReqType {
+    NR5G_MAC_PHY_OAM_MANAGE_LBM = 0,        // 0
+    NR5G_MAC_PHY_OAM_FETCH_PM_STATS = 1,    // 1
+    NR5G_MAC_PHY_OAM_MAX                    // 2
+} nr5gMacPhyOAMReqType, nr5gMacPhyOAMRespType;
+
+typedef enum nr5g_MacPhyOAMNotificationType {
+    NR5G_MAC_PHY_OAM_NOTIFY_LBM_LINK_STATUS_CHANGE = 0,
+    NR5G_MAC_PHY_OAM_NOTIFY_ERROR = 1,
+    NR5G_MAC_PHY_OAM_NOTIFY_MAX
+} nr5gMacPhyOAMMotificationType;
+
+typedef enum nr5g_MacPhyOAMNotificationERRTYPE {
+    NR5G_MAC_PHY_OAM_NOTIFY_FATALERR = 0, /* HW error and L1 not functioning, need HW reset */
+    NR5G_MAC_PHY_OAM_NOTIFY_CRITICALERR, /* L1 not functioning, need specific recover scenario based on error code and OAM agreed scenario, e.g. cell delete */
+    NR5G_MAC_PHY_OAM_NOTIFY_MAJORERR, /*  L1 is able to recover by itself, but in high risk, L2 needs to take action if continue receive this error in certain period */
+    NR5G_MAC_PHY_OAM_NOTIFY_WARNING, /* L1 is able to recover by itself, may some risk. OAM need to be aware by warning, L2 needs to take action if continue receive this error in certain period */
+    NR5G_MAC_PHY_OAM_NOTIFY_LOG, /* logging or other info exchange during run time */
+    NR5G_MAC_PHY_OAM_NOTIFY_ERRTYPE_MAX
+} nr5gMacPhyOAMMotificationErrType;
+
+typedef enum nr5g_MacPhyOAMNotificationERRCODE {
+    NR5G_MAC_PHY_OAM_NOTIFY_BBDEV_ERROR = 0,
+    NR5G_MAC_PHY_OAM_NOTIFY_DL_LIST_NOT_COMPLETE,
+    NR5G_MAC_PHY_OAM_NOTIFY_UL_LIST_NOT_COMPLETE,
+    NR5G_MAC_PHY_OAM_NOTIFY_SRS_LIST_NOT_COMPLETE,
+    NR5G_MAC_PHY_OAM_NOTIFY_LATE_API,
+    NR5G_MAC_PHY_OAM_NOTIFY_MAX_SUCCESSIVE_NO_API,
+    NR5G_MAC_PHY_OAM_NOTIFY_API_PARAM_ERROR,
+    NR5G_MAC_PHY_OAM_NOTIFY_L1_MEM_ALLOC_ERROR,
+    NR5G_MAC_PHY_OAM_NOTIFY_L1_THREAD_ERROR,
+    NR5G_MAC_PHY_OAM_NOTIFY_ERRCODE_MAX
+} nr5gMacPhyOAMMotificationErrCode;
+
 
 // General Message header that is present at the top of each message
 typedef struct tL1L2MessageHeader
@@ -138,9 +202,9 @@ typedef struct tSfnSlot
 {
     uint32_t nSFN:10;       // system frame number 0->1023
     uint32_t nSlot:9;       // slot number 0->319
-    uint32_t nCarrierIdx:5; // carrier index, 0->23
+    uint32_t nCarrierIdx:6; // carrier index, 0->63
     uint32_t nSym:4;        // Symbol Number, 0->13
-    uint32_t nRsv:4;
+    uint32_t nRsv:3;
 } SFN_SlotStruct, *PSFN_SlotStruct;
 
 //------------------------------------------------------------------------------------------------------------
@@ -149,6 +213,35 @@ typedef struct tSlotConfigReq
     uint8_t nSymbolType[MAX_NUM_OF_SYMBOL_PER_SLOT];    // Defines the Symbol type for all 14 symbols in a slot. 0: DL, 1: UL, 2: Guard
     uint8_t reserved[2];
 } SLOTCONFIGStruct, *PSLOTCONFIGStruct;
+
+typedef struct tCsiPart2SizeMap
+{
+    uint16_t   nPart2Size[MAX_SIZE_CSI_PART2_MAP];      //Array indicating the uci Part2 size, as a function the part1
+}tCsiPart2SizeMapStruct;
+
+//ORAN config info, 36 bytes
+typedef struct ORANRFCfg_tag
+{
+    uint8_t nRUPortNum;                  /* the number of RU used eth points. 1 or 2*/
+    uint8_t nCCID;                       /* vaulue 0 - 15. use for multi carrier per Radio*/
+    uint8_t RadioTypeIndex;              /* which can detail the radio configuration in future, eg: cata-a, cata-b, … detail compression, PRPCH… in xml file */
+    uint8_t nRsv[3];
+
+    uint16_t TadvCpDl;                   /* cp adv up time in microsecond */
+    uint16_t T1aMaxCpDl;                 /* the max t1a time value in microsecond ,for downlink cp message. for value 0, this field is not vaild,use default config in the xml.*/
+    uint16_t T1aMinCpDl;                 /* the min t1a time value in microsecond ,for downlink cp message. for value 0, this field is not vaild,use default config in the xml.*/
+    uint16_t T1aMaxCpUl;                 /* the max t1a time value in microsecond ,for uplink cp message. for value 0, this field is not vaild,use default config in the xml.*/
+    uint16_t T1aMinCpUl;                 /* the min t1a time value in microsecond ,for uplink cp message. for value 0, this field is not vaild,use default config in the xml.*/
+    uint16_t T1aMaxUp;                   /* the max t1a time value in microsecond ,for downlink up message. for value 0, this field is not vaild,use default config in the xml.*/
+    uint16_t T1aMinUp;                   /* the min t1a time value in microsecond ,for downlink up message. for value 0, this field is not vaild,use default config in the xml.*/
+    uint16_t Ta4Max;                     /* the max ta4 time value in microsecond . for value 0, this field is not vaild,use default config in the xml.*/
+    uint16_t Ta4Min;                     /* the min ta4 time value in microsecond . for value 0, this field is not vaild,use default config in the xml.*/
+    uint8_t nSrcPrimMacAddress[6];     /* the major mac addr of the local VF. */
+    uint8_t nSrcSecMacAddress[6];      /* the secondary mac addr of the local VF,is used only for nRUPortNum is 2. */
+    uint8_t nRFDesPrimMacAddress[6];     /* the major mac addr of the RU. */
+    uint8_t nRFDesSecMacAddress[6];      /* the secondary mac addr of the RU,is used only for nRUPortNum is 2. */
+} ORANRFCfgStruct, *PORANRFCfgStruct;
+
 
 // Payload for MSG_TYPE_PHY_CONFIG_REQ message
 typedef struct tConfigReq
@@ -185,7 +278,7 @@ typedef struct tConfigReq
 
     /**** word 7 *****/
     /*SSB config*/
-    /*SSB block powerValue :1->110000,0.001 dB step, -60 to 50 dBm*/
+    /*SSB block powerValue :1->110000,0.001 dB step, -60 to 50 dB offset to default value*/
     uint32_t     nSSBPwr;
     /*absoluteFrequencySSB in KHz*/
     uint32_t     nSSBAbsFre;
@@ -254,21 +347,22 @@ typedef struct tConfigReq
 
     /**** word 434 *****/
     /* PRACH config*/
-    /*PRACH Configuration Index*/
+    /*PRACH Configuration Index, vale = 0 to MAX_PRACH_CONFIG_IDX */
     uint8_t      nPrachConfIdx;
     /*PRACH Subcarrier spacing
-    Value:0->1
-    For below 6GHz the values indicate 15kHz or 30kHz
+    Value:0->4
+    0: 15KHz, 1: 30KHz, 2: 60KHz, 3: 120KHz, 4: 1.25KHz
+    For below 6GHz the values indicate 15kHz or 30kHz or 1.25KHz
     For above 6GHz the values indicate 60kHz or 120kHz*/
     /*PRACH subcarrier spacing */
     uint8_t      nPrachSubcSpacing;
-    /*PRACH zeroCorrelationZoneConfig */
+    /*PRACH zeroCorrelationZoneConfig, value = 0 to MAX_PRACH_ZERO_ZONE_CONFIG */
     uint8_t      nPrachZeroCorrConf;
-    /*PRACH restrictedSetConfig */
+    /*PRACH restrictedSetConfig, value = 0 or 1 */
     uint8_t      nPrachRestrictSet;
 
     /**** word 435 *****/
-    /*PRACH Root Sequence Index */
+    /*PRACH Root Sequence Index, value = 0 to MAX_PRACH_ROOT_SEQ_IDX */
     uint16_t     nPrachRootSeqIdx;
     /*PRACH prach-frequency-start  (in RBs)*/
     uint16_t     nPrachFreqStart;
@@ -288,7 +382,7 @@ typedef struct tConfigReq
     uint8_t    nGroupHopFlag;
     /* sequence hopping flag, Value: 0 or 1 */
     uint8_t    nSequenceHopFlag;
-    /* Cell-Specific scrambling ID for group hopping and sequence hopping*/
+    /* nID used for group and sequence hopping[38.211&6.3.2.2.1]Valid for format 0,1,3,4, Value:0~1023*/
     uint16_t   nHoppingId;
 
     /**** word 438 *****/
@@ -296,6 +390,25 @@ typedef struct tConfigReq
     uint16_t   nUrllcCapable;
     /* Bit Mask (14 Bits) which indicate which symbol numbers to send SLOT_IND to L2 */
     uint16_t   nUrllcMiniSlotMask;
+
+    /**** word 439 - 448 *****/
+    /* Radio management Info */
+    uint8_t RFInfoVal; /* RU configure vaild flag. 0: not vaild; 1: the ru configure vaild */
+    uint8_t rsv[3];
+    ORANRFCfgStruct stOranCfgInfo; /* only used when the RFInfoVal field is 1*/
+
+
+    /**** word 449 *****/
+    /* Number of UCI maps indicating how a set of UCI part1 parameters map to a length of a corresponding UCI part2 */
+    uint16_t   nUci2Maps;
+    uint8_t nNrOfDLCSIRSPorts;
+    uint8_t    rsv2[1];
+
+    /**** word 450 - 2498 *****/
+    /* UCI maps csi-part1 params -> csi-part2 size. Array dimension is nUci2Maps */
+    /* this empty array should be the last in CONFIGREQUESTStruct */
+    tCsiPart2SizeMapStruct  sPart2SizeMap[];
+
 } CONFIGREQUESTStruct, *PCONFIGREQUESTStruct;
 
 //------------------------------------------------------------------------------------------------------------
@@ -367,6 +480,51 @@ typedef struct tShutdownResponseStruct
 } SHUTDOWNRESPONSEStruct, *PSHUTDOWNRESPONSEStruct;
 
 //------------------------------------------------------------------------------------------------------------
+// Structures for MSG_TYPE_PHY_CELL_INFO_REQ message
+typedef struct tCellInfoPdu
+{
+    uint16_t nNumPdsch;
+    uint16_t nNumPdcch;
+    uint16_t nNumPbch;
+    uint16_t nNumCsiRs;
+    uint16_t nNumPusch;
+    uint16_t nNumPuschUci;
+    uint16_t nNumPucch;
+    uint16_t nNumSrs;
+    uint16_t nNumPrach;
+    uint32_t nPdschTput;   // in bytes / TTI
+    uint32_t nPuschTput;   // in bytes / TTI
+    uint32_t nTotalPdschRBs;
+    uint32_t nTotalPuschRBs;
+    uint16_t nPdschLayers;
+    uint16_t nPuschLayers;
+} CellInfoPdu, *PCellInfoPdu;
+
+//------------------------------------------------------------------------------------------------------------
+// Payload for MSG_TYPE_PHY_EXIT_REQ message
+typedef struct tExitRequestStruct
+{
+    L1L2MessageHdr sMsgHdr;
+    SFN_SlotStruct sSFN_Slot;
+} EXITREQUESTStruct, *PEXITREQUESTStruct;
+
+//------------------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------------------
+// Payload for MSG_TYPE_PHY_CELL_INFO_REQ message
+typedef struct tCellInfoRequestStruct
+{
+    L1L2MessageHdr sMsgHdr;
+    SFN_SlotStruct sSFN_Slot;
+    uint32_t nNumCells;
+
+    // CellInfoPdu for multiple(nNumCells) Cells.
+    CellInfoPdu    sCellInfoPDU[];
+} CELLINFOREQUESTStruct, *PCELLINFOREQUESTStruct;
+
+//------------------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------------------
 // Payload for MSG_TYPE_PHY_ERR_IND message
 typedef struct tErrorIndicationStruct
 {
@@ -395,6 +553,119 @@ typedef struct tPduStruct
 } PDUStruct, *PPDUStruct;
 
 //------------------------------------------------------------------------------------------------------------
+// MSG_TYPE_PHY_OAM_REQ message
+typedef struct tPhyOAMReqMsg {
+    L1L2MessageHdr sMsgHdr;
+    SFN_SlotStruct sSFN_Slot;
+    uint8_t        nPDU;    /** Number of PDUs that are included in this message., */
+    uint8_t        resv[3];
+    PDUStruct      sPDUHdr[]; /** nr5gMacPhyOAMReqType values are supported in sPDUHdr->nPDUType **/
+} PHY_OAM_REQ_MSG, *PPHY_OAM_REQ_MSG;
+
+//------------------------------------------------------------------------------------------------------------
+// nPDUType NR5G_MAC_PHY_OAM_MANAGE_LBM
+typedef struct tPhyOAMReq_ManageLBMPDU {
+    PDUStruct      sPDUHdr;
+    uint8_t   vfId;      /** VF-ID to disable LBM for */
+    uint8_t   lbmEnable; /** 0/1 Disable/Enable LBM **/
+    uint8_t   resv[2];
+} PHY_OAM_REQ_MANAGE_LBM_PDU, *PPHY_OAM_REQ_MANAGE_LBM_PDU;
+
+//------------------------------------------------------------------------------------------------------------
+// nPDUType NR5G_MAC_PHY_OAM_FETCH_PM_STATS
+typedef struct tPhyOAMReq_FetchPMStatsPDU {
+    PDUStruct      sPDUHdr;
+    uint8_t   ruID;    /** RU ID to fetch PM stats for **/
+    uint8_t   resv[3];
+} PHY_OAM_REQ_FETCH_PM_STATS_PDU, *PPHY_OAM_REQ_FETCH_PM_STATS_PDU;
+
+//------------------------------------------------------------------------------------------------------------
+// MSG_TYPE_PHY_OAM_RESP message
+typedef struct tPhyOAMRespMsg {
+    L1L2MessageHdr sMsgHdr;
+    SFN_SlotStruct sSFN_Slot;
+    uint8_t        nPDU;    /** Number of PDUs that are included in this message */
+    uint8_t        resv[3];
+    PDUStruct      sPDUHdr[]; /** nr5gMacPhyOAMRespType values are supported in nPDUType of sMsgHdr*/
+} PHY_OAM_RESP_MSG, *PPHY_OAM_RESP_MSG;
+
+//------------------------------------------------------------------------------------------------------------
+// NR5G_MAC_PHY_OAM_MANAGE_LBM message
+typedef struct tPhyOAMRespLBMManagePDU {
+    PDUStruct      sPDUHdr;
+    uint8_t   vfId;   /** VF-ID response sent for */
+    uint8_t   status; /** Status of the OAM request 0/1 Success/Fail */
+    uint8_t   resv[2];
+} PHY_OAM_RESP_LBM_MANAGE_PDU, *PPHY_OAM_RESP_LBM_MANAGE_PDU;
+
+//------------------------------------------------------------------------------------------------------------
+// NR5G_MAC_PHY_OAM_FETCH_PM_STATS message
+typedef struct tPhyOAMRespPMCountersPDU{
+    PDUStruct      sPDUHdr;
+    uint8_t   ruID;           /** O-RU ID PM stats fetched for */
+    uint8_t   status;         /* Status of the OAM request 0/1 Success/Fail */
+    uint8_t   resv[2];
+    uint32_t  xRANpktsOnTime; /** PM stats */
+    uint32_t  xRANpktsEarly;  /** PM stats */
+    uint32_t  xRANpktsLate;   /** PM stats */
+} PHY_OAM_RESP_PM_COUNTERS_PDU, *PPHY_OAM_RESP_PM_COUNTERS_PDU;
+
+// MSG_TYPE_PHY_OAM_NOTIFICATION message
+typedef struct tPhyOAMNotifyMsg {
+    L1L2MessageHdr sMsgHdr;
+    SFN_SlotStruct sSFN_Slot;
+    uint8_t        nPDU;    /** Number of PDUs that are included in this message */
+    uint8_t        resv[3];
+    PDUStruct      sPDUHdr[]; /** nr5gMacPhyOAMMotificationType values are supported in nPDUType of sMsgHdr*/
+} PHY_OAM_NOTIFY_MSG, *PPHY_OAM_NOTIFY_MSG;
+
+//------------------------------------------------------------------------------------------------------------
+// NR5G_MAC_PHY_OAM_NOTIFY_LBM_LINK_STATUS_CHANGE message
+typedef struct tPhyOAMNotifyLBMLinkStatusPDU {
+    PDUStruct      sPDUHdr;
+    uint8_t vfId;   /** VF-ID response sent for */
+    uint8_t prevState;
+    uint8_t currState;
+    uint8_t resv;
+} PHY_OAM_NOTIFY_LBM_LINK_STATUS_PDU, *PPHY_OAM_NOTIFY_LBM_LINK_STATUS_PDU;
+
+typedef struct tPhyOAMNotifyErrorPDU {
+    PDUStruct      sPDUHdr;
+    uint8_t nErrorType;   /* Error Type, defined in nr5gMacPhyOAMMotificationErrType  */
+    uint8_t ErrorCode; /*error code*/
+    uint8_t ModelID; /* Model who generates this error */
+    uint8_t SequenceID; /* unit Id, easy to find where this error generated in code from l1 */
+    char    errorInf[512];/* string */
+} PHY_OAM_NOTIFY_Error_PDU, *PPHY_OAM_NOTIFY_Error_PDU;
+
+
+//------------------------------------------------------------------------------------------------------------
+// Structures for BeamMatrix
+typedef struct
+{
+    int8_t  nType;/*0:pmi based mimo 1:srs algo1 based mimo , or any others*/
+    int8_t  nMatrixBeamID; /* 0:L1 create beamID with matrix input,1: use both beamId and matrix input, 2: use beamID only without matrix*/
+    int8_t  nrsv[2];
+    int16_t nNumPRG;/* the number of Matrix pre layer,
+                       when wideband nNumPRG is 1
+                       when subband,
+                            if pdsch rb allocation used type 0, the nNumPRG need same as the number RBG(nRPG) which is scheduled
+                            if pdsch rb allocation used type 1, nPRG is alloc start the floor(rbstart/nPRGSize)*nPRGSize rb*/
+    int16_t nPRGSize;/* number of prb for bundling.
+                      if pdsch rb allocation used type 0, it needs to equal the nRBG size */
+    int16_t *pMatrixBeamID; /* pMatrixBeamID is a physical address
+                               NULL if nMatrixBeamID = 0 ,
+                               point to the buffer i16MatrixBeamID[nNrOfLayers][nNumPRG]
+                               nNumPRG is  the number of Matrix pre layer,
+                                nNrOfLayers is the layer number of pdsch*/
+    int32_t *pMatrixBuff; /* pMatrixBuff is a physical address,
+                             point to 32bit data buffer(16bits real + 16bits image) ,
+                             point to the buffer u32MatrixBuff[nNrOfLayers][nNumPRG][AntEle],
+                             AntEle is the ant number of DLlink
+                             nNumPRG is  the number of Matrix pre layer,
+                             nNrOfLayers is the layer number of pdsch*/
+} BeamMatrixStruct, *PBeamMatrixStruct;
+
 // Structures for MSG_TYPE_PHY_DL_CONFIG_REQ message
 typedef struct tDlSchPdu
 {
@@ -422,13 +693,13 @@ typedef struct tDlSchPdu
     /**** word 6 *****/
     uint8_t   nNDI[MAX_DL_PER_UE_CODEWORD_NUM]; // New data indication,0: retransmission,1: new data
     uint8_t   nNrOfLayers;                      // Layer number,Value : 1->8,single user, up to 8 layers,multi-user, up to 4 layers
-    uint8_t   nNrOfAntennaPorts;                // Number of antenna ports Value : 1->8, for DL, the nuuber of ports is equal to the number of layers
+    uint8_t   nNrOfAntennaPorts;                // Number of antenna ports Value : 1->8,
 
     /**** word 7, 8 *****/
     uint32_t  nTBSize[MAX_DL_PER_UE_CODEWORD_NUM];    // transmit block size (in bytes)
 
     /**** word 9, 10 *****/
-    uint8_t   nPortIndex[MAX_DL_PER_UE_DMRS_PORT_NUM];// 0: port 1000,1: port 1001 . 11: port 1011
+    uint8_t   nPortIndex[MAX_DL_REAL_PORTS];// 0: port 1000,1: port 1001 . 11: port 1011
 
     /**** word 11 *****/
     uint8_t   nHARQID;           //HARQ Process number, 0->15
@@ -449,14 +720,15 @@ typedef struct tDlSchPdu
     uint8_t   nResourceAllocType;//resource allocation type,0: type 0,1: type 1
     uint8_t   nNrOfRBGs;         //For resource allocation type 1.Number of RBGs
     uint8_t   nRBGSize;          //For resource allocation type 1.RBG size,Value: 2,4,8,16
-    uint8_t   rsv;
+    /* DMRS reference point for k, 38.211 7.4.1.1.2 */
+    uint8_t   nRefPoint;         // 0 - refence point is subcarrier 0 in common resource block 0, 1 - refence point is subcarrier 0 of the lowest-numbered resource block in CORESET 0
 
 
     /**** word 15 *****/
-    uint32_t  nRBGIndex;//For resource allocation type 0.RBG index allocated for this DLSCH.	The maximum number is 138 with 275 RBs and RBG size 2.
+    uint32_t  nRBGIndex;//For resource allocation type 0.RBG index allocated for this DLSCH. The maximum number is 138 with 275 RBs and RBG size 2.
 
     /**** word 16 *****/
-    uint8_t   nMappingType;      // PDSCH mapping Type,	0: mapping type A,	1: mapping type B
+    uint8_t   nMappingType;      // PDSCH mapping Type, 0: mapping type A, 1: mapping type B
     uint8_t   nDMRSConfigType;   // DL DMRS config type,0: type 1,1: type2
     uint8_t   nNrOfCDMs;         // Number of DM-RS CDM groups without data
     uint8_t   nNrOfDMRSSymbols;  // DL DMRS symbol number,1: single symbol,2: double symbol
@@ -475,7 +747,7 @@ typedef struct tDlSchPdu
     uint8_t   nPTRSFreqDensity;         // PT-RS frequency density,Value: 0, 2 or 4,0 means PT-RS is not present
     uint8_t   nPTRSReOffset;            // DL-PTRS-RE-offset,
     uint8_t   nEpreRatioOfPDSCHToPTRS;
-    uint8_t   nMMimoMode;               // 0->non Massive Mimo PDU, 1->SRS based Massive MIMO
+    uint8_t   nMMimoMode;               // 0->non Massive Mimo PDU, 1-> beamID + matrix mode,wideband+subband,  Beam Matrix generated by L1 , 2-> beamID + matrix mode, wideband+subband, Beam Matrix generated by L2
 
     /**** word 20 *****/
     uint8_t   nTransmissionScheme;      // 0: static precoder; 1: codebook-based transmission
@@ -489,8 +761,7 @@ typedef struct tDlSchPdu
 
     /**** word 22 *****/
     uint16_t   nNid;                    // Data-scrambling-IdentityValue : 0->1023
-    /* Beam index value:0~63 */
-    uint8_t    nBeamId;
+    uint8_t    nRev;
     /*Number of TxRU value:1~4*/
     uint8_t    nNrofTxRU;
 
@@ -502,9 +773,28 @@ typedef struct tDlSchPdu
     /* SRS Channel Estimation Buffer Index to be used for beam weight generation */
     uint8_t    nSRSChanEstBufferIndx;
 
-    /**** word 24-28 *****/
+    /**** word 24 *****/
+    uint8_t    nWeightnorm;
+    uint8_t    npadding[3];
+
+    /**** word 25 *****/
     /*TxRU index, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 value:0~15*/
-    uint8_t    nTxRUIdx[MAX_TXRU_NUM];
+    uint8_t    nTxRUIdx[MAX_DL_REAL_PORTS];
+
+    /**** word 26 ****/
+    /* TBSlbrm 3GPP TS38.212, section 5.4.2-1 unit (bit)*/
+    uint32_t    nTBSlbrm;
+
+    /**** word 27-28 ****/
+    /* beamID table, only for nMMimoMode = 0 */
+    int16_t  nBeamId[MAX_TXRU_NUM];
+
+    /**** word 29 *****/
+    uint32_t  nRsvForBeamMatrixStruct;// for stBeamMatrixInfo 8 bytes alain !!!!!
+
+    /**** word 30-35 ****/
+    /* valid when nMMimoMode = 1 or nMMimoMode = 2 */
+    BeamMatrixStruct stBeamMatrixInfo;
 
 } DLSCHPDUStruct, *PDLSCHPDUStruct;
 
@@ -569,21 +859,25 @@ typedef struct tDciPduStruct
     /*PDCCH DMRS EPRE*/
     uint16_t     nEpreRatioOfDmrsToSSB;
 
-    /**** word 11-19 *****/
+    /**** word 11-18 *****/
     /*The total DCI length including padding bits*/
     uint8_t      nDciBits[MAX_DCI_BIT_BYTE_LEN];
 
-    /**** word 20 *****/
-    /* Beam index that UE DL DCI used Value:0~63*/
-    uint8_t      nBeamId;
+    /**** word 19 *****/
+    uint8_t      nRsv0;
     /*According to nBeamId[64], if nBeamId[26] is used, nNrofTxRUPerBeam[26] indicates the number of TxRU Value: 1~4*/
     uint8_t      nNrofTxRU;
     /* nID range 0 to 65535, equals the higher-layer parameter pdcch-DMRS-ScramblingID if configured. otherwise equal to Cell ID*/
     uint16_t     nID;
 
-    /**** word 21-25 *****/
+    /**** word 20 *****/
     /* TxRU index, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 Value:0~15 */
     uint8_t      nTxRUIdx[MAX_TXRU_NUM];
+
+    /**** word 21 *****/
+    int16_t      nBeamId;/* beamID for DCI. Value:0~4095*/
+    int16_t      nRsv1;
+
 } DCIPDUStruct, *PDCIPDUStruct;
 
 typedef struct tUeManagementPduStruct
@@ -592,11 +886,8 @@ typedef struct tUeManagementPduStruct
     PDUStruct  sPDUHdr;
 
     /**** word 2 *****/
-    uint16_t   nNumUE;                   /* Number of UEs included in this PDU whose SRS buffers and UE context can be cleared. */
+    uint16_t   nRnti;       /* RNTI for UE whose SRS buffers and context to be cleared */
     uint16_t   nRsv;
-
-    /**** word 3 -> *****/
-    uint16_t   nRntiList[MAX_UE_MANAGEMENT_NUM];    /* List of RNTIs for UEs whose SRS buffers and context to be cleared */
 } UEMANAGEMENTPDUStruct,*PUEMANAGEMENTPDUStruct;
 
 typedef struct  tSrsPduStruct
@@ -646,17 +937,19 @@ typedef struct  tSrsPduStruct
     uint16_t   nToffset;                /* SRS-Periodicity offset in slots, of type 'periodicityAndOffset-p' RRC Config Message */
                                         /* Values = 0 -> (nTsrs - 1), for example, if nTsrs = 160, valid value = 0 -> 159 */
     /**** word 10 *****/
-    /*Beam index value:0~63*/
-    uint8_t    nBeamId;
-    /* Number of RxRU value:1~4*/
+    uint8_t    nrsv0;
+    /* Number of RxRU value:1~32*/
     uint8_t    nNrofRxRU;
     /* Bit ID for SRS ports to be updated.  bit0=port0, bit1=port1, bit2=port2, bit3=port3 */
     uint8_t    nPortInfoBitMap;
     uint8_t    rsv2[1];
 
     /**** word 11 *****/
-    /*RxRU index, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 value:0~15*/
-    uint8_t    nRxRUIdx[MAX_RXRU_NUM];
+    /*RxRU index, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 value:0~31*/
+    uint8_t    nRxRUIdx[MAX_RX_SRS_STREAM_NUM];
+
+    /**** word 10 - 25 *****/
+    int16_t     nBeamId[MAX_RX_SRS_STREAM_NUM];/* Beamid table for each SRS iq stream */
 }SRSPDUStruct,*PSRSPDUStruct;
 
 typedef struct  tPrachPduStruct
@@ -694,13 +987,18 @@ typedef struct tDlBchPdu
     uint8_t      nSSBSubcOffset;
     /*ssb-PrbOffset  */
     uint8_t      nSSBPrbOffset;
-    /*Beam index value:0~63*/
-    uint8_t    nBeamId;
-    uint8_t    nRsv1;
+    uint8_t      nrsv[2];
 
+    /**** word 3 *****/
     /* MIB payload */
     uint8_t      nMIB[3];
-    uint8_t      nRsv2;
+    /* value： 0,1, refer to spec 213, 4.1 chapter, if =0, 0dB, if =1, 3dB */
+    uint8_t      nPssEpreOffset;
+
+    /**** word 4 *****/
+    /*Beam index value:0~63*/
+    /*max support 4 ssb with ssb beamid in one slot if ssb scs == common scs + 1*/
+    int16_t    nBeamId[4];
 
 } BCHPDUStruct, *PBCHPDUStruct;
 
@@ -748,16 +1046,31 @@ typedef struct tCsiRsPduStruct
     uint16_t      nEpreRatioToSSB;
 
     /**** word 8 *****/
-    /* Beam index Value:0~63*/
-    uint8_t      nBeamId;
+    uint8_t      rsv0;
     /*TxRU number Value:1~2*/
     uint8_t      nNrofTxRU;
     uint8_t      rsv[2];
 
-    /**** word 9-13 *****/
+    /**** word 9 *****/
     /*TxRU index, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 Value:0~15*/
     uint8_t      nTxRUIdx[MAX_TXRU_NUM];
+
+    /**** word 10 - 25 *****/
+    /* Beam index Value:0~63*/
+    int16_t     nBeamId[MAX_DL_CSIRS_PORT_NUM];
 } CSIRSPDUStruct, *PCSIRSPDUStruct;
+
+typedef struct tUlSchCsiPart2Info
+{
+    uint16_t  nPriority;                                   //Priority of the part 2 report;L2 shall signal part2 parameters in increasing order of priorities.
+    uint16_t  nPart2SizeMapIndex;                          //Index of one of the maps for determining the size of a part2, from the part 1 parameter values.
+    uint8_t   nPart2SizeMapScope;                          // 0: nPart2SizeMapIndex shall be looked up in common map(cell0) in PHY_CONFIG_REQ shared by all cells; 1: nPart2SizeMapIndex shall be looked up PHY_CONFIG_REQ in this cell.
+    uint8_t   nPart1Params;                                //Number of Part 1 parameters that influence the size of this part 2.
+    uint8_t   rsv[2];
+    uint8_t   nPart1ParamSize[MAX_NUM_PART1_PARAMS];       //Bitsizes of part 1 param in the same order as nPart1ParamOffsets, sum(nPart1ParamSize[*]) shall not exceed 12
+    uint16_t  nPart1ParamOffsets[MAX_NUM_PART1_PARAMS];    //Ordered list of parameter offsets (offset from 0 = first bit of part1)
+} CsiPart2InfoStruct;
+
 
 //------------------------------------------------------------------------------------------------------------
 // Structures for PHY_UL_CONFIG_REQ message
@@ -784,7 +1097,7 @@ typedef struct tUlSchPduInfo
     uint8_t    nMCS;                // MCS index value: 0->31
     uint8_t    nTransPrecode;       // 0: transform precoding disabled,1: transform precoding enabled
     uint8_t    nTransmissionScheme; // 0: non-codebook-based transmission,1: codebook-based transmission
-    uint8_t    nNrOfLayers;         // number of layers,Value: 1,2,4
+    uint8_t    nNrOfLayers;         // number of layers,Value: 1,2
 
     /**** word 6 *****/
     uint8_t    nPortIndex[MAX_UL_PER_UE_DMRS_PORT_NUM];//Up to 4 ports,0: port 1000,1: port 1001 . 11: port 1011
@@ -838,37 +1151,62 @@ typedef struct tUlSchPduInfo
     uint8_t    nPTRSPortIndex[MAX_UL_PER_UE_PTRS_PORT_NUM];//0: port 1000,1: port 1001 . 11: port 1011
     uint8_t    nPTRSFreqDensity;    // PT-RS frequency density,Value: 0, 2 or 4,0 means PT-RS is not present
     uint8_t    nPTRSReOffset;       // UL-PTRS-RE-offset , refer to Table 6.4.1.2.2.1-1 in [2] Value: 0->3
-    uint8_t    nTpPi2BPSK;          //TP with Pi2BPSK .0 : TpPi2BPSK disable ,1 : TpPi2BPSK enable
 
     /**** word 17 *****/
+    uint8_t    nTpPi2BPSK;          //TP with Pi2BPSK .0 : TpPi2BPSK disable ,1 : TpPi2BPSK enable
+    uint8_t    nrsv;
+    int16_t    nHisTaNs;  // Historical TA for this UE, for pre-TA correction in PHY. value is in NanoSecond. 0: disabled
+
+    /**** word 18 *****/
     uint16_t   nNid;                // Data-scrambling-IdentityValue : 0->1023
     uint8_t    nAlphaScaling;       // configured by higher parameter scaling, ENUMERATED for UCI-onPUSCH RRC { f0p5, f0p65, f0p8, f1 }, Value 0->3
     uint8_t    nBetaOffsetACKIndex; // BetaoffsetAck index
 
-    /**** word 18 *****/
+    /**** word 19 *****/
     uint16_t   nAck;                    // number of HARQ bits
     uint8_t    nBetaOffsetCSIP1Index;   // BetaoffsetCsi-part1 index
     uint8_t    nBetaOffsetCSIP2Index;   // BetaoffsetCsi-part2 index
 
-    /**** word 19 *****/
-    uint16_t   nCSIPart1;             // number of CSI part1 bits
-    uint16_t   nCSIPart2;             // number of CSI part2 bits
-
     /**** word 20 *****/
-    uint8_t    nBeamId;               // Beam index value:0~63
-    uint8_t    nNrofRxRU;             // Number of RxRU value:1~4*/
-    uint16_t   nTPPuschID;            // nPUSCH-Identity
+    uint16_t   nCSIPart1;             // number of CSI part1 bits
+    uint16_t   nCSIPart2;             // Number of CSI part2, Value: 0 -> No CSI part 2, others -> Number of CSI part2
 
     /**** word 21 *****/
-    uint8_t   nMMimoMode;             // 0->non Massive Mimo PDU, 1->SRS based Massive MIMO
+    uint8_t    nrsv0;
+    uint8_t    nNrofRxRU;             // Number of RxRU value:1~4*/
+    uint16_t   nTPPuschID;            // nRSID, refer to 38.211 6.4.1.1.1.2
+
+    /**** word 22 *****/
+    uint8_t   nMMimoMode;             // 0->non Massive Mimo PDU, 1-> beamID + matrix mode,wideband+subband,  Beam Matrix generated by L1 ,using SRS, 2-> beamID + matrix mode, wideband+subband, Beam Matrix generated by L2
     /* Bit ID for SRS Chan Est ports to be for beam weight generation.  bit0=port0, bit1=port1, bit2=port2, bit3=port3 */
     uint8_t    nPortInfoBitMap;
     /* SRS Channel Estimation Buffer Index to be used for beam weight generation */
     uint8_t    nSRSChanEstBufferIndx;
-    uint8_t    nRsv1;
+    uint8_t    nDmrsGroupSeqHop;     //groupOrSequenceHopping for transform precoding, value:0->2, 0: neither, 1: groupHopping, 2: sequenceHopping
 
-    /**** word 22 *****/
+    /**** word 23-26 *****/
     uint8_t    nRxRUIdx[MAX_RXRU_NUM];
+
+    /**** word 27-28 ****/
+    /** TBSlbrm 3GPP TS38.212 section 5.4.2.1 **/
+    uint32_t    isLBRMSupp;
+    uint32_t    nTBSlbrm;
+
+
+    /**** word 29-36 ****/
+    /* beamID table, only for nMMimoMode = 0 */
+    int16_t    nBeamId[MAX_RXRU_NUM];
+
+    /**** word 37 *****/
+    uint32_t  nRsvForBeamMatrixStruct;// for stBeamMatrixInfo 8 bytes alain !!!!!
+
+    /**** word 38-43 ****/
+    /* valid when nMMimoMode = 1 or nMMimoMode = 2 */
+    BeamMatrixStruct stBeamMatrixInfo;
+
+    /**** word 44-45 *****/
+    /* Maps info for determining the size of a part2, from the part 1 parameter values,dimension is nCSIPart2*/
+    CsiPart2InfoStruct sCSIPart2[];
 } ULSCHPDUStruct, *PULSCHPDUStruct;
 
 typedef struct tUlUcchPduInfo
@@ -891,8 +1229,8 @@ typedef struct tUlUcchPduInfo
     uint8_t    nFormat;             // PUCCH format, Value:0~4
 
     /**** word 5 *****/
-    uint16_t   nID;                 // Data scrambling ID if high layer configured, otherwise is cellID, Value: 0~1023, valid for format2/3/4
-    uint16_t   nScramID;            // Using for reference signal scrambling, Value:0~65535, valid for format2
+    uint16_t   nID;                 // nID used for data scrambling[38.211&6.3.2.5.1/6.3.2.6.1].Valid for format2/3/4, Value:0~1023
+    uint16_t   nScramID;            // nID0 used for reference signal scrambling[38.211&6.4.1.3.2.1].Valid for format2, Value:0~65535
 
     /**** word 6 *****/
     uint8_t    nSRPriodAriv;        // whether SR period arrived, Value:0 or 1, valid for format0
@@ -911,7 +1249,7 @@ typedef struct tUlUcchPduInfo
 
     /**** word 9 *****/
     uint8_t    nAddDmrsFlag;        // Flag for additional DMRS, Value: 0 or 1, valid for format3/4
-    uint8_t    rsv;
+    uint8_t    nMaxCodeRate;        // Max coding rate to determine how to feedback UCI on PUCCH for format 3 or 4, Value 0 -> 6: max code rate per Table 9.2.5.2-1 of 3GPP TS 28.213. 255: not applicable (e.g., formats 0 or 1)
     uint8_t    nFmt1OrthCCodeIdx;   // An index of an orthogonal cover code in case of PUCCH format 1, Value: 0~6
     uint8_t    nFmt4OrthCCodeIdx;   // An index of an orthogonal cover code in case of PUCCH format 4, Value: 0~3
 
@@ -921,15 +1259,25 @@ typedef struct tUlUcchPduInfo
     uint16_t   nBitLenUci;          // Bit length of UCI payload for format1/2/3/4 or bit length of UCI payload exclude SR for format0
 
     /**** word 11 *****/
-    /*Beam index value:0~63*/
-    uint8_t    nBeamId;
+    uint8_t    nRsv;
     /*Number of RxRU value:1~4*/
     uint8_t    nNrofRxRU;
-    uint16_t   nGroupId;
+    uint16_t   nGroupId;           // Index to identify the group of UEs sharing same resources. Value: 0~199
 
-    /**** word 12-16 *****/
+    /**** word 12-15*****/
     /* RxRU index, refer to spec 36.897, section 5.2.2-1 and API doc section 3.1.3 value:0~15*/
     uint8_t    nRxRUIdx[MAX_RXRU_NUM];
+
+    /**** word 16-23 ****/
+    int16_t    nBeamId[MAX_RXRU_NUM];// beamID table for each pucch iq-stream
+
+    /**** word 24 *****/
+    uint16_t nCSIPart2;              // Number of CSI part2, Value: 0 -> No CSI part 2, others -> Number of CSI part2
+    uint8_t rsv2[2];
+
+    /**** word 25-28 *****/
+    CsiPart2InfoStruct sCSIPart2[];  // Maps info for determining the size of a part2, from the part 1 parameter values, dimension is nCSIPart2
+
 } ULCCHUCIPDUStruct, *PULCCHUCIPDUStruct;
 
 typedef struct tPdschGroupInfoStruct
@@ -966,7 +1314,7 @@ typedef struct tDlConfigRequestStruct
     uint8_t        nPdcchPrecoderEn;
     /* Enable Precoder for SSB. Setting this field will run precoder on SSB resource map and fill all the antenna */
     uint8_t        nSSBPrecoderEn;
-    uint8_t        nRsv[1];
+    uint8_t        nTestMode;            //Enable or disable FR1 Test Models per spec 38.141 sec4.9.2.2. Value 0 - Disabled and Value 1 - Test Mode Enabled
 
     PDSCHGroupInfoStruct sPDSCHGroupInfoStruct[MAX_MIMO_GROUP_NUM];
     // PDUStruct  for multiple(nPDU) PDU.
@@ -1023,6 +1371,22 @@ typedef struct tUlDciRequestStruct
     DCIPDUStruct sULDCIPDU[];
 } ULDCIRequestStruct, *PULDCIRequestStruct;
 
+//------------------------------------------------------------------------------------------------------------
+// Structures for MSG_TYPE_UE_MANAGEMENT_REQ message
+typedef struct tUeManagementRequestStruct
+{
+    /**** word 1 *****/
+    L1L2MessageHdr sMsgHdr;
+
+    /**** word 2 *****/
+    SFN_SlotStruct sSFN_Slot;   //A 32-bit value where,[24:9] SFN, range 0 -> 1023,[8:0] SF, range 0 -> 319
+
+    /**** word 3 *****/
+    uint16_t   nNumUEs;         // Number of UEs that are included in this message.Range 0 -> MAX_UE_MANAGEMENT_NUM
+    uint16_t   nRsv;
+
+    UEMANAGEMENTPDUStruct sUeManagement[];
+} UEManagementRequestStruct, *PUEManagementRequestStruct;
 
 typedef struct tDlPduDataStruct
 {
@@ -1063,19 +1427,32 @@ typedef struct tUlCrcStruct
     uint16_t nUEId;         // UE index in the sector;Value:0 -> 1199
     uint16_t nRNTI;         // The RNTI associated with the UE,Value: 1 -> 65535
 
-    /**** word 2 *****/
+    /**** word 2-3 *****/
     int16_t  nSNR;          // Reported SNR in 1/256 dB steps, estimated by this PUSCH
-    int16_t  nTA;           // Reported Timing advance value in samples ,estimated by this PUSCH
+    uint8_t  nConfLvl;      // the level of confidence for Timing advance measure. value is 0-1. 0 is low, 1 is high.
+    uint8_t  nTA;           // Reported Timing advance value 0 -> 63 ,estimated by this PUSCH,  unit is 16 * 64 / 2^u Tc
+    int16_t  nTANanos;      // Reported Timing advance in nanoseconds. value -16800 -> 16800 nanoseconds。0xFFFF is not vaild this field.
+    uint8_t  rsv0[2];
 
-    /**** word 3 *****/
+    /**** word 4 *****/
     uint8_t  nCrcFlag;      //CRC flag to indicate if error detected:0: CRC error ,1: CRC correct
     uint8_t  nChanDetected; //Channel Detected flag. 0: possible DTX detected for channel, 1: channel detected
     uint8_t  nDtxDetected;  //DTX detected.  0: channel present, 1: DTX detected for channel
     uint8_t  rsv1[1];
 
-    /**** word 4 *****/
+    /**** word 5 *****/
     int16_t  nDMRSPwrDBFS;  //receive DMRS amplitude in dBFS, 0.01 dB step
     uint8_t  rsv2[2];
+
+    /**** word 6 - 9 *****/
+    int16_t  nSigPwr[MAX_REPORT_UL_PORTS];  // 8 received signal power from antennas in 1/256 dBm steps
+
+    /**** word 10 *****/
+    int16_t  nTotalSigPwr;  // Sum of received signal power from all antennas in 1/256 dBm steps
+    uint8_t  rsv3[2];
+
+    /**** word 11 -12*****/
+    int16_t nPostSNR[MAX_UL_PORTS_PER_UE]; // Reported Post_SNR per Layer in 1/256 dB steps, estimated by this PUSCH, target accuracy < 1db
 } ULCRCStruct, *PULCRCStruct;
 
 //------------------------------------------------------------------------------------------------------------
@@ -1090,6 +1467,10 @@ typedef struct tCrcIndicationStruct
 
     uint8_t    nCrc;        // Number of CRCs included in this message:Value: 0->255
     uint8_t    rsv1[3];
+
+    /**** word 3*****/
+    int16_t    nIntfNoisePwr[MAX_NUM_RBG]; // Subband granularity for RBG size of 4
+    uint8_t    rsv2[2];
 
     ULCRCStruct sULCRCStruct[];
 } CRCIndicationStruct, *PCRCIndicationStruct;
@@ -1119,7 +1500,7 @@ typedef struct tRxUlSchIndicationStruct
 
     /**** word 3 *****/
     uint8_t   nUlsch;       // Number of ULSCH PDUs included in this message. Value: 0->255
-    uint8_t   rsv1[3];
+    uint8_t   rsv1[3];      // rsv1[0] is reserved to indicate using PUSCH float16 or not: 0 fixed-point datatype, 1 float16 datatype.
 
     ULSCHPDUDataStruct sULSCHPDUDataStruct[];
 } RXULSCHIndicationStruct, *PRXULSCHIndicationStruct;
@@ -1138,12 +1519,12 @@ typedef struct tUlSchUciPduDataStruct
 
     /**** word 3 *****/
     uint16_t nPduUciCsiP1Len;       // The total length (in bits) of UlSch UCI CsiP1 PDU payload, without the padding bytes.
-    uint8_t  nUciCsiP1Detected;     // Indicates if L1 was able to decode UCI or not (0- detected / 1 - dtx ), for sizes < 11
+    uint8_t  nUciCsiP1Detected;     // Indicates if L1 was able to decode UCI or not (1- detected / 0 - dtx ), for sizes < 11
     uint8_t  nUciCsiP1Crc;          // for polar coded Csi Part 1, UCI, CRC flag to indicate if error detected:0: CRC error ,1: CRC correct
 
     /**** word 4 *****/
     uint16_t nPduUciCsiP2Len;       // The total length (in bits) of UlSch UCI CsiP2 PDU payload, without the padding bytes.
-    uint8_t  nUciCsiP2Detected;     // Indicates if L1 was able to decode UCI or not (0- detected / 1 - dtx ), for sizes < 11
+    uint8_t  nUciCsiP2Detected;     // Indicates if L1 was able to decode UCI or not (1- detected / 0 - dtx ), for sizes < 11
     uint8_t  nUciCsiP2Crc;          // for polar coded Csi Part 2, UCI, CRC flag to indicate if error detected:0: CRC error ,1: CRC correct
 
     /**** word 5 *****/
@@ -1223,9 +1604,20 @@ typedef struct tUlUciPduDataStruct
 
     /**** word 3 *****/
     int16_t  nSNR;          // Reported SNR in 1/256 dB steps, estimated by this PUCCH
-    int16_t  nTA;           // Reported Timing advance value in samples ,estimated by this PUCCH
+    int16_t  nTA;           // Reported Timing advance value 0 -> 63 ,estimated by this PUCCH, unit is 16 * 64 / 2^u Tc
 
+    /**** word 4 *****/
+    int16_t   nTotalSigPwr;      // Received total signal power for all ports in 1/256 dBm steps
+    int8_t   nSrBitLen;    // Indicate if valid bit length in nSRPresent field for format0
+    uint8_t    rsv1[1];
+
+    /**** word 5 *****/
+    uint16_t nPduPart2BitLen;       // The total length (in bits) of Ulcch UCI CsiP2 PDU payload, without the padding bytes.
+    uint8_t    rsv2[2];
+
+    /**** word 6+ *****/
     uint8_t   nUciBits[MAX_UCI_BIT_BYTE_LEN];//Contents of the ULUCI PDU
+    uint8_t   nUciPart2Bits[MAX_UCI_BIT_BYTE_LEN];//Contents of the ULUCI PDU, CSI part2
 } ULUCIPDUDataStruct, *PULUCIPDUDataStruct;
 
 //------------------------------------------------------------------------------------------------------------
@@ -1259,8 +1651,8 @@ typedef struct tPreambleStruct
     uint16_t    nFreqIdx;
 
     /**** word 3 *****/
-    /*Receiving power Value :0->170000, 0.001 dB step, -140 to 30 dBm*/
-    uint32_t    nPreambPwr;
+    /*Receiving preamble power, in 1/256 dBm step*/
+    int32_t    nPreambPwr;
 
     /**** word 4 *****/
     /*the UL carrier used for Msg1 transmission
@@ -1286,6 +1678,9 @@ typedef struct tRxPrachIndicationStruct
     uint8_t    nNrOfPreamb;     // Number of preambles detected.
     uint8_t    rsv1[3];
 
+    /**** word 4 - word 32 *****/
+    int16_t    nPrachRssi[MAX_PRACH_FRE_FDM][MAX_PRACH_TIME_TDM];  // RSSI per PRB,  in 0.01 dBm steps
+
     PreambleStruct    sPreambleStruct[];
 } RXRACHIndicationStruct, *PRXRACHIndicationStruct;
 
@@ -1310,6 +1705,13 @@ typedef struct tUlSrsEstStruct
     int8_t    nWideBandSNR[4];   // SNR in db measured within configured SRS bandwidth on each symbols, up to 4 symbols can be configured
     int8_t    nBlockSNR[4][68];  // SNR in db measured within 4 RBs on each symbols, up to 68 blocks in case of SRS bandwidth 272 RBs
     int16_t   *pSrsChanEst[MAX_UL_PORTS_PER_UE][MAX_NUM_ANT_NR5G];  // Pointer to SRS Channel Estimates
+
+    /**** word 5 -> *****/
+    uint8_t    nRi;               // Selected RI based on SRS, range 1-4 for UE using layer 1-4
+    uint8_t    nTpmi;              // Selected TPMI based on SRS, same as spec defined
+    uint8_t    rsv1[2];
+    int16_t    nSubBandSNR[68];   // Subband (with size of 4 PRB) post MMSE SNR in dB based on the selected RI and PMI (averaged by RI in linear scale)
+
 } ULSRSEstStruct, *PULSRSEstStruct;
 
 //------------------------------------------------------------------------------------------------------------
@@ -1324,14 +1726,15 @@ typedef struct tRxSrsIndicationStruct
 
     /**** word 3 *****/
     uint8_t    nNrOfSrs;     // Number of SRS
-    uint8_t    rsv1[3];
+    uint8_t    nFloatSrsEst; // SRS est channel: 0 fixed-point datatype, 1 float16 datatype.
+    uint16_t   nSprCvtScale; // int16 to fp16 conversion scale //[23.07] Add configurable scale
 
     ULSRSEstStruct    sULSRSEstStruct[];
 } RXSRSIndicationStruct, *PRXSRSIndicationStruct;
 
 enum FrTypDuplexNr5g
 {
-    NR5G_FDD = 0, NR5G_TDD
+    NR5G_FDD = 0, NR5G_TDD, NR5G_TDD_DL
 };
 
 enum CyclicPrefixTypeOptionsNr5g
@@ -1391,6 +1794,12 @@ enum SrsHopping
     SRS_NEITHER_HOPPING = 0, SRS_GROUP_HOPPING = 1, SRS_SEQUENCE_HOPPING = 2
 };
 
+enum PrachSubCarrierSpacing
+{
+    NR5G_PRACH_15KHZ = 0, NR5G_PRACH_30KHZ, NR5G_PRACH_60KHZ, NR5G_PRACH_120KHZ,
+    NR5G_PRACH_1_25KHZ, NR5G_PRACH_5KHZ
+};
+
 enum TddSymbolType
 {
     SYMBOL_TYPE_DL = 0, SYMBOL_TYPE_UL = 1, SYMBOL_TYPE_GUARD = 2
@@ -1406,6 +1815,31 @@ typedef struct tAddRemoveBbuCoresNr5g
 
     ADD_REMOVE_BBU_CORES sAddRemoveBbuCores;
 } ADD_REMOVE_BBU_CORES_NR5G, *PADD_REMOVE_BBU_CORES_NR5G;
+
+typedef struct tTestFileConfigNr5g
+{
+    /**** word 1 *****/
+    L1L2MessageHdr sMsgHdr;
+
+    /**** word 2 *****/
+    SFN_SlotStruct sSFN_Slot;
+
+    TEST_FILE_CONFIG sTestFileConfig;
+} TEST_FILE_CONFIG_NR5G, *PTEST_FILE_CONFIG_NR5G;
+
+typedef struct tDlUlIqSamplesNr5g
+{
+    /**** word 1 *****/
+    L1L2MessageHdr sMsgHdr;
+
+    /**** word 2 *****/
+    SFN_SlotStruct sSFN_Slot;
+
+    PHY_DL_UL_IQ_SAMPLES sDlUlIqSamples;
+} PHY_DL_UL_IQ_SAMPLES_NR5G, *PPHY_DL_UL_IQ_SAMPLES_NR5G;
+
+
+#pragma pack()
 
 #ifdef __cplusplus
 }

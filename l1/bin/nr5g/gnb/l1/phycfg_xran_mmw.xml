@@ -16,20 +16,29 @@
 <!--   this software.  No hardware per se is licensed hereunder.                                                                                                  -->
 <!--                                                                                                                                                              -->
 <PhyConfig>
-    <version>oran_f_release_v1.0</version>
+    <version>oran_k_release_v1.0</version>
 
     <Api>
         <!--  Maximum number of successive missing API allowed before triggering PHY stop (-1 is infinite) -->
         <successiveNoApi>15</successiveNoApi>
-        <!--  Full path to wls device used for transport of MAC-PHY API (e.g. wls0 )-->
-        <wls_dev_name>wls0</wls_dev_name>
+        <!--  WLS Wakeup Secondary process mode. 1: Wakeup using Semaphore. 0: Do usleep and wakeup using atomic variable -->
+        <wls_sema_wake_up>1</wls_sema_wake_up>
+        <!-- Number of WLS instances to open. Range 1-16. This is so that different L2 applications can talk to single L1 application -->
+        <wls_num_instances>1</wls_num_instances>
+        <!-- Number of blocks to pre-allocate per cell in UL direction to make it thread safe and lockless (Range: 8-48) -->
+        <wls_ul_queue_depth>48</wls_ul_queue_depth>
+        <!-- Full path to wls device used for transport of MAC-PHY API (e.g. wls0) -->
+        <wls_dev_name0>wls0</wls_dev_name0>
+        <!-- Mapping of WLS Instance to Cell ID. This is in Hex -->
+        <wls_cell_mapping0>0xFFFFFF</wls_cell_mapping0>
         <!-- MAC managed WLS Memory size. This is used for all API buffer allocations -->
-        <wlsMacMemorySize>0x7FE00000</wlsMacMemorySize>
+        <wlsMacMemorySize>0x3EA80000</wlsMacMemorySize>
         <!-- L1 managed WLS Memory size. This is used for SRS weight storage. For 64x64 usecase and 6 cells (with 512 users per cell) use 0x18000000 -->
         <wlsPhyMemorySize>0x18000000</wlsPhyMemorySize>
     </Api>
 
     <PhyLogs>
+        <CoreDumpEnable>0</CoreDumpEnable>
         <IqLogs>
             <dlIqLog>0</dlIqLog>
             <ulIqLog>0</ulIqLog>
@@ -37,7 +46,17 @@
         <DebugLogs>
             <phyMlog>1</phyMlog>
             <phyStats>1</phyStats>
+            <!-- Number of SubFrame recorded in Phystats, default value 1024 -->
+            <PhystatsSubFrameNum>1024</PhystatsSubFrameNum>
+            <!-- Enable/disable Phystats log streaming [0 - disable (no PhyStats Streaming), Non 0 - enable PhyStats Streaming with so many max files ] -->
+            <maxNumPhyStatsFiles>20</maxNumPhyStatsFiles>
         </DebugLogs>
+        <!-- If 1, all L1-generated logs saved with timestamps in directory config by <L1LogPath>; If 0, all L1-generated logs saved without timestamps in default directory (config by hardcode) -->
+        <TimePathEnable>0</TimePathEnable>
+        <!-- Using absolute path name (for example /var/log/ ) to save all L1-generated logs in desired path, only take effect when TimePathEnable is 1 -->
+        <L1LogPath>./</L1LogPath>
+        <!-- Named pipe used to receive commands from new L1APP console created by script L1APP_console.py, can be modified for different L1APP instance -->
+        <!-- <L1NamedPipe>/tmp/L1console_fifo</L1NamedPipe> -->
     </PhyLogs>
 
     <!-- This section defines all DPDK related parameters used for DPDK initialization -->
@@ -48,10 +67,14 @@
         <dpdkMemorySize>8192</dpdkMemorySize>
         <!--  DPDK IOVA Mode used for DPDK initialization. If 0, then PA mode. Else VA Mode -->
         <dpdkIovaMode>0</dpdkIovaMode>
+        <!-- VFIO token for DPDK EAL commandline, required when PF is bound to vfio-pci -->
+        <dpdkVfioVfToken>00112233-4455-6677-8899-aabbccddeeff</dpdkVfioVfToken>
         <!--  DPDK FEC BBDEV to use             [0 - SW, 1 - HW accelerator, 2 - Both] -->
         <dpdkBasebandFecMode>1</dpdkBasebandFecMode>
         <!--  DPDK BBDev name added to the passlist. The argument format is <[domain:]bus:devid.func> -->
         <dpdkBasebandDevice>0000:92:00.0</dpdkBasebandDevice>
+        <!--  TB mode enable [0 - CB mode, 1 - TB mode]  -->
+        <tbModeEnable>0</tbModeEnable>
     </DPDK>
 
     <Radio>
@@ -60,19 +83,105 @@
     </Radio>
 
     <PhyVars>
-        <!-- The below variables can be modified in file here and it will take effect when PHY is brought up after reboot of system -->
+        <!-- Pipeline SPR configuration-->
+        <!-- 0: disable, 1: enable -->
+        <PiplineSPR>0</PiplineSPR>
+        <!-- to boost precoding power -->
+        <!-- 0: no power boost, 1: boost precoding power -->
+        <PrecodingPowerBoost>0</PrecodingPowerBoost>
+        <!-- AGC target of signal amplitude  -->
+        <agcTarget>8192</agcTarget>
         <Pdsch>
             <!-- Split PDSCH symbol processing -->
             <PdschSymbolSplit>0</PdschSymbolSplit>
 
-            <!-- Split PDSCH DL beamforiming weight generation processing -->
-            <PdschDlWeightSplit>0</PdschDlWeightSplit>
+            <!-- PDSCH split and processing type. 0: UE Based processing, 1: OFDM symbol(non-interleaving) or UE(interleaving) based processing, 2: OFDM symbol based processing, 3: OFDM symbol or UE split + 1SDK processing, 4: OFDM symbol + 1SDK processing -->
+            <PdschProcType>0</PdschProcType>
 
             <!-- Max number of parallel tasks that the DL FEC Encoder is split into. Number needs to be between 1 and 4. If wrong value entered, it will be defaulted to 1.  -->
             <!-- For hardware offload (using fpga / eAsic) it will be defaulted to 1.  -->
             <FecEncSplit>1</FecEncSplit>
+
+            <!-- Bypass FEC Encoder. This is to mostly for some benchmarking purposes and is not real scenarios -->
+            <FecEncBypass>0</FecEncBypass>
         </Pdsch>
+        <BeamWeight>
+            <!-- Split PDSCH DL beamforiming weight generation processing -->
+            <PdschDlWeightSplit>0</PdschDlWeightSplit>
+
+            <!-- Split PUSCH UL beamforiming weight generation processing -->
+            <PuschUlWeightSplit>0</PuschUlWeightSplit>
+
+            <!-- DL beamforming weight matrix gen algo choose -->
+            <!-- 0: ZF based weight gen algo, 1: dftcodebook based weight gen algo -->
+            <DLDFTBfWeightAlgoType>0</DLDFTBfWeightAlgoType>
+
+            <!-- beamforming weight matrix gen RB pick granularity -->
+            <DLBfWeightGenGranularity>1</DLBfWeightGenGranularity>
+
+            <!-- beamforming weight matrix gen RB pick out granularity -->
+            <DLBfWeightGenOutGranularity>0</DLBfWeightGenOutGranularity>
+
+            <!-- wether DFT beamforming weight matrix gen use oversample codebook -->
+            <DLBfIsOverSample>1</DLBfIsOverSample>
+
+            <!-- the oversample rate of the horizontal ant  -->
+            <DLRxAntHorizontalOverSample>4</DLRxAntHorizontalOverSample>
+
+            <!-- the oversample rate of the vertical ant  -->
+            <DLRxAntVerticalOverSample>4</DLRxAntVerticalOverSample>
+
+            <!-- the beam select type for DFT beamforming weight matrix gen -->
+            <DLBeamSelectType>2</DLBeamSelectType>
+
+            <!-- the max rb num is used for DFT beamforming weight matrix gen -->
+            <DLDFTMaxRBUsed>16</DLDFTMaxRBUsed>
+
+            <!-- the DL DFT beamforming weight normalization type, 0: normalzation with all antenna, 1: normalzation per antenna for max tx power -->
+            <DLDFTBeamWeightNormType>1</DLDFTBeamWeightNormType>
+
+            <!-- UL beamforming weight matrix gen algo choose -->
+            <!-- 0: ZF based weight gen algo, 1: dftcodebook based weight gen algo -->
+            <ULDFTBfWeightAlgoType>0</ULDFTBfWeightAlgoType>
+
+            <!-- beamforming weight matrix gen RB pick granularity-->
+            <ULBfWeightGenGranularity>1</ULBfWeightGenGranularity>
+
+            <!-- beamforming weight matrix gen RB pick out granularity -->
+            <ULBfWeightGenOutGranularity>0</ULBfWeightGenOutGranularity>
+
+            <!--  Number of Rx Antenna Vertiacl elements    [4, 8, 64] -->
+            <RxAntVertical>1</RxAntVertical>
+            <!--  Number of Rx Antenna Horizontal elements  [4, 8, 64] -->
+            <RxAntHorizontal>1</RxAntHorizontal>
+            <!--  Number of Rx Antenna Polarization Setting [1, 2] -->
+            <RxAntPolarization>1</RxAntPolarization>
+
+            <!-- the beamforming weight Fixed-point calibration -->
+            <BeamWeightFixPointQ>13</BeamWeightFixPointQ>
+
+            <!-- the DL/UL DFT beamforming weight reorder flag. 0: not reorder, 1:reorder by the anBFOutRemapTable -->
+            <DFTBFOutRemapVaild>0</DFTBFOutRemapVaild>
+
+            <!-- the DL/UL DFT beamforming weight reorder table -->
+            <DFTBFOutRemapTable>28, 24, 12, 8, 29, 25, 13, 9, 30, 26, 14, 10, 31, 27, 15, 11, 20, 16, 4, 0, 21, 17, 5, 1, 22, 18, 6, 2, 23, 19, 7, 3</DFTBFOutRemapTable>
+
+            <!--  Enable Beam Weight Processing all the time regardless of SRS channel present or not -->
+            <!--  This is mainly done for profiling purposes -->
+            <BeamWeightSrsBypass>0</BeamWeightSrsBypass>
+
+            <!--  Bypass entire Beam Weight generation function from pipeline -->
+            <!--  This is mainly done for profiling purposes -->
+            <BeamWeightBypass>0</BeamWeightBypass>
+
+            <!--  MIMO Beam Weight debug mode, 1- enable  0- disable  -->
+            <MimoBeamWeightDebugMode>0</MimoBeamWeightDebugMode>
+            <!--  MIMO Beam Weight debug mode test file name -->
+            <MimoBeamWeightDebugFileName>MimoBFWdbg32TR.bin</MimoBeamWeightDebugFileName>
+        </BeamWeight>
         <Pusch>
+            <!-- Split processing for ULDecompression for PUSCH -->
+            <PuschDecompSplit>0</PuschDecompSplit>
             <!-- Split processing for Channel Estimation for PUSCH -->
             <PuschChanEstSplit>0</PuschChanEstSplit>
 
@@ -82,10 +191,7 @@
             <!-- Split processing for LLR Rx for PUSCH -->
             <PuschLlrRxSplit>0</PuschLlrRxSplit>
 
-            <!-- Split PUSCH UL beamforiming weight generation processing -->
-            <PuschUlWeightSplit>0</PuschUlWeightSplit>
-
-            <!-- Software FEC Decoder Early Termination disabled. If 1, then programmed number of iterations are run from MAC PHY API regardless of CRC PASS -->
+            <!-- BBDEV FEC Decoder Early Termination disabled. If 1, then programmed number of iterations are run from MAC PHY API regardless of CRC PASS -->
             <FecDecEarlyTermDisable>0</FecDecEarlyTermDisable>
 
             <!-- FEC LDPC Decoder Number of iterations. If 0 then Number of iterations is set to 10. Else this value is used -->
@@ -95,8 +201,18 @@
             <!-- For hardware offload (using fpga / eAsic) it will be defaulted to 1.  -->
             <FecDecSplit>1</FecDecSplit>
 
+            <!-- Bypass FEC Decoder. This is to mostly for some benchmarking purposes and is not real scenarios -->
+            <FecDecBypass>0</FecDecBypass>
+
             <!-- Only for terasic. Number of decimal digits of LLR fixed point output. If 0 then this value is set to 2, which means LLR is 8S2. Else this value is used -->
             <llrOutDecimalDigit>2</llrOutDecimalDigit>
+
+            <!-- Indicates saturated bits for LLR demapping, valid range 2~8 -->
+            <llrSaturatedBits>8</llrSaturatedBits>
+
+            <!-- LLR soft bit compression  -->
+            <!-- 0: disable, 1: enable -->
+            <ULLdpcLlrComp>0</ULLdpcLlrComp>
 
             <!-- SNR Threshold for IRC. If -100, then IRC will be disabled -->
             <IrcEnableThreshold>-100</IrcEnableThreshold>
@@ -126,27 +242,48 @@
             <!-- PuschLinearInterpGranularity0 - Use this value for Cell0 -->
             <!-- PuschLinearInterpGranularity1 - Use this value for Cell1 and so on -->
             <!-- PuschLinearInterpGranularityAll will superced PuschLinearInterpGranularityX (where X is CellId) -->
-            <!-- 0 - Linear, 1 - Linear2 ... 4 - Linear6, 99 - nearest -->
+            <!-- 0 - Linear, 1 - Linear2, 2 - Linear3, 3 - Linear 4, 4 - Linear6, 5 - Use internal Doppler estimator to detect best value, 99 - nearest -->
             <!-- use comma to separte the values if want to apply differnt granularity for differnt UE groups -->
             <PuschLinearInterpGranularityAll>4</PuschLinearInterpGranularityAll>
 
-            <!-- beamforming weight matrix gen algo choose-->
-            <!-- 0: ZF based weight gen algo, 1: dftcodebook based weight gen algo-->
-            <DFTBfWeightGenEnable>0</DFTBfWeightGenEnable>
-
-            <!-- beamforming weight matrix gen RB pick granularity-->
-            <BfWeightGenGranularity>2</BfWeightGenGranularity>
-
             <!-- Flag to enable/disable UL report of received PUSCH DMRS amplitude-->
             <DMRSPwrReportEna>0</DMRSPwrReportEna>
+
+            <!-- Force Enable IRC: 0: Dont change pipeline. 1: Force Disable, 2: Force Enable -->
+            <!--  This is mainly done for profiling purposes -->
+            <EnableIrc>0</EnableIrc>
+
+            <!-- Enable delay spread estimation: 0: Disable. 1: Enable -->
+            <nEnableDelaySpreadEst>0</nEnableDelaySpreadEst>
+
+            <!--  Pusch int16 to fp16 conversion scale for SPR mode 2 -->
+            <nPuschSprCvtScale>8192</nPuschSprCvtScale>
         </Pusch>
         <Pucch>
             <!-- Split processing for PUCCH -->
             <PucchSplit>0</PucchSplit>
+            <!-- PUCCH AGC target of signal amplitude  -->
+            <PucchagcTarget>8192</PucchagcTarget>
         </Pucch>
         <Srs>
             <!-- Split processing for SRS CE -->
             <SrsCeSplit>0</SrsCeSplit>
+            <!--  SRS FFT Enable Switch based on bbdev capability [0 - legacy SRS processing using DFT/MMSE, 1 - SRS processing based on FFT bbdev capability (if capability doesn't exist fallback to legacy mode)] -->
+            <srsFftEnabled>0</srsFftEnabled>
+            <!--  SRS FFT SNR EST Method Switch      [1 - FD1, 2 - FD2] -->
+            <srsFftSNRestMethod>1</srsFftSNRestMethod>
+            <!--  SRS FFT SNR EST central_part_rs Switch     [0 - not enable, 1 - enable] -->
+            <srsFftSNRestCentralPartRs>1</srsFftSNRestCentralPartRs>
+            <!--  SRS FFT Taylor window filter Switch     [0 - disable, 1 - force enable, 2 - auto enable] -->
+            <srsFftTaylorWinFilter>2</srsFftTaylorWinFilter>
+            <!--  SRS AGC Switch     [0 - disable, 1 - enable] -->
+            <SrsAgcEnabled>1</SrsAgcEnabled>
+            <!--  SRS AGC Target     [0 - disable, 1 - enable] -->
+            <SrsAgcTarget>8192</SrsAgcTarget>
+            <!--  SRS DFT est result fill full Bandwidth  [0 - disable, 1 - enable] -->
+            <SrsDftFillFullBand>0</SrsDftFillFullBand>
+            <!--  SRS AGC Method Choose  [1 - Method1(average), 2 - Method2(12pick)] -->
+            <SrsAgcMethodChoose>2</SrsAgcMethodChoose>
         </Srs>
         <Prach>
             <!-- Prach Detection Threshold. If non zero, computed value is used. -->
@@ -155,7 +292,17 @@
             <!-- 0: disable, 1: enable -->
             <prachDetectFoCheck>0</prachDetectFoCheck>
             <!-- prach Threshold calculating method -->
-            <prachThresholdMethod>0</prachThresholdMethod>
+            <prachThresholdMethod>3</prachThresholdMethod>
+            <!-- prach detect window shift  default:0 -->
+            <prachDTWindowShift>0</prachDTWindowShift>
+            <!-- used to adjust the threshold. threshold = threshold * prachThrOffsetFactor /1000-->
+            <prachThrOffsetFactor>1259</prachThrOffsetFactor>
+            <!-- Number of Short Format combine :[1 2 3 4 6] -->
+            <prachMaxNcombine>-1</prachMaxNcombine>
+            <!-- prach FFT size selection: 0: larger size(2048/1024); 1: shorter size(1024/256) -->
+            <prachFFTSel>0</prachFFTSel>
+            <!--  PRACH IFFT Enable Switch based on bbdev capability [0 - legacy PRACH processing using soft IFFT, 1 - PRACH processing based on FFT bbdev capability (if capability doesn't exist fallback to legacy mode)] -->
+            <prachIfftEnabled>0</prachIfftEnabled>
         </Prach>
 
         <Urllc>
@@ -194,12 +341,20 @@
 
         <!-- DPDK Radio Master Thread (Single core id value): Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
         <radioDpdkMaster>2, 99, 0</radioDpdkMaster>
+
+        <!-- PhyStatsLog Thread: Core(same as system core), priority, Policy [0: SCHED_FIFO 1: SCHED_RR 2:SCHED_OTHER] -->
+        <phyStatsLogThread>4, 0, 2</phyStatsLogThread>
     </Threads>
 
     <BbuPoolConfig>
         <!-- If set to 1, BBU Pool cores, return control to kernel after task is completed. Else it will always be in user space without going to sleep -->
         <!-- It is mainly used when setting core to harware sleep mode and latency of sleep is not very deterministic -->
+        <!-- 0: polling mode; 1: call usleep to sleep (configurable period); 2: call sem_timedwait to sleep (~50us period); else: poling mode -->
         <BbuPoolSleepEnable>1</BbuPoolSleepEnable>
+        <!-- Set usleep period if BbuPoolSleepEnable is 1. Valid value is 1~255, unit micro-second. Value 0 means use default setting, which is 10us now -->
+        <BbuPoolSleepPeriod>0</BbuPoolSleepPeriod>
+        <!-- Set BBU Pool thread suspend period if suspend thread API is called. Valid value is 1~65535, unit micro-second. Value 0 means use default setting, which is 550us now -->
+        <BbuPoolSuspendPeriod>0</BbuPoolSuspendPeriod>
 
         <!-- Priority Of All BBU Cores -->
         <BbuPoolThreadCorePriority>94</BbuPoolThreadCorePriority>
@@ -243,6 +398,13 @@
 
         <!-- Enable FEC Only Task List for 5GNR L1 Application. This is used to test the FEC Enq/Deq Operations with hardware. 0: Off, 1: On. -->
         <eBbuPoolFecOnlyList>0</eBbuPoolFecOnlyList>
+
+        <!-- Number of numa nodes from which BBUPool worker thread cores are allocated. Range [1-2] -->
+        <eBbuPoolNumNumaNode>1</eBbuPoolNumNumaNode>
+
+        <!-- Numa node affinity of each cell (Bit mask of all cell in Decimal or Hex [needs to start with "0x"]) -->
+        <eBbuPoolNumaNodeAffinityMask0>0x0</eBbuPoolNumaNodeAffinityMask0>
+        <eBbuPoolNumaNodeAffinityMask1>0x0</eBbuPoolNumaNodeAffinityMask1>
     </BbuPoolConfig>
 
     <Fpga>
@@ -278,6 +440,86 @@
         <!-- IP Port used to create UDP socket -->
         <StreamPort>2000</StreamPort>
     </StreamStats>
+
+    <InfoTraceTool>
+        <!-- If this is set to 1, Info Trace Tool will be enable, 0 means disable -->
+        <nInfoTraceToolEn>0</nInfoTraceToolEn>
+
+        <!-- If this is set to 1, Info Trace Tool will catch DL APIs, 0 means won't catch -->
+        <nApisDlEn>1</nApisDlEn>
+
+        <!-- If this is set to 1, Info Trace Tool will catch UL APIs, 0 means won't catch -->
+        <nApisUlEn>1</nApisUlEn>
+
+        <!-- If this is set to 1, Info Trace Tool will catch PDSCH payload APIs, 0 means won't catch -->
+        <nApisPdschPayloadEn>0</nApisPdschPayloadEn>
+
+        <!-- If this is set to 1, Info Trace Tool will catch PUSCH payload APIs, 0 means won't catch -->
+        <nApisPuschPayloadEn>0</nApisPuschPayloadEn>
+
+        <!-- If this is set to 1, Info Trace Tool will print APIs detail in apis.txt, 0 means won't print -->
+        <nApisPrintEn>0</nApisPrintEn>
+
+        <!-- Info Trace Tool Threads (Single core id value): Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
+        <InfoTraceToolThread>1, 99, 0</InfoTraceToolThread>
+
+        <!-- Destination IP Address to send Info -->
+        <nInfoTraceToolSocketIP>127.0.0.1</nInfoTraceToolSocketIP>
+
+        <!-- IP Port used to create UDP socket -->
+        <nInfoTraceToolSocketPort>10000</nInfoTraceToolSocketPort>
+
+        <!-- Bit map of cell ID that whether trace log is enabled on this cell -->
+        <nTraceCellMapping>0xFFFFFFFF</nTraceCellMapping>
+    </InfoTraceTool>
+
+    <PhyTraceLog>
+        <!-- 32-bit hex bitmask to enable or disable logprint of different levels and modules, currently BIT16-BIT31 not used -->
+        <!-- BIT15: LEVEL_ERROR, BIT14:LEVEL_WARNING, BIT13:LEVEL_LOG, BIT12: LEVEL_DEBUG, BIT11: LEVEL_INFO, BIT10,BIT9 not used-->
+        <!-- BIT8: SSB module, BIT7: PRACH module, BIT6: SRS module, BIT5: CSIRS module, BIT4: PTRS module-->
+        <!-- BIT3: PDCCH module, BIT2: PUCCH module, BIT1: PDSCH module, BIT0: PUSCH module -->
+        <!-- default 0xE1FF indicates that all levels and modules logprints are enabled by default, except LEVEL_DEBUG and LEVEL_INFO -->
+        <phytracelevelmodumask>0xE1FF</phytracelevelmodumask>
+
+        <!-- 64-bit hex bitmask to enable or disable PUSCH internal moudules' logprint -->
+        <phytracesubmodumask0>0x1</phytracesubmodumask0>
+
+        <!-- 64-bit hex bitmask to enable or disable PDSCH internal moudules' logprint -->
+        <phytracesubmodumask1>0x1</phytracesubmodumask1>
+
+        <!-- 64-bit hex bitmask to enable or disable PUCCH internal moudules' logprint -->
+        <phytracesubmodumask2>0x1</phytracesubmodumask2>
+
+        <!-- 64-bit hex bitmask to enable or disable PDCCH internal moudules' logprint -->
+        <phytracesubmodumask3>0x1</phytracesubmodumask3>
+
+        <!-- 64-bit hex bitmask to enable or disable PTRS internal moudules' logprint -->
+        <phytracesubmodumask4>0x1</phytracesubmodumask4>
+
+        <!-- 64-bit hex bitmask to enable or disable CSI-RS internal moudules' logprint -->
+        <phytracesubmodumask5>0x1</phytracesubmodumask5>
+
+        <!-- 64-bit hex bitmask to enable or disable SRS internal moudules' logprint -->
+        <phytracesubmodumask6>0x1</phytracesubmodumask6>
+
+        <!-- 64-bit hex bitmask to enable or disable PRACH internal moudules' logprint -->
+        <phytracesubmodumask7>0x1</phytracesubmodumask7>
+
+        <!-- 64-bit hex bitmask to enable or disable SSB internal moudules' logprint -->
+        <phytracesubmodumask8>0x1</phytracesubmodumask8>
+
+        <!-- Tracelog Threads (Single core id value): Core, priority, Policy [0: SCHED_FIFO 1: SCHED_RR] -->
+        <TracelogThread>0, 0, 0</TracelogThread>
+    </PhyTraceLog>
+
+    <CustomerField>
+        <!-- Used to adapt to RRU, need to scale down the amplitude to adapt to different vendors' RRU -->
+        <!-- float variable, and must be 0~1. default value 1.0. -->
+        <dliq_fscale>1.0</dliq_fscale>
+
+        <!-- make RRU only send C-P for first occasion, fix ecpri packet size and mbuf issue -->
+        <rru_workaround>0</rru_workaround>
+    </CustomerField>
 
 </PhyConfig>
 
