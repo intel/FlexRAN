@@ -14,13 +14,15 @@
 #   limitations under the License.                                             #
 ################################################################################
 
-FROM centos:centos7.7.1908
+FROM ubuntu:22.04
 
 ENV https_proxy $https_proxy
 ENV http_proxy $http_proxy
 ENV no_proxy $no_proxy
 
-RUN yum update -y && yum install -y libhugetlbfs-utils libhugetlbfs-devel libhugetlbfs numactl-devel ethtool gcc make module-init-tools kmod patch xz iproute pciutils python vim cmake unzip nano mc iputils-ping libaio libaio-devel net-tools  wget zip expect-5.45-14.el7_1.x86_64
+RUN apt update
+RUN apt upgrade -y
+RUN apt install -y build-essential libhugetlbfs-bin libhugetlbfs-dev libtool-bin cmake python3-pip tcpdump net-tools bc cmake wget  pciutils vim tcpdump ntpdate driverctl lshw numactl linux-tools-common libnuma-dev xterm pkg-config  rt-tests git libtool libcrypto++-dev linux-tools-generic vim python3 pciutils
 
 WORKDIR /opt/oran_release
 
