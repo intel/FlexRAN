@@ -16,7 +16,7 @@
 <!--   this software.  No hardware per se is licensed hereunder.                                                                                                  -->
 <!--                                                                                                                                                              -->
 <XranConfig>
-    <version>oran_k_release_v1.0</version>
+    <version>23.07</version>
     <!-- numbers of O-RU connected to O-DU. All O-RUs are the same capabilities. Max O-RUs is per XRAN_PORTS_NUM i.e. 4 -->
     <oRuNum>3</oRuNum>
     <!--  # 10G,25G,40G,100G speed of Physical connection on O-RU -->

@@ -16,7 +16,7 @@
 <!--   this software.  No hardware per se is licensed hereunder.                                                                                                  -->
 <!--                                                                                                                                                              -->
 <TestMacConfig>
-    <version>oran_k_release_v1.0</version>
+    <version>23.07</version>
 
     <Api>
         <!-- Full path to wls device used for transport of MAC-PHY API (e.g. wls0 )-->

@@ -16,7 +16,7 @@
 <!--   this software.  No hardware per se is licensed hereunder.                                                                                                  -->
 <!--                                                                                                                                                              -->
 <PhyConfig>
-    <version>oran_k_release_v1.0</version>
+    <version>23.07</version>
 
     <Api>
         <!--  Maximum number of successive missing API allowed before triggering PHY stop (-1 is infinite) -->
