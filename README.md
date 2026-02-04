@@ -104,27 +104,20 @@ Set CPU frequency using msr-tools
 
 >`make`
 
->`cat <<EOF > turbo-2.5G.sh`
+```
+cat <<EOF > turbo-2.5G.sh
+#!/bin/sh
+for i in {0..39}
+do
+#Set core 0-39 to 2.5GHz (0x1900). Please change according to your CPU model
+    ./wrmsr -p \${i} 0x199 0x1900
+done
 
->`#!/bin/sh`
-
->`for i in {0..39}`
-
->`do`
-
->`#Set core 0-39 to 2.5GHz (0x1900). Please change according to your CPU model`
-
->`    ./wrmsr -p \${i} 0x199 0x1900`
-
->`done`
-
->`#Set Uncore to Max`
-
->`./wrmsr -p 0 0x620 0x1e1e`
-
->`./wrmsr -p 39 0x620 0x1e1e`
-
->`EOF`
+#Set Uncore to Max
+./wrmsr -p 0 0x620 0x1e1e
+./wrmsr -p 39 0x620 0x1e1e
+EOF
+```
 
 >`chmod 755 turbo-2.5G.sh`
 
